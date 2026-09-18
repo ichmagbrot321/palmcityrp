@@ -1,4 +1,3 @@
-html
 <!doctype html>
 <html lang="de">
 <head>
@@ -9,18 +8,18 @@ html
 
 <style>
 :root{
-  --bg:#060b12;
-  --bg2:#0a111b;
-  --card:rgba(14,22,34,.88);
-  --card2:#111d2c;
+  --bg:#02050a;
+  --bg2:#050b14;
+  --card:rgba(7,13,22,.94);
+  --card2:#0a1220;
   --line:rgba(137,166,198,.16);
   --text:#f4f7fb;
   --muted:#8e9daf;
-  --blue:#1688ff;
-  --blue2:#55b2ff;
-  --green:#43d39e;
-  --red:#ff6475;
-  --yellow:#ffc857;
+  --blue:#1769d1;
+  --blue2:#4a9eff;
+  --green:#35d39a;
+  --red:#ff4d5f;
+  --yellow:#ffc247;
   --shadow:0 24px 70px rgba(0,0,0,.42);
 }
 
@@ -348,13 +347,13 @@ h1{
 .card{
   background:linear-gradient(
     180deg,
-    rgba(16,27,42,.9),
-    rgba(11,20,31,.9)
+    rgba(6,12,20,.96),
+    rgba(3,8,14,.96)
   );
   border:1px solid var(--line);
   border-radius:18px;
   padding:21px;
-  box-shadow:0 16px 45px rgba(0,0,0,.18);
+  box-shadow:0 18px 55px rgba(0,0,0,.30);
   min-width:0;
 }
 
@@ -609,6 +608,74 @@ textarea:focus{
   flex:1;
 }
 
+
+/* =========================================================
+   MODERATIONS-FARBEN
+   ========================================================= */
+
+.case-item{
+  border:1px solid transparent;
+  border-radius:13px;
+  padding:14px 14px;
+  margin:9px 0;
+  background:#060d16;
+}
+
+.case-item.ban{
+  border-color:rgba(255,77,95,.38);
+  background:linear-gradient(135deg,rgba(120,22,35,.22),rgba(35,8,15,.16));
+}
+.case-item.ban .tag{
+  background:rgba(255,77,95,.14);
+  color:#ff7c89;
+}
+
+.case-item.warn{
+  border-color:rgba(255,194,71,.38);
+  background:linear-gradient(135deg,rgba(117,82,10,.20),rgba(35,24,5,.14));
+}
+.case-item.warn .tag{
+  background:rgba(255,194,71,.14);
+  color:#ffd36d;
+}
+
+.case-item.kick{
+  border-color:rgba(150,160,175,.34);
+  background:linear-gradient(135deg,rgba(80,88,100,.18),rgba(20,24,30,.14));
+}
+.case-item.kick .tag{
+  background:rgba(160,170,185,.14);
+  color:#c9d0d9;
+}
+
+.case-item.other{
+  border-color:rgba(55,125,210,.20);
+  background:#050c15;
+}
+
+.case-item.appeal-approved{
+  border-color:rgba(53,211,154,.42);
+  background:linear-gradient(135deg,rgba(22,100,72,.22),rgba(7,35,27,.16));
+}
+.case-item.appeal-approved .tag{
+  background:rgba(53,211,154,.16);
+  color:#76e7ba;
+}
+
+.case-item.appeal-rejected{
+  border-color:rgba(255,77,95,.30);
+  background:linear-gradient(135deg,rgba(100,25,37,.18),rgba(30,7,12,.14));
+}
+.case-item.appeal-open{
+  border-color:rgba(255,194,71,.28);
+  background:linear-gradient(135deg,rgba(105,74,8,.16),rgba(28,20,5,.12));
+}
+
+.tag.pending{
+  background:rgba(255,194,71,.10);
+  color:#ffd36d;
+}
+
 /* =========================================================
    MODAL
    ========================================================= */
@@ -628,7 +695,7 @@ textarea:focus{
   width:min(590px,100%);
   max-height:calc(100vh - 36px);
   overflow-y:auto;
-  background:#0d1826;
+  background:#050b14;
   border:1px solid #294158;
   border-radius:18px;
   padding:22px;
@@ -1587,6 +1654,74 @@ function toast(message) {
 }
 
 
+
+/* =========================================================
+   MODERATIONS-FARBEN
+   ========================================================= */
+
+.case-item{
+  border:1px solid transparent;
+  border-radius:13px;
+  padding:14px 14px;
+  margin:9px 0;
+  background:#060d16;
+}
+
+.case-item.ban{
+  border-color:rgba(255,77,95,.38);
+  background:linear-gradient(135deg,rgba(120,22,35,.22),rgba(35,8,15,.16));
+}
+.case-item.ban .tag{
+  background:rgba(255,77,95,.14);
+  color:#ff7c89;
+}
+
+.case-item.warn{
+  border-color:rgba(255,194,71,.38);
+  background:linear-gradient(135deg,rgba(117,82,10,.20),rgba(35,24,5,.14));
+}
+.case-item.warn .tag{
+  background:rgba(255,194,71,.14);
+  color:#ffd36d;
+}
+
+.case-item.kick{
+  border-color:rgba(150,160,175,.34);
+  background:linear-gradient(135deg,rgba(80,88,100,.18),rgba(20,24,30,.14));
+}
+.case-item.kick .tag{
+  background:rgba(160,170,185,.14);
+  color:#c9d0d9;
+}
+
+.case-item.other{
+  border-color:rgba(55,125,210,.20);
+  background:#050c15;
+}
+
+.case-item.appeal-approved{
+  border-color:rgba(53,211,154,.42);
+  background:linear-gradient(135deg,rgba(22,100,72,.22),rgba(7,35,27,.16));
+}
+.case-item.appeal-approved .tag{
+  background:rgba(53,211,154,.16);
+  color:#76e7ba;
+}
+
+.case-item.appeal-rejected{
+  border-color:rgba(255,77,95,.30);
+  background:linear-gradient(135deg,rgba(100,25,37,.18),rgba(30,7,12,.14));
+}
+.case-item.appeal-open{
+  border-color:rgba(255,194,71,.28);
+  background:linear-gradient(135deg,rgba(105,74,8,.16),rgba(28,20,5,.12));
+}
+
+.tag.pending{
+  background:rgba(255,194,71,.10);
+  color:#ffd36d;
+}
+
 /* =========================================================
    MODAL ÖFFNEN
    ========================================================= */
@@ -1625,6 +1760,74 @@ function openModal(type, caseId) {
 
 }
 
+
+
+/* =========================================================
+   MODERATIONS-FARBEN
+   ========================================================= */
+
+.case-item{
+  border:1px solid transparent;
+  border-radius:13px;
+  padding:14px 14px;
+  margin:9px 0;
+  background:#060d16;
+}
+
+.case-item.ban{
+  border-color:rgba(255,77,95,.38);
+  background:linear-gradient(135deg,rgba(120,22,35,.22),rgba(35,8,15,.16));
+}
+.case-item.ban .tag{
+  background:rgba(255,77,95,.14);
+  color:#ff7c89;
+}
+
+.case-item.warn{
+  border-color:rgba(255,194,71,.38);
+  background:linear-gradient(135deg,rgba(117,82,10,.20),rgba(35,24,5,.14));
+}
+.case-item.warn .tag{
+  background:rgba(255,194,71,.14);
+  color:#ffd36d;
+}
+
+.case-item.kick{
+  border-color:rgba(150,160,175,.34);
+  background:linear-gradient(135deg,rgba(80,88,100,.18),rgba(20,24,30,.14));
+}
+.case-item.kick .tag{
+  background:rgba(160,170,185,.14);
+  color:#c9d0d9;
+}
+
+.case-item.other{
+  border-color:rgba(55,125,210,.20);
+  background:#050c15;
+}
+
+.case-item.appeal-approved{
+  border-color:rgba(53,211,154,.42);
+  background:linear-gradient(135deg,rgba(22,100,72,.22),rgba(7,35,27,.16));
+}
+.case-item.appeal-approved .tag{
+  background:rgba(53,211,154,.16);
+  color:#76e7ba;
+}
+
+.case-item.appeal-rejected{
+  border-color:rgba(255,77,95,.30);
+  background:linear-gradient(135deg,rgba(100,25,37,.18),rgba(30,7,12,.14));
+}
+.case-item.appeal-open{
+  border-color:rgba(255,194,71,.28);
+  background:linear-gradient(135deg,rgba(105,74,8,.16),rgba(28,20,5,.12));
+}
+
+.tag.pending{
+  background:rgba(255,194,71,.10);
+  color:#ffd36d;
+}
 
 /* =========================================================
    MODAL SCHLIESSEN
@@ -1694,46 +1897,44 @@ async function sendAppeal() {
    ========================================================= */
 
 function renderAppeals(appeals) {
-
   if (!appeals.length) {
-
     $('appeals').innerHTML =
       '<div class="empty">Du hast bisher keine Anträge gestellt.</div>';
-
     return;
-
   }
 
-  $('appeals').innerHTML = appeals.map(x => `
+  $('appeals').innerHTML = appeals.map(x => {
+    const status = String(x.status || 'open').toLowerCase();
+    const statusClass =
+      status === 'accepted' || status === 'approved' ? 'appeal-approved' :
+      status === 'rejected' ? 'appeal-rejected' :
+      'appeal-open';
 
-    <div class="item">
+    const statusText =
+      status === 'accepted' || status === 'approved' ? 'Genehmigt' :
+      status === 'rejected' ? 'Abgelehnt' :
+      status === 'pending' ? 'In Prüfung' :
+      'Offen';
 
-      <div class="item-head">
-
-        <div class="item-title">
-          ${esc(x.type)}
+    return `
+      <div class="item case-item ${statusClass}">
+        <div class="item-head">
+          <div class="item-title">
+            ${esc(x.type)}
+          </div>
+          <span class="tag ${statusClass === 'appeal-approved' ? 'approved' : statusClass === 'appeal-rejected' ? 'rejected' : 'open'}">
+            ${esc(statusText)}
+          </span>
         </div>
-
-        <span class="tag ${esc(
-          String(x.status).toLowerCase()
-        )}">
-          ${esc(x.status)}
-        </span>
-
+        <div class="item-meta">
+          #${esc(x.id || x.appeal_id)} · ${esc(x.created_at)}
+        </div>
+        <div class="item-reason">
+          ${esc(x.reason)}
+        </div>
       </div>
-
-      <div class="item-meta">
-        #${esc(x.id)} · ${esc(x.created_at)}
-      </div>
-
-      <div class="item-reason">
-        ${esc(x.reason)}
-      </div>
-
-    </div>
-
-  `).join('');
-
+    `;
+  }).join('');
 }
 
 
@@ -1742,57 +1943,57 @@ function renderAppeals(appeals) {
    ========================================================= */
 
 function renderCases(list, type) {
-
   if (!list.length) {
-
     return '<div class="empty">Keine Fälle gefunden.</div>';
-
   }
 
-  return list.map(x => `
+  return list.map(x => {
+    const action = String(x.action || '').toLowerCase();
+    const caseClass =
+      action === 'ban' || action === 'discord_ban' ? 'ban' :
+      action === 'warn' || action === 'discord_warn' ? 'warn' :
+      action === 'kick' ? 'kick' : 'other';
 
-    <div class="item">
+    const actionText =
+      action === 'discord_ban' ? 'Bann' :
+      action === 'discord_warn' ? 'Warnung' :
+      action === 'ban' ? 'Bann' :
+      action === 'warn' ? 'Warnung' :
+      action === 'kick' ? 'Kick' :
+      (x.action || 'Moderation');
 
-      <div class="item-head">
+    const status = String(x.status || 'open').toLowerCase();
+    const statusText =
+      status === 'closed' ? 'Erledigt' :
+      status === 'expired' ? 'Abgelaufen' :
+      status === 'removed' ? 'Entfernt' :
+      'Aktiv';
 
-        <div class="item-title">
-          Fall #${esc(x.case_id)} · ${esc(x.action)}
+    return `
+      <div class="item case-item ${caseClass}">
+        <div class="item-head">
+          <div class="item-title">
+            Fall #${esc(x.case_id)} · ${esc(actionText)}
+          </div>
+          <span class="tag">${esc(statusText)}</span>
         </div>
-
-        <span class="tag">
-          ${esc(x.status || 'open')}
-        </span>
-
+        <div class="item-meta">
+          ${esc(x.created_at || '')}
+        </div>
+        <div class="item-reason">
+          ${esc(x.reason || 'Kein Grund angegeben')}
+        </div>
+        <div class="actions">
+          <button
+            class="btn btn-dark btn-small"
+            onclick="openModal('${type}', ${Number(x.case_id)})"
+          >
+            Widerspruch
+          </button>
+        </div>
       </div>
-
-      <div class="item-meta">
-        ${esc(x.created_at || '')}
-      </div>
-
-      <div class="item-reason">
-        ${esc(
-          x.reason || 'Kein Grund angegeben'
-        )}
-      </div>
-
-      <div class="actions">
-
-        <button
-          class="btn btn-dark btn-small"
-          onclick="openModal(
-            '${type}',
-            ${Number(x.case_id)}
-          )"
-        >
-          Widerspruch
-        </button>
-
-      </div>
-
-    </div>
-
-  `).join('');
-
+    `;
+  }).join('');
 }
 
 
@@ -2064,6 +2265,74 @@ $('rbx').addEventListener(
   }
 );
 
+
+
+/* =========================================================
+   MODERATIONS-FARBEN
+   ========================================================= */
+
+.case-item{
+  border:1px solid transparent;
+  border-radius:13px;
+  padding:14px 14px;
+  margin:9px 0;
+  background:#060d16;
+}
+
+.case-item.ban{
+  border-color:rgba(255,77,95,.38);
+  background:linear-gradient(135deg,rgba(120,22,35,.22),rgba(35,8,15,.16));
+}
+.case-item.ban .tag{
+  background:rgba(255,77,95,.14);
+  color:#ff7c89;
+}
+
+.case-item.warn{
+  border-color:rgba(255,194,71,.38);
+  background:linear-gradient(135deg,rgba(117,82,10,.20),rgba(35,24,5,.14));
+}
+.case-item.warn .tag{
+  background:rgba(255,194,71,.14);
+  color:#ffd36d;
+}
+
+.case-item.kick{
+  border-color:rgba(150,160,175,.34);
+  background:linear-gradient(135deg,rgba(80,88,100,.18),rgba(20,24,30,.14));
+}
+.case-item.kick .tag{
+  background:rgba(160,170,185,.14);
+  color:#c9d0d9;
+}
+
+.case-item.other{
+  border-color:rgba(55,125,210,.20);
+  background:#050c15;
+}
+
+.case-item.appeal-approved{
+  border-color:rgba(53,211,154,.42);
+  background:linear-gradient(135deg,rgba(22,100,72,.22),rgba(7,35,27,.16));
+}
+.case-item.appeal-approved .tag{
+  background:rgba(53,211,154,.16);
+  color:#76e7ba;
+}
+
+.case-item.appeal-rejected{
+  border-color:rgba(255,77,95,.30);
+  background:linear-gradient(135deg,rgba(100,25,37,.18),rgba(30,7,12,.14));
+}
+.case-item.appeal-open{
+  border-color:rgba(255,194,71,.28);
+  background:linear-gradient(135deg,rgba(105,74,8,.16),rgba(28,20,5,.12));
+}
+
+.tag.pending{
+  background:rgba(255,194,71,.10);
+  color:#ffd36d;
+}
 
 /* =========================================================
    MODAL AUSSEN KLICK
