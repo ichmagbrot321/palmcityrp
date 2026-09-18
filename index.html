@@ -1818,16 +1818,15 @@ function renderCases(list, type) {
   return list.map(x => {
     const action = String(x.action || '').toLowerCase();
     const caseClass =
-      action === 'ban' || action === 'discord_ban' ? 'ban' :
-      action === 'warn' || action === 'discord_warn' ? 'warn' :
-      action === 'kick' ? 'kick' : 'other';
+      /^(?:discord_|roblox_)?ban$/.test(action) ? 'ban' :
+      /^(?:discord_|roblox_)?warn$/.test(action) ? 'warn' :
+      /^(?:discord_|roblox_)?kick$/.test(action) ? 'kick' :
+      'other';
 
     const actionText =
-      action === 'discord_ban' ? 'Bann' :
-      action === 'discord_warn' ? 'Warnung' :
-      action === 'ban' ? 'Bann' :
-      action === 'warn' ? 'Warnung' :
-      action === 'kick' ? 'Kick' :
+      /^(?:discord_|roblox_)?ban$/.test(action) ? 'Bann' :
+      /^(?:discord_|roblox_)?warn$/.test(action) ? 'Warnung' :
+      /^(?:discord_|roblox_)?kick$/.test(action) ? 'Kick' :
       (x.action || 'Moderation');
 
     const status = String(x.status || 'open').toLowerCase();
