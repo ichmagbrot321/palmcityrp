@@ -368,21 +368,34 @@ function show(id) {
   ['loading','home','roblox-setup','app'].forEach(x => $(x).classList.toggle('hidden', x !== id));
 }
 
-/* Roblox-Avatar mit Fallback auf Initiale */
-function robloxAvatarHtml(src, name, size) {
+/* Roblox-Avatar: mehrere Quellen der Reihe nach probieren, zuletzt Initiale */
+function avatarSources(p) {
+  return [p?.avatarData, p?.avatarProxy, p?.avatarUrl].filter(Boolean);
+}
+
+function robloxAvatarHtml(sources, name, size) {
   const initial = esc((name || '?').charAt(0).toUpperCase());
   const fb = `<div class="avatar avatar-fallback" style="width:${size}px;height:${size}px;flex-basis:${size}px">${initial}</div>`;
-  if (!src) return fb;
-  return `<img class="avatar" src="${esc(src)}" alt="Roblox-Avatar von ${esc(name)}" width="${size}" height="${size}" data-fallback="${esc(fb)}">`;
+  if (!sources.length) return fb;
+  return `<img class="avatar" src="${esc(sources[0])}" alt="Roblox-Avatar von ${esc(name)}" width="${size}" height="${size}" data-rest="${esc(JSON.stringify(sources.slice(1)))}" data-fallback="${esc(fb)}">`;
 }
 
 function attachAvatarFallback(root) {
   root.querySelectorAll('img[data-fallback]').forEach(img => {
-    img.addEventListener('error', () => {
+    const onError = () => {
+      let rest = [];
+      try { rest = JSON.parse(img.dataset.rest || '[]'); } catch {}
+      if (rest.length) {
+        img.dataset.rest = JSON.stringify(rest.slice(1));
+        img.src = rest[0];
+        return;
+      }
+      img.removeEventListener('error', onError);
       const tpl = document.createElement('template');
       tpl.innerHTML = img.dataset.fallback;
       img.replaceWith(tpl.content.firstChild);
-    }, {once:true});
+    };
+    img.addEventListener('error', onError);
   });
 }
 
@@ -497,10 +510,10 @@ function renderRoblox(d) {
   const username = p?.username || d.roblox?.username || '';
   const id = p?.id ? String(p.id) : '';
   const display = p?.displayName || username;
-  const src = p?.avatarProxy || (id ? `/api/roblox-avatar?userId=${encodeURIComponent(id)}` : '');
+  const sources = avatarSources(p || (id ? {avatarProxy:`/api/roblox-avatar?userId=${encodeURIComponent(id)}`} : null));
 
   $('roblox').innerHTML = `
-    ${robloxAvatarHtml(src, display, 60)}
+    ${robloxAvatarHtml(sources, display, 60)}
     <div class="identity-info">
       <div class="identity-label">Roblox</div>
       <div class="identity-name">${esc(display)}</div>
@@ -600,7 +613,7 @@ async function doLookup() {
     const {profile} = await api('/api/roblox-lookup?username=' + encodeURIComponent(username));
     lookedUp = profile;
     $('preview').innerHTML = `
-      ${robloxAvatarHtml(profile.avatarProxy, profile.displayName, 60)}
+      ${robloxAvatarHtml(avatarSources(profile), profile.displayName, 60)}
       <div class="identity-info">
         <div class="identity-name">${esc(profile.displayName)}</div>
         <div class="identity-sub">@${esc(profile.username)} · ID ${esc(profile.id)}</div>
