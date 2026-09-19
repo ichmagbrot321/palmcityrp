@@ -17,25 +17,34 @@ async function cases(id,source){const q=`guild_id=eq.${encodeURIComponent(GUILD)
 /*
  * Roblox Profil + Avatar
  *
- * Sucht den Roblox Account über den Benutzernamen und lädt anschließend
- * das aktuelle Roblox Headshot über die offizielle Roblox Thumbnail API.
+ * Roblox liefert bei der Thumbnail API teilweise zuerst den Status
+ * "Pending". Deshalb wird die Thumbnail-Abfrage mehrmals wiederholt.
+ * Das eigentliche Bild wird zusätzlich über /api/roblox-avatar
+ * serverseitig ausgeliefert, damit der Browser nicht direkt von
+ * Roblox/CDN abhängig ist.
  */
 async function robloxProfile(username){
   try{
     const clean=String(username||'').trim();
-    if(!/^[A-Za-z0-9_]{3,20}$/.test(clean))return null;
 
-    const userResponse=await fetch('https://users.roblox.com/v1/usernames/users',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'Accept':'application/json'
-      },
-      body:JSON.stringify({
-        usernames:[clean],
-        excludeBannedUsers:false
-      })
-    });
+    if(!/^[A-Za-z0-9_]{3,20}$/.test(clean)){
+      return null;
+    }
+
+    const userResponse=await fetch(
+      'https://users.roblox.com/v1/usernames/users',
+      {
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'Accept':'application/json'
+        },
+        body:JSON.stringify({
+          usernames:[clean],
+          excludeBannedUsers:false
+        })
+      }
+    );
 
     if(!userResponse.ok){
       console.error('Roblox Users API:',userResponse.status);
@@ -52,39 +61,148 @@ async function robloxProfile(username){
 
     const userId=String(profile.id);
 
-    const thumbnailUrl=
-      `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${encodeURIComponent(userId)}&size=150x150&format=Png&isCircular=true`;
+    let avatar=null;
 
-    const thumbnailResponse=await fetch(thumbnailUrl,{
-      headers:{
-        'Accept':'application/json'
+    /*
+     * Roblox Thumbnails können kurzzeitig "Pending" liefern.
+     * Deshalb bis zu 4 Versuche mit kurzer Pause.
+     */
+    for(let attempt=0;attempt<4;attempt++){
+      try{
+        const thumbnailUrl=
+          `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${encodeURIComponent(userId)}&size=150x150&format=Png&isCircular=false`;
+
+        const thumbnailResponse=await fetch(thumbnailUrl,{
+          headers:{
+            'Accept':'application/json',
+            'User-Agent':'PalmCityRP-Moderationsportal/1.0'
+          }
+        });
+
+        if(thumbnailResponse.ok){
+          const thumbnailData=await thumbnailResponse.json();
+          const thumbnail=thumbnailData?.data?.find(
+            x=>String(x.targetId)===userId
+          ) || thumbnailData?.data?.[0];
+
+          if(
+            thumbnail?.imageUrl &&
+            thumbnail?.state !== 'Pending'
+          ){
+            avatar=thumbnail.imageUrl;
+            break;
+          }
+        }
+      }catch(error){
+        console.error(`Roblox Thumbnail Versuch ${attempt+1}:`,error);
       }
-    });
 
-    if(!thumbnailResponse.ok){
-      console.error('Roblox Thumbnail API:',thumbnailResponse.status);
-      return {
-        id:userId,
-        username:profile.name||clean,
-        displayName:profile.displayName||profile.name||clean,
-        avatar:null
-      };
+      if(attempt<3){
+        await new Promise(resolve=>setTimeout(resolve,500));
+      }
     }
-
-    const thumbnailData=await thumbnailResponse.json();
-    const thumbnail=thumbnailData?.data?.find(x=>String(x.targetId)===userId)||thumbnailData?.data?.[0];
 
     return {
       id:userId,
       username:profile.name||clean,
       displayName:profile.displayName||profile.name||clean,
-      avatar:thumbnail?.imageUrl||null
+      avatar:avatar,
+      avatarProxy:`/api/roblox-avatar?userId=${encodeURIComponent(userId)}`
     };
   }catch(error){
     console.error('Roblox profile lookup failed:',error);
     return null;
   }
 }
+
+/*
+ * Lädt ein Roblox Avatar-Bild serverseitig und gibt es direkt
+ * als Bild an den Browser zurück.
+ *
+ * Das ist zuverlässiger als das Roblox CDN direkt aus dem Frontend
+ * aufzurufen.
+ */
+async function robloxAvatarImage(userId){
+  const cleanId=String(userId||'').trim();
+
+  if(!/^\d+$/.test(cleanId)){
+    return null;
+  }
+
+  const urls=[
+    `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${encodeURIComponent(cleanId)}&size=150x150&format=Png&isCircular=false`,
+    `https://www.roblox.com/headshot-thumbnail/image?userId=${encodeURIComponent(cleanId)}&width=150&height=150&format=png`
+  ];
+
+  /*
+   * Zuerst die moderne Thumbnail API.
+   */
+  for(let attempt=0;attempt<4;attempt++){
+    try{
+      const r=await fetch(urls[0],{
+        headers:{
+          'Accept':'application/json',
+          'User-Agent':'PalmCityRP-Moderationsportal/1.0'
+        }
+      });
+
+      if(r.ok){
+        const data=await r.json().catch(()=>null);
+        const item=data?.data?.find(
+          x=>String(x.targetId)===cleanId
+        ) || data?.data?.[0];
+
+        if(item?.imageUrl && item?.state !== 'Pending'){
+          const image=await fetch(item.imageUrl,{
+            headers:{
+              'Accept':'image/avif,image/webp,image/png,image/*,*/*;q=0.8',
+              'User-Agent':'PalmCityRP-Moderationsportal/1.0'
+            }
+          });
+
+          if(image.ok){
+            return {
+              body:Buffer.from(await image.arrayBuffer()),
+              contentType:image.headers.get('content-type')||'image/png'
+            };
+          }
+        }
+      }
+    }catch(error){
+      console.error(`Roblox Avatar API Versuch ${attempt+1}:`,error);
+    }
+
+    if(attempt<3){
+      await new Promise(resolve=>setTimeout(resolve,500));
+    }
+  }
+
+  /*
+   * Fallback für den älteren Roblox Headshot Endpoint.
+   */
+  try{
+    const fallback=await fetch(urls[1],{
+      headers:{
+        'Accept':'image/avif,image/webp,image/png,image/*,*/*;q=0.8',
+        'User-Agent':'PalmCityRP-Moderationsportal/1.0'
+      }
+    });
+
+    if(fallback.ok){
+      return {
+        body:Buffer.from(await fallback.arrayBuffer()),
+        contentType:fallback.headers.get('content-type')||'image/png'
+      };
+    }
+
+    console.error('Roblox Avatar Fallback:',fallback.status);
+  }catch(error){
+    console.error('Roblox Avatar Fallback Fehler:',error);
+  }
+
+  return null;
+}
+
 
 module.exports=async(req,res)=>{
   try{
@@ -140,6 +258,41 @@ module.exports=async(req,res)=>{
 
     const me=session(req);
     if(!me)return send(res,401,{error:'Nicht angemeldet.'});
+
+    /*
+     * Roblox Avatar Proxy
+     *
+     * Der Browser ruft nur unsere eigene Domain auf.
+     * Dadurch vermeiden wir Probleme mit Roblox CDN, CORS,
+     * Referrer und Thumbnail-Status.
+     */
+    if(p==='/api/roblox-avatar'){
+      const userId=u.searchParams.get('userId');
+
+      if(!/^\d+$/.test(String(userId||''))){
+        res.statusCode=400;
+        res.setHeader('Content-Type','application/json');
+        return res.end(JSON.stringify({
+          error:'Ungültige Roblox User ID.'
+        }));
+      }
+
+      const image=await robloxAvatarImage(userId);
+
+      if(!image){
+        res.statusCode=404;
+        res.setHeader('Content-Type','application/json');
+        return res.end(JSON.stringify({
+          error:'Roblox Avatar konnte nicht geladen werden.'
+        }));
+      }
+
+      res.statusCode=200;
+      res.setHeader('Content-Type',image.contentType);
+      res.setHeader('Cache-Control','public, max-age=300, s-maxage=300');
+      res.setHeader('Content-Length',String(image.body.length));
+      return res.end(image.body);
+    }
 
     if(p==='/api/me'){
       res.setHeader('Set-Cookie',sessionCookie(me));
