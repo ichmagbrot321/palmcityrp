@@ -396,6 +396,44 @@ h1{
   overflow-wrap:anywhere;
 }
 
+.roblox-profile{
+  display:flex;
+  align-items:center;
+  gap:13px;
+  min-width:0;
+}
+.roblox-avatar{
+  width:58px;
+  height:58px;
+  flex:0 0 58px;
+  border-radius:50%;
+  object-fit:cover;
+  border:2px solid rgba(35,154,255,.65);
+  background:#0b1623;
+  box-shadow:0 0 24px rgba(22,136,255,.16);
+}
+.roblox-profile-info{
+  min-width:0;
+}
+.roblox-display{
+  font-size:17px;
+  font-weight:800;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.roblox-username{
+  color:#8fa0b4;
+  font-size:12px;
+  margin-top:2px;
+  overflow-wrap:anywhere;
+}
+.roblox-id{
+  color:#64768a;
+  font-size:11px;
+  margin-top:2px;
+}
+
 .grid{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
@@ -985,6 +1023,12 @@ footer{
     flex-basis:50px;
   }
 
+  .roblox-avatar{
+    width:50px;
+    height:50px;
+    flex-basis:50px;
+  }
+
   .profile-name{
     font-size:17px;
   }
@@ -1328,7 +1372,8 @@ footer{
           >
 
           <div class="form-help">
-            3 bis 20 Zeichen · Buchstaben, Zahlen und Unterstrich
+            3 bis 20 Zeichen · Buchstaben, Zahlen und Unterstrich<br>
+            Nach der Verknüpfung wird dein Roblox Profilbild automatisch geladen.
           </div>
 
           <div class="form-row">
@@ -1989,21 +2034,46 @@ async function load() {
 
     /* ROBLOX */
 
-    $('roblox').innerHTML = `
+    const robloxProfile = d.roblox?.profile;
 
-      <div class="item">
-
-        <div class="item-title">
-          ${esc(d.roblox.username)}
+    $('roblox').innerHTML = robloxProfile?.avatar
+      ? `
+        <div class="item">
+          <div class="roblox-profile">
+            <img
+              class="roblox-avatar"
+              src="${esc(robloxProfile.avatar)}"
+              alt="Roblox Avatar von ${esc(robloxProfile.username || d.roblox.username)}"
+              loading="lazy"
+              referrerpolicy="no-referrer"
+            >
+            <div class="roblox-profile-info">
+              <div class="roblox-display">
+                ${esc(robloxProfile.displayName || robloxProfile.username || d.roblox.username)}
+              </div>
+              <div class="roblox-username">
+                @${esc(robloxProfile.username || d.roblox.username)}
+              </div>
+              <div class="roblox-id">
+                Roblox ID: ${esc(robloxProfile.id)}
+              </div>
+            </div>
+          </div>
+          <div class="item-meta">
+            Mit deinem Discord Konto verknüpft
+          </div>
         </div>
-
-        <div class="item-meta">
-          Mit deinem Discord Konto verknüpft
+      `
+      : `
+        <div class="item">
+          <div class="item-title">
+            ${esc(d.roblox.username)}
+          </div>
+          <div class="item-meta">
+            Roblox Avatar konnte gerade nicht geladen werden.
+          </div>
         </div>
-
-      </div>
-
-    `;
+      `;
 
 
     /* WARNS */
