@@ -180,49 +180,35 @@ function cacheSet(map, key, value) {
   map.set(key, { t: Date.now(), v: value });
 }
 
-/* Roblox-Benutzer per Name suchen: ID, Name, Anzeigename */
-async function robloxProfile(username) {
-  const clean = String(username || '').trim();
-  if (!ROBLOX_NAME.test(clean)) return null;
+const ROBLOX_HOSTS = {
+  users: ['https://users.roblox.com', 'https://users.roproxy.com'],
+  thumbs: ['https://thumbnails.roblox.com', 'https://thumbnails.roproxy.com']
+};
 
-  const key = clean.toLowerCase();
-  const cached = cacheGet(profileCache, key);
-  if (cached) return cached;
-
-  try {
-    const r = await timedFetch('https://users.roblox.com/v1/usernames/users', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'User-Agent': UA },
-      body: JSON.stringify({ usernames: [clean], excludeBannedUsers: false })
-    });
-
-    if (!r.ok) {
-      console.error('Roblox Users API:', r.status);
-      return null;
+/* Benutzer per Name suchen (erst Roblox, bei Fehler ein Spiegel-Server) */
+async function robloxUserLookup(clean) {
+  for (const host of ROBLOX_HOSTS.users) {
+    try {
+      const r = await timedFetch(host + '/v1/usernames/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'User-Agent': UA },
+        body: JSON.stringify({ usernames: [clean], excludeBannedUsers: false })
+      });
+      if (!r.ok) {
+        console.error('Roblox Users API', host, r.status);
+        continue;
+      }
+      const data = await r.json();
+      return data?.data?.[0] || null;
+    } catch (e) {
+      console.error('Roblox Users API', host, e.message);
     }
-
-    const data = await r.json();
-    const p = data?.data?.[0];
-    if (!p?.id) return null;
-
-    const id = String(p.id);
-    const profile = {
-      id,
-      username: p.name || clean,
-      displayName: p.displayName || p.name || clean,
-      avatarProxy: `/api/roblox-avatar?userId=${encodeURIComponent(id)}`
-    };
-
-    cacheSet(profileCache, key, profile);
-    return profile;
-  } catch (e) {
-    console.error('Roblox Profil Fehler:', e);
-    return null;
   }
+  return null;
 }
 
-/* Avatar-Bild serverseitig laden (Thumbnail-API, danach Fallback) */
-async function robloxAvatarImage(userId) {
+/* Avatar holen: liefert { url, body, contentType } (body kann fehlen, url ist dann für den Browser) */
+async function robloxAvatar(userId) {
   const id = String(userId || '').trim();
   if (!/^\d+$/.test(id)) return null;
 
@@ -234,55 +220,91 @@ async function robloxAvatarImage(userId) {
     'User-Agent': UA
   };
 
-  const thumbUrl = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${encodeURIComponent(id)}&size=150x150&format=Png&isCircular=false`;
+  let url = null;
 
-  for (let attempt = 0; attempt < 4; attempt++) {
-    try {
-      const r = await timedFetch(thumbUrl, { headers: { Accept: 'application/json', 'User-Agent': UA } });
-      if (r.ok) {
+  for (const host of ROBLOX_HOSTS.thumbs) {
+    const api = `${host}/v1/users/avatar-headshot?userIds=${encodeURIComponent(id)}&size=150x150&format=Png&isCircular=false`;
+    for (let attempt = 0; attempt < 3 && !url; attempt++) {
+      try {
+        const r = await timedFetch(api, { headers: { Accept: 'application/json', 'User-Agent': UA } });
+        if (!r.ok) {
+          console.error('Roblox Thumbnail API', host, r.status);
+          break;
+        }
         const data = await r.json().catch(() => null);
         const item = data?.data?.find(x => String(x.targetId) === id) || data?.data?.[0];
-
         if (item?.imageUrl && item.state === 'Completed') {
-          const img = await timedFetch(item.imageUrl, { headers: imageHeaders });
-          if (img.ok) {
-            const result = {
-              body: Buffer.from(await img.arrayBuffer()),
-              contentType: img.headers.get('content-type') || 'image/png'
-            };
-            cacheSet(imageCache, id, result);
-            return result;
-          }
+          url = item.imageUrl;
+          break;
         }
-
-        /* Blocked/Error bringt keine Wiederholung */
         if (item && item.state !== 'Pending') break;
+      } catch (e) {
+        console.error('Roblox Thumbnail API', host, e.message);
+        break;
       }
-    } catch (e) {
-      console.error(`Roblox Thumbnail Versuch ${attempt + 1}:`, e.message);
+      await wait(500);
     }
-    if (attempt < 3) await wait(600);
+    if (url) break;
   }
 
+  /* Letzter Ausweg: Roblox-Weiterleitung, die der Browser selbst laden kann */
+  const browserUrl = url || `https://www.roblox.com/headshot-thumbnail/image?userId=${encodeURIComponent(id)}&width=150&height=150&format=png`;
+
   try {
-    const r = await timedFetch(
-      `https://www.roblox.com/headshot-thumbnail/image?userId=${encodeURIComponent(id)}&width=150&height=150&format=png`,
-      { headers: imageHeaders }
-    );
-    if (r.ok && (r.headers.get('content-type') || '').startsWith('image/')) {
-      const result = {
-        body: Buffer.from(await r.arrayBuffer()),
-        contentType: r.headers.get('content-type')
-      };
+    const img = await timedFetch(browserUrl, { headers: imageHeaders });
+    const type = img.headers.get('content-type') || '';
+    if (img.ok && type.startsWith('image/')) {
+      const result = { url: browserUrl, body: Buffer.from(await img.arrayBuffer()), contentType: type };
       cacheSet(imageCache, id, result);
       return result;
     }
-    console.error('Roblox Avatar Fallback:', r.status);
+    console.error('Roblox Avatar Download', img.status, type);
   } catch (e) {
-    console.error('Roblox Avatar Fallback Fehler:', e.message);
+    console.error('Roblox Avatar Download:', e.message);
   }
 
-  return null;
+  return { url: browserUrl, body: null, contentType: null };
+}
+
+async function robloxAvatarImage(userId) {
+  const a = await robloxAvatar(userId);
+  return a && a.body ? a : null;
+}
+
+/* Profil: ID, Name, Anzeigename und Avatar (als Data-URI, Proxy-URL und Direkt-URL) */
+async function robloxProfile(username) {
+  const clean = String(username || '').trim();
+  if (!ROBLOX_NAME.test(clean)) return null;
+
+  const key = clean.toLowerCase();
+  const cached = cacheGet(profileCache, key);
+  if (cached) return cached;
+
+  try {
+    const p = await robloxUserLookup(clean);
+    if (!p?.id) return null;
+
+    const id = String(p.id);
+    const avatarInfo = await robloxAvatar(id);
+
+    const profile = {
+      id,
+      username: p.name || clean,
+      displayName: p.displayName || p.name || clean,
+      avatarData: avatarInfo?.body
+        ? `data:${avatarInfo.contentType};base64,${avatarInfo.body.toString('base64')}`
+        : null,
+      avatarUrl: avatarInfo?.url || null,
+      avatarProxy: `/api/roblox-avatar?userId=${encodeURIComponent(id)}`
+    };
+
+    /* Nur zwischenspeichern, wenn das Bild wirklich da ist */
+    if (profile.avatarData) cacheSet(profileCache, key, profile);
+    return profile;
+  } catch (e) {
+    console.error('Roblox Profil Fehler:', e);
+    return null;
+  }
 }
 
 /* =========================================================
