@@ -412,6 +412,14 @@ h1{
   background:#0b1623;
   box-shadow:0 0 24px rgba(22,136,255,.16);
 }
+
+.roblox-avatar-placeholder{
+  display:grid;
+  place-items:center;
+  color:#6f8298;
+  font-size:18px;
+  font-weight:800;
+}
 .roblox-profile-info{
   min-width:0;
 }
@@ -2035,26 +2043,40 @@ async function load() {
     /* ROBLOX */
 
     const robloxProfile = d.roblox?.profile || null;
-    const robloxUsername = robloxProfile?.username || d.roblox?.username || '';
-    const robloxId = robloxProfile?.id ? String(robloxProfile.id) : '';
-    const robloxDisplay = robloxProfile?.displayName || robloxUsername;
+    const robloxUsername =
+      robloxProfile?.username ||
+      d.roblox?.username ||
+      '';
+
+    const robloxId =
+      robloxProfile?.id
+        ? String(robloxProfile.id)
+        : '';
+
+    const robloxDisplay =
+      robloxProfile?.displayName ||
+      robloxUsername;
 
     /*
-     * Avatar direkt über Roblox laden.
-     *
-     * Falls die Backend-Thumbnail-URL fehlt, wird der offizielle
-     * Roblox Headshot Endpoint als Fallback verwendet.
+     * Wichtig:
+     * Das Bild wird nicht mehr direkt von Roblox geladen.
+     * Stattdessen kommt es über unseren eigenen API-Proxy.
      */
     const robloxAvatar =
-      robloxProfile?.avatar ||
-      (robloxId
-        ? `https://www.roblox.com/headshot-thumbnail/image?userId=${encodeURIComponent(robloxId)}&width=150&height=150&format=png`
-        : '');
+      robloxProfile?.avatarProxy ||
+      (
+        robloxId
+          ? `/api/roblox-avatar?userId=${encodeURIComponent(robloxId)}`
+          : ''
+      );
 
     if (robloxUsername) {
+
       $('roblox').innerHTML = `
         <div class="item">
+
           <div class="roblox-profile">
+
             ${
               robloxAvatar
                 ? `
@@ -2062,22 +2084,21 @@ async function load() {
                     class="roblox-avatar"
                     src="${esc(robloxAvatar)}"
                     alt="Roblox Avatar von ${esc(robloxUsername)}"
+                    width="58"
+                    height="58"
                     loading="eager"
-                    referrerpolicy="no-referrer"
-                    onerror="this.onerror=null;this.src='https://www.roblox.com/headshot-thumbnail/image?userId=${encodeURIComponent(robloxId)}&width=150&height=150&format=png';"
+                    decoding="async"
                   >
                 `
                 : `
-                  <div
-                    class="roblox-avatar"
-                    style="display:grid;place-items:center;color:#6f8298;font-size:11px;text-align:center;"
-                  >
-                    Roblox
+                  <div class="roblox-avatar roblox-avatar-placeholder">
+                    ?
                   </div>
                 `
             }
 
             <div class="roblox-profile-info">
+
               <div class="roblox-display">
                 ${esc(robloxDisplay)}
               </div>
@@ -2095,25 +2116,57 @@ async function load() {
                   `
                   : ''
               }
+
             </div>
+
           </div>
 
           <div class="item-meta">
             Mit deinem Discord Konto verknüpft
           </div>
+
         </div>
       `;
+
+      /*
+       * Falls Roblox einmal temporär nicht erreichbar ist,
+       * zeigen wir nicht wieder den falschen "Roblox"-Kreis.
+       */
+      const robloxImage =
+        $('roblox').querySelector('.roblox-avatar');
+
+      if (robloxImage?.tagName === 'IMG') {
+        robloxImage.addEventListener('error', () => {
+          robloxImage.style.display = 'none';
+
+          const fallback =
+            document.createElement('div');
+
+          fallback.className =
+            'roblox-avatar roblox-avatar-placeholder';
+
+          fallback.textContent = '?';
+
+          robloxImage.replaceWith(fallback);
+        }, {once:true});
+      }
+
     } else {
+
       $('roblox').innerHTML = `
         <div class="item">
+
           <div class="item-title">
             Kein Roblox Konto verknüpft
           </div>
+
           <div class="item-meta">
             Hinterlege zuerst deinen Roblox Benutzernamen.
           </div>
+
         </div>
       `;
+
     }
 
 
