@@ -2034,46 +2034,87 @@ async function load() {
 
     /* ROBLOX */
 
-    const robloxProfile = d.roblox?.profile;
+    const robloxProfile = d.roblox?.profile || null;
+    const robloxUsername = robloxProfile?.username || d.roblox?.username || '';
+    const robloxId = robloxProfile?.id ? String(robloxProfile.id) : '';
+    const robloxDisplay = robloxProfile?.displayName || robloxUsername;
 
-    $('roblox').innerHTML = robloxProfile?.avatar
-      ? `
+    /*
+     * Avatar direkt über Roblox laden.
+     *
+     * Falls die Backend-Thumbnail-URL fehlt, wird der offizielle
+     * Roblox Headshot Endpoint als Fallback verwendet.
+     */
+    const robloxAvatar =
+      robloxProfile?.avatar ||
+      (robloxId
+        ? `https://www.roblox.com/headshot-thumbnail/image?userId=${encodeURIComponent(robloxId)}&width=150&height=150&format=png`
+        : '');
+
+    if (robloxUsername) {
+      $('roblox').innerHTML = `
         <div class="item">
           <div class="roblox-profile">
-            <img
-              class="roblox-avatar"
-              src="${esc(robloxProfile.avatar)}"
-              alt="Roblox Avatar von ${esc(robloxProfile.username || d.roblox.username)}"
-              loading="lazy"
-              referrerpolicy="no-referrer"
-            >
+            ${
+              robloxAvatar
+                ? `
+                  <img
+                    class="roblox-avatar"
+                    src="${esc(robloxAvatar)}"
+                    alt="Roblox Avatar von ${esc(robloxUsername)}"
+                    loading="eager"
+                    referrerpolicy="no-referrer"
+                    onerror="this.onerror=null;this.src='https://www.roblox.com/headshot-thumbnail/image?userId=${encodeURIComponent(robloxId)}&width=150&height=150&format=png';"
+                  >
+                `
+                : `
+                  <div
+                    class="roblox-avatar"
+                    style="display:grid;place-items:center;color:#6f8298;font-size:11px;text-align:center;"
+                  >
+                    Roblox
+                  </div>
+                `
+            }
+
             <div class="roblox-profile-info">
               <div class="roblox-display">
-                ${esc(robloxProfile.displayName || robloxProfile.username || d.roblox.username)}
+                ${esc(robloxDisplay)}
               </div>
+
               <div class="roblox-username">
-                @${esc(robloxProfile.username || d.roblox.username)}
+                @${esc(robloxUsername)}
               </div>
-              <div class="roblox-id">
-                Roblox ID: ${esc(robloxProfile.id)}
-              </div>
+
+              ${
+                robloxId
+                  ? `
+                    <div class="roblox-id">
+                      Roblox ID: ${esc(robloxId)}
+                    </div>
+                  `
+                  : ''
+              }
             </div>
           </div>
+
           <div class="item-meta">
             Mit deinem Discord Konto verknüpft
           </div>
         </div>
-      `
-      : `
+      `;
+    } else {
+      $('roblox').innerHTML = `
         <div class="item">
           <div class="item-title">
-            ${esc(d.roblox.username)}
+            Kein Roblox Konto verknüpft
           </div>
           <div class="item-meta">
-            Roblox Avatar konnte gerade nicht geladen werden.
+            Hinterlege zuerst deinen Roblox Benutzernamen.
           </div>
         </div>
       `;
+    }
 
 
     /* WARNS */
