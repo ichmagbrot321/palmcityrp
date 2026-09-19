@@ -610,7 +610,7 @@ async function doLookup() {
   btn.disabled = true;
   btn.textContent = 'Suche läuft ...';
   try {
-    const {profile} = await api('/api/roblox-lookup?username=' + encodeURIComponent(username));
+    const {profile} = await api('/api/roblox', {method:'POST', body:JSON.stringify({username, preview:true})});
     lookedUp = profile;
     $('preview').innerHTML = `
       ${robloxAvatarHtml(avatarSources(profile), profile.displayName, 60)}
