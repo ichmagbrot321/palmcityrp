@@ -13,42 +13,379 @@ async function dapi(path,opt={}){return fetch(DISCORD+path,{...opt,headers:{Auth
 function avatar(u){return u.avatar?`https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=128`:'https://cdn.discordapp.com/embed/avatars/0.png'}
 async function ban(id){const r=await dapi(`/guilds/${GUILD}/bans/${id}`);return r.ok?r.data:null}
 async function cases(id,source){const q=`guild_id=eq.${encodeURIComponent(GUILD)}&user_id=eq.${encodeURIComponent(id)}&source=eq.${encodeURIComponent(source)}&order=created_at.desc&select=*`;const r=await db(`moderation_cases?${q}`);return r.ok?r.data||[]:[]}
+
+/*
+ * Roblox Profil + Avatar
+ *
+ * Sucht den Roblox Account über den Benutzernamen und lädt anschließend
+ * das aktuelle Roblox Headshot über die offizielle Roblox Thumbnail API.
+ */
 async function robloxProfile(username){
   try{
-    const u=await fetch('https://users.roblox.com/v1/usernames/users',{
+    const clean=String(username||'').trim();
+    if(!/^[A-Za-z0-9_]{3,20}$/.test(clean))return null;
+
+    const userResponse=await fetch('https://users.roblox.com/v1/usernames/users',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({usernames:[username],excludeBannedUsers:false})
-    }).then(r=>r.ok?r.json():null);
-    const profile=u?.data?.[0];
-    if(!profile?.id)return null;
-    const t=await fetch(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${encodeURIComponent(profile.id)}&size=150x150&format=Png&isCircular=true`).then(r=>r.ok?r.json():null);
+      headers:{
+        'Content-Type':'application/json',
+        'Accept':'application/json'
+      },
+      body:JSON.stringify({
+        usernames:[clean],
+        excludeBannedUsers:false
+      })
+    });
+
+    if(!userResponse.ok){
+      console.error('Roblox Users API:',userResponse.status);
+      return null;
+    }
+
+    const userData=await userResponse.json();
+    const profile=userData?.data?.[0];
+
+    if(!profile?.id){
+      console.error('Roblox User nicht gefunden:',clean);
+      return null;
+    }
+
+    const userId=String(profile.id);
+
+    const thumbnailUrl=
+      `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${encodeURIComponent(userId)}&size=150x150&format=Png&isCircular=true`;
+
+    const thumbnailResponse=await fetch(thumbnailUrl,{
+      headers:{
+        'Accept':'application/json'
+      }
+    });
+
+    if(!thumbnailResponse.ok){
+      console.error('Roblox Thumbnail API:',thumbnailResponse.status);
+      return {
+        id:userId,
+        username:profile.name||clean,
+        displayName:profile.displayName||profile.name||clean,
+        avatar:null
+      };
+    }
+
+    const thumbnailData=await thumbnailResponse.json();
+    const thumbnail=thumbnailData?.data?.find(x=>String(x.targetId)===userId)||thumbnailData?.data?.[0];
+
     return {
-      id:profile.id,
-      username:profile.name||username,
-      displayName:profile.displayName||profile.name||username,
-      avatar:t?.data?.[0]?.imageUrl||null
+      id:userId,
+      username:profile.name||clean,
+      displayName:profile.displayName||profile.name||clean,
+      avatar:thumbnail?.imageUrl||null
     };
-  }catch(e){
-    console.error('Roblox profile lookup failed:',e);
+  }catch(error){
+    console.error('Roblox profile lookup failed:',error);
     return null;
   }
 }
-module.exports=async(req,res)=>{try{noStore(res);const u=new URL(req.url,`https://${req.headers.host}`),p=u.pathname;
-if(p==='/api/login'){const st=enc(crypto.randomBytes(24));res.statusCode=302;res.setHeader('Set-Cookie',setCookie('pc_state',st,600));res.setHeader('Location',`https://discord.com/oauth2/authorize?client_id=${encodeURIComponent(CLIENT)}&response_type=code&redirect_uri=${encodeURIComponent(SITE+'/api/callback')}&scope=identify&state=${st}`);return res.end()}
-if(p==='/api/callback'){const code=u.searchParams.get('code'),st=u.searchParams.get('state'),m=(req.headers.cookie||'').match(/pc_state=([^;]+)/);if(!code||!st||!m||m[1]!==st)return send(res,400,{error:'Ungültige Anmeldung.'});const body=new URLSearchParams({client_id:CLIENT,client_secret:SECRET,grant_type:'authorization_code',code,redirect_uri:SITE+'/api/callback'});const t=await fetch(DISCORD+'/oauth2/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});const td=await t.json();const me=await fetch(DISCORD+'/users/@me',{headers:{Authorization:`Bearer ${td.access_token}`}}).then(r=>r.ok?r.json():null);if(!me)return send(res,401,{error:'Discord Anmeldung fehlgeschlagen.'});const user={id:me.id,username:me.username,global_name:me.global_name,avatar:avatar(me)};res.statusCode=302;res.setHeader('Set-Cookie',sessionCookie(user));res.setHeader('Location','/');return res.end()}
-const me=session(req);if(!me)return send(res,401,{error:'Nicht angemeldet.'});
-if(p==='/api/me'){res.setHeader('Set-Cookie',sessionCookie(me));const b=await ban(me.id),ws=await cases(me.id,'discord');const link=await db(`roblox_links?discord_id=eq.${me.id}&select=*`);const rl=link.ok?(link.data||[])[0]:null;let rc=[];let rp=null;if(rl){rp=await robloxProfile(rl.username);const q=`guild_id=eq.${GUILD}&source=eq.roblox&roblox_username=ilike.${encodeURIComponent(rl.username)}&order=created_at.desc&select=*`;const rr=await db(`moderation_cases?${q}`);rc=rr.ok?rr.data||[]:[]}const ap=await db(`appeals?discord_id=eq.${me.id}&order=created_at.desc&select=*`);return send(res,200,{user:me,banned:!!b,ban:b?{reason:b.reason}:null,warns:ws.filter(x=>['warn','discord_warn'].includes(String(x.action).toLowerCase())),roblox:{username:rl?.username||null,profile:rp,cases:rc},appeals:ap.ok?ap.data||[]:[]})}
-if(p==='/api/roblox'&&req.method==='POST'){const x=await json(req),name=String(x.username||'').trim();if(!/^[A-Za-z0-9_]{3,20}$/.test(name))return send(res,400,{error:'Ungültiger Roblox Benutzername.'});const existing=await db(`roblox_links?discord_id=eq.${encodeURIComponent(me.id)}&select=*`);if(!existing.ok)return send(res,500,{error:'Roblox Verknüpfung konnte nicht geprüft werden.'});if(existing.data?.length)return send(res,409,{error:'Dein Roblox Benutzername wurde bereits fest hinterlegt und kann nicht geändert werden.'});const r=await db('roblox_links',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({discord_id:me.id,username:name,updated_at:new Date().toISOString()})});return send(res,r.ok?200:500,r.ok?{ok:true}:{error:'Roblox Name konnte nicht gespeichert werden.'})}
-if(p==='/api/appeals'&&req.method==='POST'){const x=await json(req),type=String(x.type||''),reason=String(x.reason||'').trim(),caseId=x.case_id?String(x.case_id):null;if(!['discord_ban','discord_warn','roblox'].includes(type)||reason.length<10||reason.length>2000)return send(res,400,{error:'Ungültiger Antrag.'});if(type==='discord_ban'&&!(await ban(me.id)))return send(res,400,{error:'Du bist aktuell nicht gebannt.'});if(type!=='discord_ban'&&!caseId)return send(res,400,{error:'Kein Fall ausgewählt.'});if(caseId){const r=await db(`moderation_cases?guild_id=eq.${GUILD}&case_id=eq.${encodeURIComponent(caseId)}&select=*`);if(!r.ok||!r.data?.[0]||String(r.data[0].user_id)!==String(me.id))return send(res,403,{error:'Dieser Fall gehört nicht zu dir.'})}
-const now=new Date().toISOString();const appealData={discord_id:me.id,discord_username:me.username,type,case_id:caseId,reason,status:'open',created_at:now};let r=await db('appeals',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({...appealData,discord_notified:false,bot_handled:false})});if(!r.ok){r=await db('appeals',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify(appealData)})}if(!r.ok){console.error('Supabase appeals insert failed:',r.status,r.data);return send(res,500,{error:'Der Antrag konnte nicht gespeichert werden. Supabase: '+(r.data?.message||r.data?.hint||r.data?.details||('HTTP '+r.status))})}
-const appeal=Array.isArray(r.data)?r.data[0]:r.data;const appealId=appeal?.id??appeal?.appeal_id;if(!appealId){console.error('Supabase appeal insert returned no id:',r.data);return send(res,500,{error:'Der Antrag wurde gespeichert, aber es wurde keine Antrags-ID zurückgegeben.'})}
-const channelId=process.env.DISCORD_APPEAL_CHANNEL_ID||'1548705694033780867';const title=type==='discord_ban'?'🔨 Neuer Entbannungsantrag':type==='discord_warn'?'⚠️ Neuer Warnungs-Widerspruch':'🎮 Neuer Roblox-Widerspruch';const detail=caseId?`Fall: #${caseId}`:'Kein Fall';const msgBody={content:`**${title}**
+
+module.exports=async(req,res)=>{
+  try{
+    noStore(res);
+    const u=new URL(req.url,`https://${req.headers.host}`),p=u.pathname;
+
+    if(p==='/api/login'){
+      const st=enc(crypto.randomBytes(24));
+      res.statusCode=302;
+      res.setHeader('Set-Cookie',setCookie('pc_state',st,600));
+      res.setHeader('Location',`https://discord.com/oauth2/authorize?client_id=${encodeURIComponent(CLIENT)}&response_type=code&redirect_uri=${encodeURIComponent(SITE+'/api/callback')}&scope=identify&state=${st}`);
+      return res.end();
+    }
+
+    if(p==='/api/callback'){
+      const code=u.searchParams.get('code'),st=u.searchParams.get('state'),m=(req.headers.cookie||'').match(/pc_state=([^;]+)/);
+      if(!code||!st||!m||m[1]!==st)return send(res,400,{error:'Ungültige Anmeldung.'});
+
+      const body=new URLSearchParams({
+        client_id:CLIENT,
+        client_secret:SECRET,
+        grant_type:'authorization_code',
+        code,
+        redirect_uri:SITE+'/api/callback'
+      });
+
+      const t=await fetch(DISCORD+'/oauth2/token',{
+        method:'POST',
+        headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body
+      });
+
+      const td=await t.json();
+
+      const me=await fetch(DISCORD+'/users/@me',{
+        headers:{Authorization:`Bearer ${td.access_token}`}
+      }).then(r=>r.ok?r.json():null);
+
+      if(!me)return send(res,401,{error:'Discord Anmeldung fehlgeschlagen.'});
+
+      const user={
+        id:me.id,
+        username:me.username,
+        global_name:me.global_name,
+        avatar:avatar(me)
+      };
+
+      res.statusCode=302;
+      res.setHeader('Set-Cookie',sessionCookie(user));
+      res.setHeader('Location','/');
+      return res.end();
+    }
+
+    const me=session(req);
+    if(!me)return send(res,401,{error:'Nicht angemeldet.'});
+
+    if(p==='/api/me'){
+      res.setHeader('Set-Cookie',sessionCookie(me));
+
+      const b=await ban(me.id);
+      const ws=await cases(me.id,'discord');
+
+      const link=await db(`roblox_links?discord_id=eq.${encodeURIComponent(me.id)}&select=*`);
+      const rl=link.ok?(link.data||[])[0]:null;
+
+      let rc=[];
+      let rp=null;
+
+      if(rl){
+        /*
+         * Roblox Profil laden.
+         * Dadurch bekommt das Frontend neben dem Namen auch Roblox-ID,
+         * Display Name und Avatar-URL.
+         */
+        rp=await robloxProfile(rl.username);
+
+        const q=`guild_id=eq.${GUILD}&source=eq.roblox&roblox_username=ilike.${encodeURIComponent(rl.username)}&order=created_at.desc&select=*`;
+        const rr=await db(`moderation_cases?${q}`);
+        rc=rr.ok?rr.data||[]:[];
+      }
+
+      const ap=await db(`appeals?discord_id=eq.${encodeURIComponent(me.id)}&order=created_at.desc&select=*`);
+
+      return send(res,200,{
+        user:me,
+        banned:!!b,
+        ban:b?{reason:b.reason}:null,
+        warns:ws.filter(x=>['warn','discord_warn'].includes(String(x.action).toLowerCase())),
+        roblox:{
+          username:rl?.username||null,
+          profile:rp,
+          cases:rc
+        },
+        appeals:ap.ok?ap.data||[]:[]
+      });
+    }
+
+    if(p==='/api/roblox'&&req.method==='POST'){
+      const x=await json(req);
+      const name=String(x.username||'').trim();
+
+      if(!/^[A-Za-z0-9_]{3,20}$/.test(name)){
+        return send(res,400,{error:'Ungültiger Roblox Benutzername.'});
+      }
+
+      /*
+       * Vor dem Speichern prüfen, ob der Roblox Account wirklich existiert.
+       * So wird kein ungültiger Roblox Name dauerhaft verknüpft.
+       */
+      const rp=await robloxProfile(name);
+
+      if(!rp?.id){
+        return send(res,404,{
+          error:'Dieser Roblox Benutzername wurde nicht gefunden. Bitte überprüfe die Schreibweise.'
+        });
+      }
+
+      const existing=await db(`roblox_links?discord_id=eq.${encodeURIComponent(me.id)}&select=*`);
+
+      if(!existing.ok){
+        return send(res,500,{error:'Roblox Verknüpfung konnte nicht geprüft werden.'});
+      }
+
+      if(existing.data?.length){
+        return send(res,409,{
+          error:'Dein Roblox Benutzername wurde bereits fest hinterlegt und kann nicht geändert werden.'
+        });
+      }
+
+      const r=await db('roblox_links',{
+        method:'POST',
+        headers:{Prefer:'return=minimal'},
+        body:JSON.stringify({
+          discord_id:me.id,
+          username:rp.username,
+          updated_at:new Date().toISOString()
+        })
+      });
+
+      return send(
+        res,
+        r.ok?200:500,
+        r.ok
+          ?{ok:true,profile:rp}
+          :{error:'Roblox Name konnte nicht gespeichert werden.'}
+      );
+    }
+
+    if(p==='/api/appeals'&&req.method==='POST'){
+      const x=await json(req),type=String(x.type||''),reason=String(x.reason||'').trim(),caseId=x.case_id?String(x.case_id):null;
+
+      if(!['discord_ban','discord_warn','roblox'].includes(type)||reason.length<10||reason.length>2000){
+        return send(res,400,{error:'Ungültiger Antrag.'});
+      }
+
+      if(type==='discord_ban'&&!(await ban(me.id))){
+        return send(res,400,{error:'Du bist aktuell nicht gebannt.'});
+      }
+
+      if(type!=='discord_ban'&&!caseId){
+        return send(res,400,{error:'Kein Fall ausgewählt.'});
+      }
+
+      if(caseId){
+        const r=await db(`moderation_cases?guild_id=eq.${GUILD}&case_id=eq.${encodeURIComponent(caseId)}&select=*`);
+
+        if(!r.ok||!r.data?.[0]||String(r.data[0].user_id)!==String(me.id)){
+          return send(res,403,{error:'Dieser Fall gehört nicht zu dir.'});
+        }
+      }
+
+      const now=new Date().toISOString();
+
+      const appealData={
+        discord_id:me.id,
+        discord_username:me.username,
+        type,
+        case_id:caseId,
+        reason,
+        status:'open',
+        created_at:now
+      };
+
+      let r=await db('appeals',{
+        method:'POST',
+        headers:{Prefer:'return=representation'},
+        body:JSON.stringify({
+          ...appealData,
+          discord_notified:false,
+          bot_handled:false
+        })
+      });
+
+      if(!r.ok){
+        r=await db('appeals',{
+          method:'POST',
+          headers:{Prefer:'return=representation'},
+          body:JSON.stringify(appealData)
+        });
+      }
+
+      if(!r.ok){
+        console.error('Supabase appeals insert failed:',r.status,r.data);
+        return send(res,500,{
+          error:'Der Antrag konnte nicht gespeichert werden. Supabase: '+(r.data?.message||r.data?.hint||r.data?.details||('HTTP '+r.status))
+        });
+      }
+
+      const appeal=Array.isArray(r.data)?r.data[0]:r.data;
+      const appealId=appeal?.id??appeal?.appeal_id;
+
+      if(!appealId){
+        console.error('Supabase appeal insert returned no id:',r.data);
+        return send(res,500,{
+          error:'Der Antrag wurde gespeichert, aber es wurde keine Antrags-ID zurückgegeben.'
+        });
+      }
+
+      const channelId=process.env.DISCORD_APPEAL_CHANNEL_ID||'1548705694033780867';
+
+      const title=
+        type==='discord_ban'
+          ?'🔨 Neuer Entbannungsantrag'
+          :type==='discord_warn'
+            ?'⚠️ Neuer Warnungs-Widerspruch'
+            :'🎮 Neuer Roblox-Widerspruch';
+
+      const detail=caseId?`Fall: #${caseId}`:'Kein Fall';
+
+      const msgBody={
+        content:`**${title}**
 
 **Antrag:** #${appealId}
 **Nutzer:** ${me.username} (${me.id})
 **${detail}**
-**Begründung:** ${reason}`,allowed_mentions:{parse:[]},components:[{type:1,components:[{type:2,style:3,label:'Annehmen',emoji:{name:'✅'},custom_id:`webappeal:accept:${appealId}`},{type:2,style:4,label:'Ablehnen',emoji:{name:'❌'},custom_id:`webappeal:reject:${appealId}`}]}]};
-const dr=await dapi(`/channels/${encodeURIComponent(channelId)}/messages`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(msgBody)});if(!dr.ok){console.error('Discord appeal message failed:',dr.status,dr.data);return send(res,502,{error:'Der Antrag wurde gespeichert, konnte aber nicht nach Discord gesendet werden.'})}
-const discordMessageId=dr.data?.id;let ur=await db(`appeals?id=eq.${encodeURIComponent(appealId)}`,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({discord_notified:true,discord_message_id:discordMessageId||null})});if(!ur.ok){ur=await db(`appeals?appeal_id=eq.${encodeURIComponent(appealId)}`,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({discord_notified:true,discord_message_id:discordMessageId||null})})}return send(res,200,{ok:true,appeal_id:appealId})}
-return send(res,404,{error:'Nicht gefunden.'})}catch(e){console.error(e);return send(res,500,{error:'Interner Fehler.'})}};
+**Begründung:** ${reason}`,
+        allowed_mentions:{parse:[]},
+        components:[
+          {
+            type:1,
+            components:[
+              {
+                type:2,
+                style:3,
+                label:'Annehmen',
+                emoji:{name:'✅'},
+                custom_id:`webappeal:accept:${appealId}`
+              },
+              {
+                type:2,
+                style:4,
+                label:'Ablehnen',
+                emoji:{name:'❌'},
+                custom_id:`webappeal:reject:${appealId}`
+              }
+            ]
+          }
+        ]
+      };
+
+      const dr=await dapi(`/channels/${encodeURIComponent(channelId)}/messages`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(msgBody)
+      });
+
+      if(!dr.ok){
+        console.error('Discord appeal message failed:',dr.status,dr.data);
+        return send(res,502,{
+          error:'Der Antrag wurde gespeichert, konnte aber nicht nach Discord gesendet werden.'
+        });
+      }
+
+      const discordMessageId=dr.data?.id;
+
+      let ur=await db(`appeals?id=eq.${encodeURIComponent(appealId)}`,{
+        method:'PATCH',
+        headers:{Prefer:'return=minimal'},
+        body:JSON.stringify({
+          discord_notified:true,
+          discord_message_id:discordMessageId||null
+        })
+      });
+
+      if(!ur.ok){
+        ur=await db(`appeals?appeal_id=eq.${encodeURIComponent(appealId)}`,{
+          method:'PATCH',
+          headers:{Prefer:'return=minimal'},
+          body:JSON.stringify({
+            discord_notified:true,
+            discord_message_id:discordMessageId||null
+          })
+        });
+      }
+
+      return send(res,200,{ok:true,appeal_id:appealId});
+    }
+
+    return send(res,404,{error:'Nicht gefunden.'});
+  }catch(e){
+    console.error(e);
+    return send(res,500,{error:'Interner Fehler.'});
+  }
+};
