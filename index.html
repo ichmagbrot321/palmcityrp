@@ -399,6 +399,54 @@ function attachAvatarFallback(root) {
   });
 }
 
+/* Browser-Fallback: Wenn der Server Roblox nicht erreicht, fragt der Browser selbst (roproxy) */
+async function clientRobloxProfile(username) {
+  try {
+    const r = await fetch('https://users.roproxy.com/v1/usernames/users', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({usernames:[username], excludeBannedUsers:false})
+    });
+    if (!r.ok) return null;
+    const p = (await r.json())?.data?.[0];
+    if (!p?.id) return null;
+    const id = String(p.id);
+    return {
+      id,
+      username: p.name || username,
+      displayName: p.displayName || p.name || username,
+      avatarUrl: `https://www.roblox.com/headshot-thumbnail/image?userId=${encodeURIComponent(id)}&width=150&height=150&format=png`,
+      avatarProxy: `/api/roblox-avatar?userId=${encodeURIComponent(id)}`
+    };
+  } catch { return null; }
+}
+
+/* Roblox-Profil getrennt nachladen, damit das Portal sofort erscheint */
+async function loadRobloxProfile() {
+  const username = currentData?.roblox?.username;
+  if (!username) return;
+  let profile = null;
+  let problem = '';
+  try {
+    const r = await api('/api/me?roblox=1');
+    profile = r.profile;
+    if (!profile) problem = 'Server: ' + (r.error || 'kein Profil');
+  } catch (e) {
+    problem = 'Server-Antwort: ' + e.message + (e.status ? ' (HTTP ' + e.status + ')' : '');
+  }
+  if (!profile) {
+    profile = await clientRobloxProfile(username);
+    if (!profile) problem += ' | Browser: Roblox nicht erreichbar';
+  }
+  if (profile) {
+    currentData.roblox.profile = profile;
+    currentData.roblox.problem = '';
+  } else {
+    currentData.roblox.problem = problem;
+  }
+  renderRoblox(currentData);
+}
+
 /* ---------- Modal ---------- */
 const MODAL = {
   discord_ban: ['Entbannungsantrag', 'Erkläre, warum du entbannt werden solltest.'],
@@ -518,6 +566,7 @@ function renderRoblox(d) {
       <div class="identity-label">Roblox</div>
       <div class="identity-name">${esc(display)}</div>
       <div class="identity-sub">@${esc(username)}${id ? ' · ID ' + esc(id) : ''}</div>
+      ${d.roblox?.problem ? `<div class="identity-sub" style="color:#ff8a98;margin-top:4px">Profil konnte nicht geladen werden: ${esc(d.roblox.problem)} <button class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="loadRobloxProfile()">Erneut versuchen</button></div>` : ''}
     </div>`;
   attachAvatarFallback($('roblox'));
 }
@@ -563,6 +612,7 @@ async function load() {
     $('id').textContent = 'ID ' + d.user.id;
 
     renderRoblox(d);
+    if (!d.roblox.profile?.avatarData) loadRobloxProfile();
 
     $('banBanner').classList.toggle('hidden', !d.banned);
     $('banReason').textContent = d.ban?.reason || 'Kein Grund angegeben';
@@ -610,13 +660,18 @@ async function doLookup() {
   btn.disabled = true;
   btn.textContent = 'Suche läuft ...';
   try {
-    const {profile} = await api('/api/roblox', {method:'POST', body:JSON.stringify({username, preview:true})});
+    const res = await api('/api/roblox', {method:'POST', body:JSON.stringify({username, preview:true})});
+    let profile = res.profile;
+    if (res.unverified) {
+      const alt = await clientRobloxProfile(username);
+      if (alt) profile = alt;
+    }
     lookedUp = profile;
     $('preview').innerHTML = `
       ${robloxAvatarHtml(avatarSources(profile), profile.displayName, 60)}
       <div class="identity-info">
         <div class="identity-name">${esc(profile.displayName)}</div>
-        <div class="identity-sub">@${esc(profile.username)} · ID ${esc(profile.id)}</div>
+        <div class="identity-sub">@${esc(profile.username)}${profile.id ? ' · ID ' + esc(profile.id) : ' · konnte gerade nicht bei Roblox geprüft werden'}</div>
       </div>`;
     attachAvatarFallback($('preview'));
     $('setup-step1').classList.add('hidden');
