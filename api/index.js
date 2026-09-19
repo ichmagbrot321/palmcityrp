@@ -186,7 +186,7 @@ const ROBLOX_HOSTS = {
 };
 
 /* Benutzer per Name suchen (erst Roblox, bei Fehler ein Spiegel-Server) */
-async function robloxUserLookup(clean) {
+async function robloxUserLookup(clean, diag = []) {
   for (const host of ROBLOX_HOSTS.users) {
     try {
       const r = await timedFetch(host + '/v1/usernames/users', {
@@ -196,12 +196,14 @@ async function robloxUserLookup(clean) {
       });
       if (!r.ok) {
         console.error('Roblox Users API', host, r.status);
+        diag.push(`${new URL(host).hostname}: HTTP ${r.status}`);
         continue;
       }
       const data = await r.json();
       return data?.data?.[0] || null;
     } catch (e) {
       console.error('Roblox Users API', host, e.message);
+      diag.push(`${new URL(host).hostname}: ${e.message}`);
     }
   }
   return null;
@@ -272,7 +274,7 @@ async function robloxAvatarImage(userId) {
 }
 
 /* Profil: ID, Name, Anzeigename und Avatar (als Data-URI, Proxy-URL und Direkt-URL) */
-async function robloxProfile(username) {
+async function robloxProfile(username, diag = []) {
   const clean = String(username || '').trim();
   if (!ROBLOX_NAME.test(clean)) return null;
 
@@ -281,7 +283,7 @@ async function robloxProfile(username) {
   if (cached) return cached;
 
   try {
-    const p = await robloxUserLookup(clean);
+    const p = await robloxUserLookup(clean, diag);
     if (!p?.id) return null;
 
     const id = String(p.id);
@@ -459,9 +461,18 @@ module.exports = async (req, res) => {
         return send(res, 409, { error: 'Dein Roblox Benutzername wurde bereits fest hinterlegt und kann nicht geändert werden.' });
       }
 
-      const rp = await robloxProfile(name);
+      const diag = [];
+      const rp = await robloxProfile(name, diag);
       if (!rp?.id) {
+        if (diag.length) {
+          return send(res, 502, { error: 'Roblox ist vom Server aus gerade nicht erreichbar (' + diag.join('; ') + '). Bitte versuche es später erneut.' });
+        }
         return send(res, 404, { error: 'Dieser Roblox Benutzername wurde nicht gefunden. Bitte überprüfe die Schreibweise.' });
+      }
+
+      /* Nur Vorschau: nichts speichern */
+      if (x.preview) {
+        return send(res, 200, { ok: true, preview: true, profile: rp });
       }
 
       const r = await db('roblox_links', {
