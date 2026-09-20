@@ -1,0 +1,1182 @@
+"""
+Team-Dashboard-API
+Discord.py 2.7.1+
+
+Dashboard und Discord-Commands arbeiten mit EINEM gemeinsamen System:
+dem TeamModerationCog (data/moderation.json, Team-Log-Channel, DMs,
+automatische Zusatzrollen).
+
+    Dashboard-Aktion  ->  Akte in moderation.json + Log + DM
+    /uprank, /teamwarn, /teamkick, ... -> dieselbe Akte -> erscheint im Dashboard
+
+Es gibt keine eigene Datenhaltung mehr. Alles im Dashboard (Team-Liste,
+Verwarnungen, Sperren, Verlauf) wird live aus den Rollen und den
+Team-Akten des TeamModerationCog berechnet.
+
+Dateiname/Ort: neben dem Team-Moderations-Cog, als Extension laden.
+"""
+
+from __future__ import annotations
+
+import hmac
+import logging
+import os
+import sys
+from dataclasses import dataclass
+from typing import Any
+
+import discord
+from aiohttp import web
+from discord.ext import commands
+
+
+logger = logging.getLogger(__name__)
+
+
+# ============================================================
+# KONFIGURATION
+# ============================================================
+
+API_HOST = "0.0.0.0"
+API_PORT = int(os.getenv("TEAM_API_PORT", "40002"))
+
+# Umgebungsvariable mit dem geheimen Key (= DASHBOARD_API_KEY in Vercel).
+API_KEY_ENV = "DASHBOARD_API_KEY"
+
+# Name des Moderations-Cogs (= Klassenname).
+MOD_COG_NAME = "TeamModerationCog"
+
+MAX_REASON_LENGTH = 300
+HISTORY_IN_STATE = 100
+USER_RESULTS = 40
+
+# Team-Akte (Cog) -> Aktion im Dashboard
+ACTION_MAP = {
+    "hire": "hire",
+    "uprank": "up",
+    "downrank": "down",
+    "teamwarn": "warn",
+    "teamkick": "kick",
+    "teamkick_remove": "ban_remove",
+}
+
+
+# ============================================================
+# HILFSFUNKTIONEN
+# ============================================================
+
+def safe_int(value: Any) -> int | None:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def role_color(role: discord.Role) -> str | None:
+    if not role.color.value:
+        return None
+    return f"#{role.color.value:06x}"
+
+
+def ok(**payload: Any) -> web.Response:
+    return web.json_response({"ok": True, **payload})
+
+
+class ApiError(Exception):
+    def __init__(self, status: int, message: str, code: str = "error") -> None:
+        super().__init__(message)
+        self.status = status
+        self.message = message
+        self.code = code
+
+
+@dataclass(slots=True)
+class Ctx:
+    cog: Any                       # TeamModerationCog
+    mod: Any                       # Modul des Cogs (Konstanten/Helfer)
+    guild: discord.Guild
+    actor: discord.Member
+    team_roles: list[discord.Role]  # hoch -> niedrig
+    ladder: list[discord.Role]      # niedrig -> hoch
+    member_role: discord.Role | None
+    kick_role: discord.Role | None
+    is_admin: bool
+
+
+# ============================================================
+# COG
+# ============================================================
+
+class TeamDashboardAPI(commands.Cog):
+    def __init__(self, bot: commands.Bot) -> None:
+        self.bot = bot
+        self._runner: web.AppRunner | None = None
+
+    # ========================================================
+    # SERVER
+    # ========================================================
+
+    async def cog_load(self) -> None:
+        if not os.getenv(API_KEY_ENV):
+            logger.error(
+                "Umgebungsvariable %s fehlt - Team-Dashboard-API "
+                "wird nicht gestartet.",
+                API_KEY_ENV,
+            )
+            return
+
+        @web.middleware
+        async def middleware(request: web.Request, handler: Any) -> web.StreamResponse:
+            try:
+                self._check_key(request)
+                return await handler(request)
+
+            except ApiError as error:
+                return web.json_response(
+                    {"ok": False, "error": error.message, "code": error.code},
+                    status=error.status,
+                )
+
+            except web.HTTPException:
+                raise
+
+            except Exception:
+                logger.exception("Unerwarteter Fehler in der Team-Dashboard-API.")
+                return web.json_response(
+                    {"ok": False, "error": "Interner Fehler im Bot.", "code": "internal"},
+                    status=500,
+                )
+
+        app = web.Application(middlewares=[middleware], client_max_size=64 * 1024)
+
+        app.add_routes(
+            [
+                web.get("/team/health", self.handle_health),
+                web.get("/team/state", self.handle_state),
+                web.get("/team/users", self.handle_users),
+                web.post("/team/hire", self.handle_hire),
+                web.post("/team/rank", self.handle_rank),
+                web.post("/team/kick", self.handle_kick),
+                web.post("/team/warn", self.handle_warn),
+                web.post("/team/warn/remove", self.handle_warn_remove),
+                web.post("/team/ban/remove", self.handle_ban_remove),
+                web.post("/team/config/ranks", self.handle_config_ranks),
+            ]
+        )
+
+        runner = web.AppRunner(app)
+        await runner.setup()
+
+        try:
+            await web.TCPSite(runner, API_HOST, API_PORT).start()
+        except OSError:
+            logger.exception(
+                "Team-Dashboard-API konnte Port %s nicht öffnen "
+                "(Port evtl. bereits belegt).",
+                API_PORT,
+            )
+            await runner.cleanup()
+            return
+
+        self._runner = runner
+        logger.info("Team-Dashboard-API läuft auf Port %s.", API_PORT)
+
+    async def cog_unload(self) -> None:
+        if self._runner is not None:
+            await self._runner.cleanup()
+            self._runner = None
+
+    # ========================================================
+    # AUTH
+    # ========================================================
+
+    @staticmethod
+    def _check_key(request: web.Request) -> None:
+        expected = os.getenv(API_KEY_ENV, "")
+        given = request.headers.get("X-API-Key", "")
+
+        if not expected or not hmac.compare_digest(
+            given.encode("utf-8"),
+            expected.encode("utf-8"),
+        ):
+            raise ApiError(401, "Ungültiger API-Key.", "unauthorized")
+
+    def _mod_cog(self) -> tuple[Any, Any]:
+        cog = self.bot.get_cog(MOD_COG_NAME)
+
+        if cog is None:
+            raise ApiError(
+                503,
+                "Das Team-Moderationssystem ist im Bot nicht geladen.",
+                "cog_missing",
+            )
+
+        return cog, sys.modules[type(cog).__module__]
+
+    def _guild(self, mod: Any) -> discord.Guild:
+        for guild in self.bot.guilds:
+            if guild.get_role(mod.TEAM_MEMBER_ROLE_ID) is not None:
+                return guild
+
+        raise ApiError(
+            503,
+            "Der Team-Server wurde vom Bot nicht gefunden.",
+            "guild_missing",
+        )
+
+    async def _get_member(self, guild: discord.Guild, user_id: int) -> discord.Member | None:
+        member = guild.get_member(user_id)
+
+        if member is not None:
+            return member
+
+        try:
+            return await guild.fetch_member(user_id)
+        except discord.HTTPException:
+            return None
+
+    async def _members(self, guild: discord.Guild) -> list[discord.Member]:
+        if not guild.chunked:
+            try:
+                await guild.chunk()
+            except discord.HTTPException:
+                logger.exception("Konnte Mitglieder nicht laden.")
+
+        return list(guild.members)
+
+    async def _authorize(self, request: web.Request) -> Ctx:
+        actor_id = safe_int(request.headers.get("X-Actor-Id"))
+
+        if actor_id is None:
+            raise ApiError(401, "Nicht angemeldet.", "no_session")
+
+        cog, mod = self._mod_cog()
+        guild = self._guild(mod)
+        actor = await self._get_member(guild, actor_id)
+
+        if actor is None:
+            raise ApiError(403, "Du bist nicht auf dem Server.", "no_access")
+
+        is_admin = actor.guild_permissions.administrator
+        moderator_role_id = await cog.get_moderator_role_id(guild.id)
+
+        if not is_admin and not (
+            moderator_role_id
+            and any(role.id == moderator_role_id for role in actor.roles)
+        ):
+            raise ApiError(
+                403,
+                "Dir fehlt die Team-Moderationsrolle für die Teamverwaltung.",
+                "no_access",
+            )
+
+        team_roles = cog.get_configured_team_roles(guild)
+
+        return Ctx(
+            cog=cog,
+            mod=mod,
+            guild=guild,
+            actor=actor,
+            team_roles=team_roles,
+            ladder=list(reversed(team_roles)),
+            member_role=guild.get_role(mod.TEAM_MEMBER_ROLE_ID),
+            kick_role=guild.get_role(mod.ROLE_TEAMKICK_ID),
+            is_admin=is_admin,
+        )
+
+    # ========================================================
+    # HELFER
+    # ========================================================
+
+    @staticmethod
+    async def _body(request: web.Request) -> dict[str, Any]:
+        try:
+            data = await request.json()
+        except Exception:
+            raise ApiError(400, "Ungültige Anfrage.", "bad_request") from None
+
+        if not isinstance(data, dict):
+            raise ApiError(400, "Ungültige Anfrage.", "bad_request")
+
+        return data
+
+    @staticmethod
+    def _reason(value: Any, required: bool = False, default: str = "") -> str:
+        reason = " ".join(str(value or "").split())[:MAX_REASON_LENGTH]
+
+        if required and len(reason) < 3:
+            raise ApiError(
+                400,
+                "Bitte gib einen Grund an (mindestens 3 Zeichen).",
+                "bad_request",
+            )
+
+        return reason or default
+
+    @staticmethod
+    async def _discord_call(coroutine: Any) -> Any:
+        try:
+            return await coroutine
+
+        except discord.Forbidden:
+            raise ApiError(
+                500,
+                "Der Bot darf diese Rolle nicht ändern "
+                "(Bot-Rolle steht zu niedrig oder Rechte fehlen).",
+                "bot_forbidden",
+            ) from None
+
+        except discord.HTTPException:
+            logger.exception("Discord-Anfrage fehlgeschlagen.")
+            raise ApiError(
+                500,
+                "Discord hat die Anfrage abgelehnt. Bitte später erneut versuchen.",
+                "discord_error",
+            ) from None
+
+    @staticmethod
+    def _check_bot(ctx: Ctx, roles: list[discord.Role]) -> None:
+        me = ctx.guild.me
+
+        if me is None or not me.guild_permissions.manage_roles:
+            raise ApiError(
+                500,
+                "Der Bot benötigt die Berechtigung „Rollen verwalten“.",
+                "bot_forbidden",
+            )
+
+        for role in roles:
+            if role.is_default():
+                continue
+
+            if role.managed or role >= me.top_role:
+                raise ApiError(
+                    500,
+                    f"Die Bot-Rolle muss über der Rolle „{role.name}“ stehen.",
+                    "bot_forbidden",
+                )
+
+    @staticmethod
+    def _is_team(ctx: Ctx, member: discord.Member) -> bool:
+        return (
+            ctx.member_role is not None
+            and ctx.member_role in member.roles
+            and (ctx.kick_role is None or ctx.kick_role not in member.roles)
+        )
+
+    @staticmethod
+    def _require_ladder(ctx: Ctx) -> None:
+        if not ctx.ladder:
+            raise ApiError(
+                400,
+                "Es wurden keine Teamrollen auf dem Server gefunden.",
+                "no_ranks",
+            )
+
+    @staticmethod
+    def _rank_index_from_id(ctx: Ctx, value: Any) -> int:
+        rank_id = safe_int(value)
+
+        for position, role in enumerate(ctx.ladder):
+            if role.id == rank_id:
+                return position
+
+        raise ApiError(400, "Ungültiger Rang.", "bad_request")
+
+    @staticmethod
+    def _guard_new_rank(ctx: Ctx, new_role: discord.Role) -> None:
+        """Gleiche Regel wie in den Commands: nicht auf den eigenen/höheren Rang."""
+        if ctx.is_admin:
+            return
+
+        moderator_rank = ctx.cog.get_current_team_role(ctx.actor, ctx.team_roles)
+
+        if moderator_rank and new_role.position >= moderator_rank.position:
+            raise ApiError(
+                403,
+                "Du kannst niemanden auf deinen eigenen oder einen höheren Teamrang setzen.",
+                "forbidden",
+            )
+
+    async def _resolve_target(self, ctx: Ctx, user_id: int | None) -> discord.Member:
+        if user_id is None:
+            raise ApiError(400, "Ungültige Nutzer-ID.", "bad_request")
+
+        if user_id == ctx.actor.id:
+            raise ApiError(409, "Du kannst dich nicht selbst verwalten.", "forbidden")
+
+        member = await self._get_member(ctx.guild, user_id)
+
+        if member is None:
+            raise ApiError(404, "Nutzer nicht auf dem Server gefunden.", "not_found")
+
+        if member.bot:
+            raise ApiError(409, "Bots können nicht verwaltet werden.", "forbidden")
+
+        if member.id == ctx.guild.owner_id:
+            raise ApiError(409, "Der Server-Besitzer kann nicht verwaltet werden.", "forbidden")
+
+        if member.guild_permissions.administrator and not ctx.is_admin:
+            raise ApiError(
+                409,
+                "Administratoren können nur von Administratoren verwaltet werden.",
+                "forbidden",
+            )
+
+        return member
+
+    async def _target(self, ctx: Ctx, body: dict[str, Any]) -> discord.Member:
+        return await self._resolve_target(ctx, safe_int(body.get("user_id")))
+
+    def _name(self, guild: discord.Guild, user_id: Any) -> str:
+        uid = safe_int(user_id)
+        member = guild.get_member(uid) if uid is not None else None
+        return member.display_name if member else str(user_id)
+
+    def _role_name(self, guild: discord.Guild, role_id: Any) -> str:
+        rid = safe_int(role_id)
+        role = guild.get_role(rid) if rid is not None else None
+        return role.name if role else "Unbekannt"
+
+    # ========================================================
+    # LOG + DM (gleiches Format wie die Discord-Commands)
+    # ========================================================
+
+    @staticmethod
+    def _actor_line(ctx: Ctx) -> str:
+        return f"**Moderator:** {ctx.actor.mention} (`{ctx.actor.id}`) • 🌐 Dashboard"
+
+    @staticmethod
+    def _time_line(ctx: Ctx) -> str:
+        return f"**Zeit:** {ctx.mod.fmt_time(ctx.mod.utcnow().isoformat())}"
+
+    async def _log(self, ctx: Ctx, title: str, lines: list[str], color: discord.Colour) -> None:
+        await ctx.cog.send_case_log(ctx.guild, title, "\n".join(lines), color)
+
+    async def _dm(self, ctx: Ctx, target: discord.Member, title: str, body: str, color: discord.Colour) -> None:
+        await ctx.cog.dm_target(target, title=title, body=body, color=color)
+
+    @staticmethod
+    def _create_case(ctx: Ctx, **kwargs: Any) -> Any:
+        metadata = dict(kwargs.pop("metadata", None) or {})
+        metadata["via"] = "dashboard"
+
+        return ctx.cog.db.create_case(
+            guild_id=ctx.guild.id,
+            moderator_id=ctx.actor.id,
+            metadata=metadata,
+            **kwargs,
+        )
+
+    # ========================================================
+    # KERNLOGIK
+    # ========================================================
+
+    async def _hire(self, ctx: Ctx, target: discord.Member, rank_id: Any) -> str:
+        self._require_ladder(ctx)
+
+        if ctx.member_role is None:
+            raise ApiError(500, "Die Teammitglied-Rolle wurde nicht gefunden.", "config")
+
+        if ctx.kick_role is not None and ctx.kick_role in target.roles:
+            raise ApiError(
+                409,
+                "Diese Person hat eine Teamsperre. Hebe sie zuerst auf.",
+                "banned",
+            )
+
+        if self._is_team(ctx, target):
+            raise ApiError(409, "Diese Person ist bereits im Team.", "conflict")
+
+        new_role = ctx.ladder[self._rank_index_from_id(ctx, rank_id)]
+        self._guard_new_rank(ctx, new_role)
+        self._check_bot(ctx, [ctx.member_role, new_role])
+
+        reason = f"Team-Dashboard: Aufnahme durch {ctx.actor} ({ctx.actor.id})"
+        to_add = [role for role in (ctx.member_role, new_role) if role not in target.roles]
+
+        await self._discord_call(target.add_roles(*to_add, reason=reason))
+        await ctx.cog.sync_auto_team_roles(target)
+
+        case_id = await self._create_case(
+            ctx,
+            user_id=target.id,
+            action="hire",
+            reason="Ins Team aufgenommen",
+            new_role_id=new_role.id,
+        )
+
+        await self._log(
+            ctx,
+            f"👥 Ins Team geholt • Akte #{case_id}",
+            [
+                f"**Nutzer:** {target.mention} (`{target.id}`)",
+                self._actor_line(ctx),
+                f"**Nach:** {new_role.mention}",
+                self._time_line(ctx),
+            ],
+            discord.Colour.green(),
+        )
+
+        await self._dm(
+            ctx,
+            target,
+            f"👥 Willkommen im Team • Fall #{case_id}",
+            (
+                "Du wurdest ins Team aufgenommen.\n\n"
+                f"**Nach:** {new_role.name}\n"
+                f"**Ausgeführt von:** {ctx.actor.mention}\n"
+                f"**Akte:** `#{case_id}`"
+            ),
+            discord.Colour.green(),
+        )
+
+        return f"{target.display_name} wurde als {new_role.name} ins Team geholt."
+
+    async def _rank(
+        self,
+        ctx: Ctx,
+        target: discord.Member,
+        action: str,
+        rank_id: Any,
+        reason: str,
+    ) -> str:
+        if not self._is_team(ctx, target):
+            raise ApiError(409, "Diese Person ist nicht im Team.", "conflict")
+
+        self._require_ladder(ctx)
+
+        current_role = ctx.cog.get_current_team_role(target, ctx.team_roles)
+
+        if current_role is None:
+            raise ApiError(
+                409,
+                "Diese Person besitzt keine der konfigurierten Teamrollen.",
+                "conflict",
+            )
+
+        current = ctx.ladder.index(current_role)
+
+        if action == "up":
+            new_index = current + 1
+
+            if new_index >= len(ctx.ladder):
+                raise ApiError(409, "Diese Person hat bereits den höchsten Rang.", "conflict")
+
+        elif action == "down":
+            new_index = current - 1
+
+            if new_index < 0:
+                raise ApiError(409, "Diese Person hat bereits den niedrigsten Rang.", "conflict")
+
+        elif action == "set":
+            new_index = self._rank_index_from_id(ctx, rank_id)
+
+            if new_index == current:
+                raise ApiError(409, "Diese Person hat diesen Rang bereits.", "conflict")
+
+        else:
+            raise ApiError(400, "Ungültige Aktion.", "bad_request")
+
+        new_role = ctx.ladder[new_index]
+        promoted = new_index > current
+
+        self._guard_new_rank(ctx, new_role)
+        self._check_bot(ctx, [current_role, new_role])
+
+        title = "🚀 BEFÖRDERUNG" if promoted else "📉 DEGRADIERUNG"
+        color = discord.Colour.green() if promoted else discord.Colour.orange()
+        audit = f"{title} über Dashboard von {ctx.actor} • {reason}"
+
+        await self._discord_call(target.remove_roles(current_role, reason=audit))
+        await self._discord_call(target.add_roles(new_role, reason=audit))
+        await ctx.cog.sync_auto_team_roles(target)
+
+        case_id = await self._create_case(
+            ctx,
+            user_id=target.id,
+            action="uprank" if promoted else "downrank",
+            reason=reason,
+            old_role_id=current_role.id,
+            new_role_id=new_role.id,
+            metadata={"set": action == "set"},
+        )
+
+        await self._log(
+            ctx,
+            f"{title} • Akte #{case_id}",
+            [
+                f"**Nutzer:** {target.mention} (`{target.id}`)",
+                self._actor_line(ctx),
+                f"**Von:** {current_role.mention}",
+                f"**Nach:** {new_role.mention}",
+                f"**Grund:** {reason}",
+                self._time_line(ctx),
+            ],
+            color,
+        )
+
+        await self._dm(
+            ctx,
+            target,
+            f"{title} • Fall #{case_id}",
+            (
+                "Deine Teamposition wurde geändert.\n\n"
+                f"**Von:** {current_role.name}\n"
+                f"**Nach:** {new_role.name}\n"
+                f"**Ausgeführt von:** {ctx.actor.mention}\n"
+                f"**Grund:** {reason}\n"
+                f"**Akte:** `#{case_id}`"
+            ),
+            color,
+        )
+
+        return f"{target.display_name}: {current_role.name} → {new_role.name}"
+
+    async def _kick(self, ctx: Ctx, target: discord.Member, reason: str) -> str:
+        if not self._is_team(ctx, target):
+            raise ApiError(409, "Diese Person ist nicht im Team.", "conflict")
+
+        if ctx.kick_role is None:
+            raise ApiError(500, "Die Teamkick-Rolle wurde auf dem Server nicht gefunden.", "config")
+
+        if not ctx.is_admin:
+            moderator_rank = ctx.cog.get_current_team_role(ctx.actor, ctx.team_roles)
+
+            if moderator_rank and any(
+                role.position >= moderator_rank.position
+                for role in ctx.team_roles
+                if role in target.roles
+            ):
+                raise ApiError(
+                    403,
+                    "Das Zielmitglied hat einen Rang auf deinem oder einem höheren Team-Level.",
+                    "forbidden",
+                )
+
+        remove_ids = (
+            {role.id for role in ctx.team_roles}
+            | set(ctx.mod.TEAMKICK_EXTRA_REMOVE_ROLE_IDS)
+            | ({ctx.member_role.id} if ctx.member_role else set())
+        )
+
+        remove_roles = [
+            role
+            for role in ctx.guild.roles
+            if role.id in remove_ids
+            and role in target.roles
+            and role.id != ctx.kick_role.id
+            and not role.is_default()
+            and not role.managed
+        ]
+
+        self._check_bot(ctx, [ctx.kick_role, *remove_roles])
+
+        audit = f"Teamkick über Dashboard von {ctx.actor} • {reason}"
+
+        if remove_roles:
+            await self._discord_call(target.remove_roles(*remove_roles, reason=audit))
+
+        await self._discord_call(target.add_roles(ctx.kick_role, reason=audit))
+
+        case_id = await self._create_case(
+            ctx,
+            user_id=target.id,
+            action="teamkick",
+            reason=reason,
+            metadata={
+                "removed_role_ids": [role.id for role in remove_roles],
+                "teamkick_role_id": ctx.kick_role.id,
+            },
+        )
+
+        removed_text = ", ".join(role.name for role in remove_roles) or "Keine"
+
+        await self._log(
+            ctx,
+            f"🚫 Teamkick • Akte #{case_id}",
+            [
+                f"**Nutzer:** {target.mention} (`{target.id}`)",
+                self._actor_line(ctx),
+                f"**Teamkick-Rolle:** {ctx.kick_role.mention}",
+                f"**Entfernte Rollen:** {removed_text}",
+                f"**Grund:** {reason}",
+                self._time_line(ctx),
+            ],
+            discord.Colour.red(),
+        )
+
+        await self._dm(
+            ctx,
+            target,
+            f"🚫 Teamkick • Fall #{case_id}",
+            (
+                "Du wurdest aus dem Team entfernt.\n\n"
+                f"**Teamkick-Rolle:** {ctx.kick_role.name}\n"
+                f"**Ausgeführt von:** {ctx.actor.mention}\n"
+                f"**Grund:** {reason}\n"
+                f"**Akte:** `#{case_id}`\n\n"
+                "Bei Fragen kannst du dich an die zuständige Teamleitung wenden."
+            ),
+            discord.Colour.red(),
+        )
+
+        return f"{target.display_name} wurde aus dem Team entfernt."
+
+    async def _warn(self, ctx: Ctx, target: discord.Member, reason: str) -> str:
+        if not self._is_team(ctx, target):
+            raise ApiError(409, "Diese Person ist nicht im Team.", "conflict")
+
+        number = len(ctx.cog.db.get_open_team_warns(ctx.guild.id, target.id)) + 1
+
+        case_id = await self._create_case(
+            ctx,
+            user_id=target.id,
+            action="teamwarn",
+            reason=reason,
+            metadata={"warn_number": number},
+        )
+
+        await self._log(
+            ctx,
+            f"⚠️ Teamwarn #{number} • Akte #{case_id}",
+            [
+                f"**Nutzer:** {target.mention} (`{target.id}`)",
+                self._actor_line(ctx),
+                f"**Warn:** `#{number}`",
+                f"**Grund:** {reason}",
+                self._time_line(ctx),
+            ],
+            discord.Colour.orange(),
+        )
+
+        await self._dm(
+            ctx,
+            target,
+            f"⚠️ Teamwarn #{number} • Fall #{case_id}",
+            (
+                f"Du hast eine **Teamwarn #{number}** erhalten.\n\n"
+                f"**Grund:** {reason}\n"
+                f"**Ausgeführt von:** {ctx.actor.mention}\n"
+                f"**Akte:** `#{case_id}`\n\n"
+                f"Du hast aktuell **{number} offene Teamwarn(s)**."
+            ),
+            discord.Colour.orange(),
+        )
+
+        return f"{target.display_name} wurde verwarnt ({number}. Verwarnung)."
+
+    async def _warn_remove(self, ctx: Ctx, user_id: int | None, warn_id: Any) -> str:
+        case_id = safe_int(warn_id)
+        db = ctx.cog.db
+
+        case = db.get_team_case(ctx.guild.id, case_id) if case_id is not None else None
+
+        if (
+            case is None
+            or case.get("action") != "teamwarn"
+            or user_id is None
+            or int(case.get("user_id", 0)) != user_id
+        ):
+            raise ApiError(404, "Verwarnung nicht gefunden.", "not_found")
+
+        reason = "Über das Dashboard entfernt"
+
+        if not await db.revoke_team_warn(ctx.guild.id, case_id, ctx.actor.id, reason):
+            raise ApiError(409, "Diese Verwarnung ist bereits entfernt.", "conflict")
+
+        for store in ("cases", "team_cases"):
+            stored = db.data[store].get(str(case_id))
+
+            if stored is not None:
+                metadata = stored.get("metadata")
+
+                if not isinstance(metadata, dict):
+                    metadata = {}
+                    stored["metadata"] = metadata
+
+                metadata["revoked_via"] = "dashboard"
+
+        await db._save()
+
+        member = await self._get_member(ctx.guild, user_id)
+        mention = member.mention if member else f"<@{user_id}>"
+
+        await self._log(
+            ctx,
+            f"✅ Teamwarn entfernt • Akte #{case_id}",
+            [
+                f"**Nutzer:** {mention} (`{user_id}`)",
+                f"**Entfernt von:** {ctx.actor.mention} (`{ctx.actor.id}`) • 🌐 Dashboard",
+                f"**Begründung:** {reason}",
+                self._time_line(ctx),
+            ],
+            discord.Colour.green(),
+        )
+
+        if member is not None:
+            await self._dm(
+                ctx,
+                member,
+                f"✅ Teamwarn entfernt • Fall #{case_id}",
+                (
+                    f"Die Teamwarn `#{case_id}` wurde entfernt.\n\n"
+                    f"**Entfernt von:** {ctx.actor.mention}\n"
+                    f"**Grund:** {reason}"
+                ),
+                discord.Colour.green(),
+            )
+
+        return "Verwarnung wurde entfernt."
+
+    async def _ban_remove(self, ctx: Ctx, user_id: int | None) -> str:
+        member = await self._get_member(ctx.guild, user_id) if user_id is not None else None
+
+        if (
+            member is None
+            or ctx.kick_role is None
+            or ctx.kick_role not in member.roles
+        ):
+            raise ApiError(404, "Teamsperre nicht gefunden.", "not_found")
+
+        self._check_bot(ctx, [ctx.kick_role])
+
+        await self._discord_call(
+            member.remove_roles(
+                ctx.kick_role,
+                reason=f"Teamsperre über Dashboard aufgehoben von {ctx.actor}",
+            )
+        )
+
+        reason = "Teamsperre über das Dashboard aufgehoben"
+
+        case_id = await self._create_case(
+            ctx,
+            user_id=member.id,
+            action="teamkick_remove",
+            reason=reason,
+        )
+
+        await self._log(
+            ctx,
+            f"🔓 Teamsperre aufgehoben • Akte #{case_id}",
+            [
+                f"**Nutzer:** {member.mention} (`{member.id}`)",
+                self._actor_line(ctx),
+                f"**Grund:** {reason}",
+                self._time_line(ctx),
+            ],
+            discord.Colour.teal(),
+        )
+
+        return "Teamsperre wurde aufgehoben."
+
+    # ========================================================
+    # DATEN AUS DEN TEAM-AKTEN
+    # ========================================================
+
+    def _team_cases(self, ctx: Ctx) -> list[dict[str, Any]]:
+        return [
+            case
+            for case in ctx.cog.db.data["cases"].values()
+            if case.get("source") == "team"
+            and int(case.get("guild_id", 0)) == ctx.guild.id
+        ]
+
+    def _open_warns(self, ctx: Ctx) -> dict[int, list[dict[str, Any]]]:
+        result: dict[int, list[dict[str, Any]]] = {}
+
+        for case in self._team_cases(ctx):
+            if case.get("action") != "teamwarn" or case.get("status") != "open":
+                continue
+
+            result.setdefault(int(case["user_id"]), []).append(
+                {
+                    "id": str(case["case_id"]),
+                    "reason": case.get("reason", ""),
+                    "by": str(case.get("moderator_id", "")),
+                    "by_name": self._name(ctx.guild, case.get("moderator_id")),
+                    "at": case.get("created_at"),
+                }
+            )
+
+        for warns in result.values():
+            warns.sort(key=lambda warn: warn["at"] or "", reverse=True)
+
+        return result
+
+    def _history(self, ctx: Ctx) -> list[dict[str, Any]]:
+        guild = ctx.guild
+        events: list[dict[str, Any]] = []
+
+        for case in self._team_cases(ctx):
+            action = ACTION_MAP.get(str(case.get("action")))
+
+            if action is None:
+                continue
+
+            metadata = case.get("metadata") if isinstance(case.get("metadata"), dict) else {}
+
+            if action in {"up", "down"} and metadata.get("set"):
+                action = "set"
+
+            if action in {"up", "down", "set"}:
+                detail = (
+                    f"{self._role_name(guild, case.get('old_role_id'))} → "
+                    f"{self._role_name(guild, case.get('new_role_id'))}"
+                )
+            elif action == "hire":
+                detail = self._role_name(guild, case.get("new_role_id"))
+            else:
+                detail = str(case.get("reason", ""))
+
+            events.append(
+                {
+                    "at": case.get("created_at"),
+                    "action": action,
+                    "source": "dashboard" if metadata.get("via") == "dashboard" else "discord",
+                    "actor_id": str(case.get("moderator_id", "")),
+                    "actor_name": self._name(guild, case.get("moderator_id")),
+                    "target_id": str(case.get("user_id", "")),
+                    "target_name": self._name(guild, case.get("user_id")),
+                    "detail": detail,
+                }
+            )
+
+            if (
+                case.get("action") == "teamwarn"
+                and case.get("status") == "revoked"
+                and case.get("closed_at")
+            ):
+                events.append(
+                    {
+                        "at": case["closed_at"],
+                        "action": "warn_remove",
+                        "source": "dashboard" if metadata.get("revoked_via") == "dashboard" else "discord",
+                        "actor_id": str(case.get("closed_by", "")),
+                        "actor_name": self._name(guild, case.get("closed_by")),
+                        "target_id": str(case.get("user_id", "")),
+                        "target_name": self._name(guild, case.get("user_id")),
+                        "detail": str(case.get("reason", "")),
+                    }
+                )
+
+        events.sort(key=lambda event: event["at"] or "", reverse=True)
+        return events[:HISTORY_IN_STATE]
+
+    def _serialize_member(
+        self,
+        ctx: Ctx,
+        member: discord.Member,
+        warns: dict[int, list[dict[str, Any]]],
+    ) -> dict[str, Any]:
+        role = ctx.cog.get_current_team_role(member, ctx.team_roles)
+        index = ctx.ladder.index(role) if role else -1
+
+        return {
+            "id": str(member.id),
+            "name": member.display_name,
+            "username": member.name,
+            "avatar": member.display_avatar.with_size(64).url,
+            "rank_id": str(role.id) if role else None,
+            "rank_name": role.name if role else None,
+            "rank_color": role_color(role) if role else None,
+            "rank_index": index,
+            "warns": warns.get(member.id, []),
+        }
+
+    # ========================================================
+    # HANDLER
+    # ========================================================
+
+    async def handle_health(self, request: web.Request) -> web.Response:
+        return ok(ready=self.bot.get_cog(MOD_COG_NAME) is not None)
+
+    async def handle_state(self, request: web.Request) -> web.Response:
+        ctx = await self._authorize(request)
+        warns = self._open_warns(ctx)
+        members = await self._members(ctx.guild)
+
+        team = [
+            self._serialize_member(ctx, member, warns)
+            for member in members
+            if not member.bot and self._is_team(ctx, member)
+        ]
+
+        team.sort(key=lambda entry: (-entry["rank_index"], entry["name"].lower()))
+
+        last_kick: dict[int, dict[str, Any]] = {}
+
+        for case in self._team_cases(ctx):
+            if case.get("action") != "teamkick":
+                continue
+
+            uid = int(case["user_id"])
+
+            if uid not in last_kick or (case.get("created_at") or "") > (
+                last_kick[uid].get("created_at") or ""
+            ):
+                last_kick[uid] = case
+
+        bans = []
+
+        if ctx.kick_role is not None:
+            for member in ctx.kick_role.members:
+                if member.bot:
+                    continue
+
+                case = last_kick.get(member.id, {})
+
+                bans.append(
+                    {
+                        "user_id": str(member.id),
+                        "name": member.display_name,
+                        "username": member.name,
+                        "avatar": member.display_avatar.with_size(64).url,
+                        "on_server": True,
+                        "reason": case.get("reason", ""),
+                        "by_name": self._name(ctx.guild, case.get("moderator_id"))
+                        if case
+                        else "Unbekannt",
+                        "at": case.get("created_at"),
+                    }
+                )
+
+        bans.sort(key=lambda entry: entry.get("at") or "", reverse=True)
+
+        return ok(
+            actor={
+                "id": str(ctx.actor.id),
+                "name": ctx.actor.display_name,
+                "is_admin": ctx.is_admin,
+                # Rangleiste ist fest im Bot konfiguriert.
+                "can_config": False,
+            },
+            guild={"id": str(ctx.guild.id), "name": ctx.guild.name},
+            ranks=[
+                {"id": str(role.id), "name": role.name, "color": role_color(role)}
+                for role in ctx.ladder
+            ],
+            team=team,
+            bans=bans,
+            history=self._history(ctx),
+            roles=[],
+        )
+
+    async def handle_users(self, request: web.Request) -> web.Response:
+        ctx = await self._authorize(request)
+        query = request.query.get("q", "").strip().lower()[:50]
+
+        matches: list[discord.Member] = []
+
+        for member in await self._members(ctx.guild):
+            if member.bot or (
+                ctx.member_role is not None
+                and ctx.member_role in member.roles
+                and not (ctx.kick_role is not None and ctx.kick_role in member.roles)
+            ):
+                continue
+
+            if query and not (
+                query in member.display_name.lower()
+                or query in member.name.lower()
+                or query == str(member.id)
+            ):
+                continue
+
+            matches.append(member)
+
+        matches.sort(key=lambda member: member.display_name.lower())
+
+        return ok(
+            total=len(matches),
+            users=[
+                {
+                    "id": str(member.id),
+                    "name": member.display_name,
+                    "username": member.name,
+                    "avatar": member.display_avatar.with_size(64).url,
+                    "banned": ctx.kick_role is not None and ctx.kick_role in member.roles,
+                }
+                for member in matches[:USER_RESULTS]
+            ],
+        )
+
+    async def handle_hire(self, request: web.Request) -> web.Response:
+        ctx = await self._authorize(request)
+        body = await self._body(request)
+        target = await self._target(ctx, body)
+
+        return ok(message=await self._hire(ctx, target, body.get("rank_id")))
+
+    async def handle_rank(self, request: web.Request) -> web.Response:
+        ctx = await self._authorize(request)
+        body = await self._body(request)
+        target = await self._target(ctx, body)
+
+        return ok(
+            message=await self._rank(
+                ctx,
+                target,
+                str(body.get("action") or ""),
+                body.get("rank_id"),
+                self._reason(body.get("reason"), default="Rangänderung über das Dashboard"),
+            )
+        )
+
+    async def handle_kick(self, request: web.Request) -> web.Response:
+        ctx = await self._authorize(request)
+        body = await self._body(request)
+        target = await self._target(ctx, body)
+
+        return ok(
+            message=await self._kick(
+                ctx,
+                target,
+                self._reason(body.get("reason"), default="Kein Grund angegeben."),
+            )
+        )
+
+    async def handle_warn(self, request: web.Request) -> web.Response:
+        ctx = await self._authorize(request)
+        body = await self._body(request)
+        target = await self._target(ctx, body)
+
+        return ok(
+            message=await self._warn(ctx, target, self._reason(body.get("reason"), required=True))
+        )
+
+    async def handle_warn_remove(self, request: web.Request) -> web.Response:
+        ctx = await self._authorize(request)
+        body = await self._body(request)
+
+        return ok(
+            message=await self._warn_remove(
+                ctx,
+                safe_int(body.get("user_id")),
+                body.get("warn_id"),
+            )
+        )
+
+    async def handle_ban_remove(self, request: web.Request) -> web.Response:
+        ctx = await self._authorize(request)
+        body = await self._body(request)
+
+        return ok(message=await self._ban_remove(ctx, safe_int(body.get("user_id"))))
+
+    async def handle_config_ranks(self, request: web.Request) -> web.Response:
+        await self._authorize(request)
+
+        raise ApiError(
+            409,
+            "Die Rangleiste ist fest im Bot konfiguriert (CONFIGURED_TEAM_ROLE_IDS).",
+            "fixed_ranks",
+        )
+
+
+# ============================================================
+# SETUP
+# ============================================================
+
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(TeamDashboardAPI(bot))
