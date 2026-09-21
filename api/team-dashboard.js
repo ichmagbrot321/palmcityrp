@@ -115,7 +115,7 @@ function login(req, res) {
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
     response_type: "code",
-    redirect_uri: `${siteOrigin(req)}/api/teamd-ashboard?action=callback`,
+    redirect_uri: `${siteOrigin(req)}/api/team-dashboard?action=callback`,
     scope: "identify",
     state,
     prompt: "none",
