@@ -18,7 +18,7 @@ const API_KEY = process.env.DASHBOARD_API_KEY;
 const SESSION_SECRET = process.env.SESSION_SECRET || API_KEY;
 const BOT_API_URL = (process.env.TEAM_API_URL || "http://server.infynix.de:40002").replace(/\/$/, "");
 
-const DASHBOARD_PATH = "/team-dashboard.html";
+const DASHBOARD_PATH = "/team-dashboard";
 const SESSION_COOKIE = "td_session";
 const OAUTH_COOKIE = "td_oauth";
 const SESSION_TTL = 60 * 60 * 24 * 7;
@@ -35,6 +35,8 @@ const ROUTES = {
   warn_remove: ["POST", "/team/warn/remove"],
   ban_remove: ["POST", "/team/ban/remove"],
   ranks_config: ["POST", "/team/config/ranks"],
+  absence_end: ["POST", "/team/absence/end"],
+  complaint_status: ["POST", "/team/complaint/status"],
 };
 
 // ============================================================
@@ -242,7 +244,15 @@ async function proxy(req, res, url, action, session) {
     }
 
     json(res, upstream.status, data);
-  } catch {
+  } catch (error) {
+    if (error && error.name === "AbortError") {
+      return json(res, 504, {
+        ok: false,
+        error: "Der Bot hat zu lange gebraucht. Die Aktion wurde eventuell trotzdem ausgeführt, bitte Seite neu laden.",
+        code: "bot_timeout",
+      });
+    }
+
     json(res, 502, {
       ok: false,
       error: "Der Bot ist nicht erreichbar.",
