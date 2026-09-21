@@ -37,6 +37,13 @@ const ROUTES = {
   ranks_config: ["POST", "/team/config/ranks"],
   absence_end: ["POST", "/team/absence/end"],
   complaint_status: ["POST", "/team/complaint/status"],
+  complaint_warn: ["POST", "/team/complaint/warn"],
+  absence_extend: ["POST", "/team/absence/extend"],
+  absence_approve: ["POST", "/team/absence/approve"],
+  absence_reject: ["POST", "/team/absence/reject"],
+  applications_status: ["POST", "/team/applications/status"],
+  history: ["GET", "/team/history"],
+  activity: ["GET", "/team/activity"],
 };
 
 // ============================================================
