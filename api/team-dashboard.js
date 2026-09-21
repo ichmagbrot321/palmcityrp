@@ -115,7 +115,7 @@ function login(req, res) {
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
     response_type: "code",
-    redirect_uri: `${siteOrigin(req)}/api/team-dashboard?action=callback`,
+    redirect_uri: `${siteOrigin(req)}/api/teamdashboard?action=callback`,
     scope: "identify",
     state,
     prompt: "none",
@@ -143,7 +143,7 @@ async function callback(req, res, url) {
         client_secret: CLIENT_SECRET,
         grant_type: "authorization_code",
         code,
-        redirect_uri: `${siteOrigin(req)}/api/team-dashboard?action=callback`,
+        redirect_uri: `${siteOrigin(req)}/api/teamdashboard?action=callback`,
       }),
     });
 
