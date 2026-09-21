@@ -356,6 +356,16 @@ button.badge { cursor: pointer; }
 }
 .warn-item p { margin: 0; }
 
+.badge.ok { color: var(--green); border-color: rgba(56, 217, 160, .4); background: rgba(56, 217, 160, .1); }
+.badge.info { color: #6cb4ff; border-color: rgba(43, 140, 255, .4); background: rgba(43, 140, 255, .1); }
+.row.away::before { background: var(--blue); box-shadow: 0 0 14px var(--blue-glow); }
+.row.pending::before { background: var(--sunset); box-shadow: 0 0 14px rgba(255, 138, 61, .6); }
+.row.done::before { background: var(--green); box-shadow: 0 0 14px rgba(56, 217, 160, .5); }
+.row.closed::before { background: var(--line-strong); box-shadow: none; }
+.detail { grid-column: 1 / -1; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.detail.muted { color: var(--muted); font-size: 13px; }
+.modal .detail { margin: 0 0 12px; }
+
 .empty { text-align: center; color: var(--muted); padding: 44px 16px; border: 1px dashed var(--line-strong); border-radius: var(--radius); background: var(--panel); }
 .note { color: var(--muted); font-size: 13px; margin: 12px 0 0; }
 
@@ -546,6 +556,14 @@ button.badge { cursor: pointer; }
         <ul class="list" id="banList"></ul>
       </section>
 
+      <section id="p-absences" hidden>
+        <ul class="list" id="absenceList"></ul>
+      </section>
+
+      <section id="p-complaints" hidden>
+        <ul class="list" id="complaintList"></ul>
+      </section>
+
       <section id="p-settings" hidden></section>
     </main>
   </div>
@@ -617,6 +635,8 @@ const ICONS = {
   plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
   unlock: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>',
   x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>',
 };
 
 function icon(name) {
@@ -636,6 +656,8 @@ const TITLES = {
   team: ["Teamliste", "Ränge, Verwarnungen und Entfernen"],
   users: ["Nutzer", "Hole Mitglieder ins Team"],
   bans: ["Teamsperren", "Personen, die sich nicht fürs Team bewerben können"],
+  absences: ["Abmeldungen", "Wer ist wie lange abwesend und warum"],
+  complaints: ["Beschwerden", "Teambeschwerden bearbeiten"],
   settings: ["Einstellungen", "Rangleiste festlegen"],
 };
 
@@ -913,6 +935,9 @@ function memberRow(member) {
       "div",
       { class: "tags" },
       rankBadge(member),
+      member.absence
+        ? h("span", { class: "badge info", title: member.absence.reason }, icon("clock"), "Abgemeldet bis " + formatDate(member.absence.end))
+        : null,
       count
         ? h(
             "button",
@@ -1042,7 +1067,8 @@ function renderUsers(users, total) {
           "div",
           { class: "actions" },
           user.banned ? h("span", { class: "badge bad" }, icon("ban"), "Teamsperre") : null,
-          button("Ins Team holen", () => openHireModal(user), "primary", user.banned, "userPlus")
+          user.applicant ? h("span", { class: "badge info" }, icon("clock"), "Bewerbung offen") : null,
+          button("Ins Team holen", () => openHireModal(user), "primary", user.banned || user.applicant, "userPlus")
         )
       )
     )
@@ -1089,6 +1115,167 @@ function renderBans() {
       )
     )
   );
+}
+
+// ============================================================
+// ABMELDUNGEN + BESCHWERDEN
+// ============================================================
+
+const ABSENCE_LABELS = { active: "Aktiv", ended: "Beendet", expired: "Abgelaufen" };
+const COMPLAINT_LABELS = { open: "Offen", in_progress: "In Bearbeitung", resolved: "Erledigt", rejected: "Abgelehnt" };
+
+function spanText(startIso, endIso) {
+  const minutes = Math.max(0, Math.round((new Date(endIso) - new Date(startIso)) / 60000));
+  const days = Math.floor(minutes / 1440);
+  const hours = Math.floor((minutes % 1440) / 60);
+  const dayText = `${days} ${days === 1 ? "Tag" : "Tage"}`;
+
+  if (days && hours) return `${dayText} ${hours} Std`;
+  if (days) return dayText;
+  return `${Math.max(hours, 1)} Std`;
+}
+
+function remainingText(endIso) {
+  const ms = new Date(endIso) - Date.now();
+  if (ms <= 0) return "abgelaufen";
+
+  const minutes = Math.floor(ms / 60000);
+  const days = Math.floor(minutes / 1440);
+  const hours = Math.floor((minutes % 1440) / 60);
+  const mins = minutes % 60;
+
+  if (days) return `noch ${days} T ${hours} Std`;
+  if (hours) return `noch ${hours} Std ${mins} Min`;
+  return `noch ${Math.max(mins, 1)} Min`;
+}
+
+function absenceRow(item) {
+  const active = item.status === "active";
+  const statusClass = active ? "info" : item.status === "ended" ? "ok" : "";
+
+  return h(
+    "li",
+    { class: "row " + (active ? "away" : "closed") },
+    h(
+      "div",
+      { class: "who" },
+      avatar(item.avatar),
+      h(
+        "div",
+        { class: "names" },
+        h("strong", {}, item.name),
+        h("span", { class: "sub" }, `${formatDate(item.start)} bis ${formatDate(item.end)}`)
+      )
+    ),
+    h(
+      "div",
+      { class: "tags" },
+      h("span", { class: "badge " + statusClass }, ABSENCE_LABELS[item.status] || item.status),
+      h("span", { class: "badge" }, icon("clock"), spanText(item.start, item.end)),
+      active ? h("span", { class: "badge info" }, remainingText(item.end)) : null
+    ),
+    h("p", { class: "detail" }, item.reason || "Kein Grund angegeben."),
+    !active && item.ended_by_name
+      ? h("p", { class: "detail muted" }, `Beendet von ${item.ended_by_name}, ${formatDate(item.ended_at)}`)
+      : null,
+    active
+      ? h("div", { class: "actions" }, button("Abmeldung beenden", () => openEndAbsenceModal(item), "", false, "x"))
+      : null
+  );
+}
+
+function renderAbsences() {
+  const list = S.data.absences || [];
+  const key = JSON.stringify([list, Math.floor(Date.now() / 60000)]);
+  if (key === S.keys.absences) return;
+  S.keys.absences = key;
+
+  $("#absenceList").replaceChildren(
+    ...(list.length
+      ? list.map(absenceRow)
+      : [h("li", { class: "empty" }, "Keine Abmeldungen. Teammitglieder melden sich mit „/abmeldung neu“ ab.")])
+  );
+}
+
+function openEndAbsenceModal(item) {
+  modal({
+    title: "Abmeldung beenden",
+    subtitle: item.name,
+    content: h("p", { class: "sub" }, "Die Abmeldung wird vorzeitig beendet. Die Person bekommt eine Nachricht per DM."),
+    confirm: "Beenden",
+    onConfirm: () => act("absence_end", { absence_id: item.id }),
+  });
+}
+
+function complaintRow(item) {
+  const open = item.status === "open" || item.status === "in_progress";
+  const stateClass = item.status === "resolved" ? "done" : item.status === "rejected" ? "closed" : "pending";
+  const badgeClass = item.status === "resolved" ? "ok" : item.status === "rejected" ? "" : "warn";
+
+  return h(
+    "li",
+    { class: "row " + stateClass },
+    h(
+      "div",
+      { class: "who" },
+      avatar(item.target_avatar),
+      h(
+        "div",
+        { class: "names" },
+        h("strong", {}, `#${item.id} · über ${item.target_name}`),
+        h("span", { class: "sub" }, `von ${item.complainant_name} · ${formatDate(item.created_at)}`)
+      )
+    ),
+    h("div", { class: "tags" }, h("span", { class: "badge " + badgeClass }, COMPLAINT_LABELS[item.status] || item.status)),
+    h("p", { class: "detail" }, item.reason),
+    item.evidence ? h("p", { class: "detail muted" }, "Beweise: " + item.evidence) : null,
+    item.note
+      ? h("p", { class: "detail muted" }, `Notiz${item.handled_by_name ? " von " + item.handled_by_name : ""}: ${item.note}`)
+      : null,
+    h("div", { class: "actions" }, button(open ? "Bearbeiten" : "Status ändern", () => openComplaintModal(item), open ? "primary" : "", false, "check"))
+  );
+}
+
+function renderComplaints() {
+  const list = S.data.complaints || [];
+  const key = JSON.stringify(list);
+  if (key === S.keys.complaints) return;
+  S.keys.complaints = key;
+
+  $("#complaintList").replaceChildren(
+    ...(list.length
+      ? list.map(complaintRow)
+      : [h("li", { class: "empty" }, "Keine Beschwerden. Spieler reichen sie mit „/beschwerde neu“ ein.")])
+  );
+}
+
+function openComplaintModal(item) {
+  const select = h(
+    "select",
+    { id: "complaintStatus" },
+    ...Object.entries(COMPLAINT_LABELS).map(([value, label]) => h("option", { value, selected: value === item.status }, label))
+  );
+
+  const note = h("textarea", {
+    id: "complaintNote",
+    maxlength: 500,
+    placeholder: "Pflicht bei „Erledigt“ und „Abgelehnt“. Geht per DM an den Einreicher.",
+  });
+
+  modal({
+    title: `Beschwerde #${item.id}`,
+    subtitle: `über ${item.target_name} · von ${item.complainant_name}`,
+    content: h(
+      "div",
+      {},
+      h("p", { class: "detail" }, item.reason),
+      item.evidence ? h("p", { class: "detail muted" }, "Beweise: " + item.evidence) : null,
+      h("div", { class: "field" }, h("label", { for: "complaintStatus" }, "Status"), select),
+      h("div", { class: "field" }, h("label", { for: "complaintNote" }, "Notiz"), note)
+    ),
+    confirm: "Speichern",
+    onConfirm: () => act("complaint_status", { complaint_id: item.id, status: select.value, note: note.value }),
+  });
 }
 
 function renderSettings() {
@@ -1192,6 +1379,14 @@ function renderTabs() {
     ["bans", "Sperren", data.bans.length, "ban"],
   ];
 
+  if (data.features && data.features.extras) {
+    const away = (data.absences || []).filter((item) => item.status === "active").length;
+    const open = (data.complaints || []).filter((item) => item.status === "open" || item.status === "in_progress").length;
+
+    tabs.push(["absences", "Abmeldungen", away, "clock"]);
+    tabs.push(["complaints", "Beschwerden", open, "flag"]);
+  }
+
   if (data.actor.is_admin && data.actor.can_config) tabs.push(["settings", "Einstellungen", null, "settings"]);
 
   const key = JSON.stringify([tabs, S.tab]);
@@ -1223,7 +1418,7 @@ function switchTab(id) {
   S.tab = id;
   S.keys.tabs = "";
 
-  for (const panel of ["team", "users", "bans", "settings"]) {
+  for (const panel of ["team", "users", "bans", "absences", "complaints", "settings"]) {
     $("#p-" + panel).hidden = panel !== id;
   }
 
@@ -1242,6 +1437,8 @@ function renderAll() {
 
   if (S.tab === "team") renderTeam();
   if (S.tab === "bans") renderBans();
+  if (S.tab === "absences") renderAbsences();
+  if (S.tab === "complaints") renderComplaints();
   if (S.tab === "settings") renderSettings();
 }
 
