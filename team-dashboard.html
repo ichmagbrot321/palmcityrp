@@ -366,6 +366,19 @@ button.badge { cursor: pointer; }
 .detail.muted { color: var(--muted); font-size: 13px; }
 .modal .detail { margin: 0 0 12px; }
 
+.filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; align-items: center; }
+.filters .search { flex: 1 1 240px; margin-bottom: 0; }
+.filters select { width: auto; min-width: 150px; }
+.hero { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px; }
+.hero.on { border-color: rgba(56, 217, 160, .45); }
+.hero.off { border-color: rgba(255, 84, 104, .45); }
+.hero strong { display: block; }
+.hero .sub { color: var(--muted); font-size: 13px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.metrics { grid-column: 1 / -1; display: flex; gap: 6px 16px; flex-wrap: wrap; color: var(--muted); font-size: 13px; margin: 0; }
+.metrics b { color: var(--text); font-weight: 600; }
+a.btn { text-decoration: none; }
+
 .empty { text-align: center; color: var(--muted); padding: 44px 16px; border: 1px dashed var(--line-strong); border-radius: var(--radius); background: var(--panel); }
 .note { color: var(--muted); font-size: 13px; margin: 12px 0 0; }
 
@@ -394,7 +407,7 @@ button.badge { cursor: pointer; }
 .ladder .lvl { font-family: var(--mono); font-size: 12px; color: var(--muted); width: 58px; flex: none; }
 .ladder .nm { flex: 1; min-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .add-rank { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
-.add-rank select, .field select, .field textarea {
+.add-rank select, .field select, .field textarea, .field input, .filters select {
   background: rgba(2, 5, 12, .6);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -402,7 +415,7 @@ button.badge { cursor: pointer; }
   width: 100%;
 }
 .add-rank select { flex: 1; min-width: 180px; width: auto; }
-.field select:focus, .field textarea:focus, .add-rank select:focus { border-color: var(--blue); outline: none; box-shadow: 0 0 0 3px rgba(43, 140, 255, .18); }
+.field input:focus, .filters select:focus, .field select:focus, .field textarea:focus, .add-rank select:focus { border-color: var(--blue); outline: none; box-shadow: 0 0 0 3px rgba(43, 140, 255, .18); }
 
 /* ---------- Modal ---------- */
 .backdrop { position: fixed; inset: 0; z-index: 50; background: rgba(2, 4, 10, .78); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); display: grid; place-items: center; padding: 16px; }
@@ -564,6 +577,42 @@ button.badge { cursor: pointer; }
         <ul class="list" id="complaintList"></ul>
       </section>
 
+      <section id="p-applications" hidden>
+        <div id="appHero"></div>
+        <ul class="list" id="appList"></ul>
+      </section>
+
+      <section id="p-activity" hidden>
+        <div class="filters">
+          <select id="actDays" aria-label="Zeitraum">
+            <option value="7">Letzte 7 Tage</option>
+            <option value="30">Letzte 30 Tage</option>
+          </select>
+        </div>
+        <div class="chips" id="actChips"></div>
+        <p class="note" id="actNote"></p>
+        <ul class="list" id="actList"></ul>
+      </section>
+
+      <section id="p-history" hidden>
+        <div class="filters">
+          <label class="search">
+            <span class="ico" data-icon="search"></span>
+            <input id="histSearch" type="search" placeholder="Name, Grund oder Akten-Nr. suchen" autocomplete="off" aria-label="Verlauf durchsuchen">
+          </label>
+          <select id="histAction" aria-label="Aktion"></select>
+          <select id="histSource" aria-label="Quelle">
+            <option value="">Alle Quellen</option>
+            <option value="dashboard">Dashboard</option>
+            <option value="discord">Discord</option>
+            <option value="auto">Automatisch</option>
+          </select>
+          <button type="button" class="btn small" id="histExport">CSV exportieren</button>
+        </div>
+        <ul class="list" id="histList"></ul>
+        <p class="note" id="histNote"></p>
+      </section>
+
       <section id="p-settings" hidden></section>
     </main>
   </div>
@@ -636,6 +685,8 @@ const ICONS = {
   unlock: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>',
   x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
   clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  chart: '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+  history: '<path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/>',
   flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>',
 };
 
@@ -658,6 +709,9 @@ const TITLES = {
   bans: ["Teamsperren", "Personen, die sich nicht fürs Team bewerben können"],
   absences: ["Abmeldungen", "Wer ist wie lange abwesend und warum"],
   complaints: ["Beschwerden", "Teambeschwerden bearbeiten"],
+  applications: ["Bewerbungen", "Teambewerbungen und Status"],
+  activity: ["Aktivität", "Nachrichten und Voice-Zeit im Team"],
+  history: ["Verlauf", "Alle Aktionen mit Suche, Filter und Export"],
   settings: ["Einstellungen", "Rangleiste festlegen"],
 };
 
@@ -671,6 +725,11 @@ const S = {
   keys: {},
   userQuery: "",
   userTimer: null,
+  activity: null,
+  activityAt: 0,
+  activityDays: 7,
+  inactiveCount: 0,
+  histTimer: null,
 };
 
 // ============================================================
@@ -859,6 +918,8 @@ function openWarnModal(member) {
 
 function openKickModal(member) {
   const reason = h("textarea", { id: "reason", maxlength: 300, placeholder: "Optional" });
+  const lockDefault = Number((S.data.settings && S.data.settings.lock_days_default) || 0);
+  const lock = h("input", { id: "lockDays", type: "number", min: 0, max: 3650, value: String(lockDefault) });
 
   modal({
     title: "Aus dem Team entfernen",
@@ -868,10 +929,16 @@ function openKickModal(member) {
       "div",
       {},
       h("div", { class: "field" }, h("label", { for: "reason" }, "Grund"), reason),
-      h("p", { class: "sub" }, "Die Person erhält die Teamkick-Rolle (Teamsperre) und verliert alle Teamrollen.")
+      h("div", { class: "field" }, h("label", { for: "lockDays" }, "Teamsperre in Tagen (0 = dauerhaft)"), lock),
+      h("p", { class: "sub" }, "Die Person erhält die Teamkick-Rolle (Teamsperre) und verliert alle Teamrollen. Nach Ablauf der Sperre kann sie sich automatisch wieder bewerben.")
     ),
     confirm: "Aus dem Team entfernen",
-    onConfirm: () => act("kick", { user_id: member.id, reason: reason.value, ban: true }),
+    onConfirm: () =>
+      act("kick", {
+        user_id: member.id,
+        reason: reason.value,
+        lock_days: lock.value.trim() === "" ? lockDefault : Math.max(0, Math.round(Number(lock.value) || 0)),
+      }),
   });
 }
 
@@ -953,6 +1020,9 @@ function memberRow(member) {
             icon("alert"),
             count === 1 ? "1 Verwarnung" : `${count} Verwarnungen`
           )
+        : null,
+      count >= ((S.data.settings && S.data.settings.warn_escalation) || 3)
+        ? h("span", { class: "badge bad", title: "Downrank oder Teamkick prüfen" }, icon("alert"), "Eskalation prüfen")
         : null
     ),
     h(
@@ -1107,7 +1177,7 @@ function renderBans() {
             h(
               "span",
               { class: "sub" },
-              (ban.reason || "Kein Grund angegeben") + ` · ${ban.by_name}, ${formatDate(ban.at)}` + (ban.on_server ? "" : " · nicht auf dem Server")
+              (ban.reason || "Kein Grund angegeben") + ` · ${ban.by_name}, ${formatDate(ban.at)}` + (ban.until ? ` · Sperre bis ${formatDate(ban.until)}` : " · dauerhaft") + (ban.on_server ? "" : " · nicht auf dem Server")
             )
           )
         ),
@@ -1121,7 +1191,14 @@ function renderBans() {
 // ABMELDUNGEN + BESCHWERDEN
 // ============================================================
 
-const ABSENCE_LABELS = { active: "Aktiv", ended: "Beendet", expired: "Abgelaufen" };
+const ABSENCE_LABELS = {
+  active: "Aktiv",
+  pending: "Wartet auf Genehmigung",
+  ended: "Beendet",
+  expired: "Abgelaufen",
+  rejected: "Abgelehnt",
+  cancelled: "Zurückgezogen",
+};
 const COMPLAINT_LABELS = { open: "Offen", in_progress: "In Bearbeitung", resolved: "Erledigt", rejected: "Abgelehnt" };
 
 function spanText(startIso, endIso) {
@@ -1151,11 +1228,41 @@ function remainingText(endIso) {
 
 function absenceRow(item) {
   const active = item.status === "active";
-  const statusClass = active ? "info" : item.status === "ended" ? "ok" : "";
+  const pending = item.status === "pending";
+  const canApprove = S.data.actor.can_approve;
+  const statusClass = { active: "info", pending: "warn", ended: "ok", expired: "", rejected: "bad", cancelled: "" }[item.status] || "";
+
+  const notes = [];
+  if (item.status === "rejected") notes.push(`Abgelehnt von ${item.decided_by_name || "?"}: ${item.decision_note || "ohne Angabe"}`);
+  if (item.decided_by_name && item.status !== "rejected" && item.status !== "pending") notes.push(`Genehmigt von ${item.decided_by_name}`);
+  if (!active && !pending && item.status !== "rejected" && item.ended_by_name) notes.push(`Beendet von ${item.ended_by_name}, ${formatDate(item.ended_at)}`);
+  if (item.extended) notes.push(`${item.extended}× verlängert`);
+
+  let actions = null;
+
+  if (pending) {
+    actions = h(
+      "div",
+      { class: "actions" },
+      canApprove
+        ? [
+            button("Genehmigen", () => approveAbsence(item), "primary", false, "check"),
+            button("Ablehnen", () => openRejectAbsenceModal(item), "danger", false, "x"),
+          ]
+        : h("span", { class: "sub" }, "Nur die Leitung kann entscheiden.")
+    );
+  } else if (active) {
+    actions = h(
+      "div",
+      { class: "actions" },
+      button("Verlängern", () => openExtendAbsenceModal(item), "", false, "clock"),
+      button("Beenden", () => openEndAbsenceModal(item), "", false, "x")
+    );
+  }
 
   return h(
     "li",
-    { class: "row " + (active ? "away" : "closed") },
+    { class: "row " + (pending ? "pending" : active ? "away" : "closed") },
     h(
       "div",
       { class: "who" },
@@ -1175,18 +1282,14 @@ function absenceRow(item) {
       active ? h("span", { class: "badge info" }, remainingText(item.end)) : null
     ),
     h("p", { class: "detail" }, item.reason || "Kein Grund angegeben."),
-    !active && item.ended_by_name
-      ? h("p", { class: "detail muted" }, `Beendet von ${item.ended_by_name}, ${formatDate(item.ended_at)}`)
-      : null,
-    active
-      ? h("div", { class: "actions" }, button("Abmeldung beenden", () => openEndAbsenceModal(item), "", false, "x"))
-      : null
+    notes.length ? h("p", { class: "detail muted" }, notes.join(" · ")) : null,
+    actions
   );
 }
 
 function renderAbsences() {
   const list = S.data.absences || [];
-  const key = JSON.stringify([list, Math.floor(Date.now() / 60000)]);
+  const key = JSON.stringify([list, S.data.actor.can_approve, Math.floor(Date.now() / 60000)]);
   if (key === S.keys.absences) return;
   S.keys.absences = key;
 
@@ -1197,11 +1300,58 @@ function renderAbsences() {
   );
 }
 
+async function approveAbsence(item) {
+  try {
+    await act("absence_approve", { absence_id: item.id });
+  } catch (err) {
+    toast(err.message, true);
+  }
+}
+
+function openRejectAbsenceModal(item) {
+  const note = h("textarea", { id: "absNote", maxlength: 300, placeholder: "Warum wird die Abmeldung abgelehnt? Geht per DM an die Person." });
+
+  modal({
+    title: "Abmeldung ablehnen",
+    subtitle: item.name,
+    danger: true,
+    content: h(
+      "div",
+      {},
+      h("p", { class: "detail" }, item.reason),
+      h("div", { class: "field" }, h("label", { for: "absNote" }, "Grund"), note)
+    ),
+    confirm: "Ablehnen",
+    onConfirm: () => act("absence_reject", { absence_id: item.id, note: note.value }),
+  });
+}
+
+function openExtendAbsenceModal(item) {
+  const duration = h("input", { id: "absExtend", type: "text", maxlength: 40, placeholder: "z. B. 3 Tage, 1 Woche oder bis 24.12." });
+
+  modal({
+    title: "Abmeldung verlängern",
+    subtitle: `${item.name} · aktuell bis ${formatDate(item.end)}`,
+    content: h(
+      "div",
+      {},
+      h("div", { class: "field" }, h("label", { for: "absExtend" }, "Zusätzliche Dauer"), duration),
+      h(
+        "p",
+        { class: "sub" },
+        `Insgesamt sind höchstens 60 Tage möglich. Über ${S.data.settings.absence_approval_days} Tage gesamt darf nur die Leitung verlängern.`
+      )
+    ),
+    confirm: "Verlängern",
+    onConfirm: () => act("absence_extend", { absence_id: item.id, duration: duration.value }),
+  });
+}
+
 function openEndAbsenceModal(item) {
   modal({
     title: "Abmeldung beenden",
     subtitle: item.name,
-    content: h("p", { class: "sub" }, "Die Abmeldung wird vorzeitig beendet. Die Person bekommt eine Nachricht per DM."),
+    content: h("p", { class: "sub" }, "Die Abmeldung wird vorzeitig beendet und die Rolle „Abgemeldet“ entfernt. Die Person bekommt eine Nachricht per DM."),
     confirm: "Beenden",
     onConfirm: () => act("absence_end", { absence_id: item.id }),
   });
@@ -1232,8 +1382,36 @@ function complaintRow(item) {
     item.note
       ? h("p", { class: "detail muted" }, `Notiz${item.handled_by_name ? " von " + item.handled_by_name : ""}: ${item.note}`)
       : null,
-    h("div", { class: "actions" }, button(open ? "Bearbeiten" : "Status ändern", () => openComplaintModal(item), open ? "primary" : "", false, "check"))
+    h(
+      "div",
+      { class: "actions" },
+      open ? button("Teamwarn erteilen", () => openComplaintWarnModal(item), "danger", false, "alert") : null,
+      button(open ? "Bearbeiten" : "Status ändern", () => openComplaintModal(item), open ? "primary" : "", false, "check")
+    )
   );
+}
+
+function openComplaintWarnModal(item) {
+  const reason = h("textarea", {
+    id: "complaintWarnReason",
+    maxlength: 300,
+    placeholder: `Optional. Standard: „Teambeschwerde #${item.id}: …“`,
+  });
+
+  modal({
+    title: `Teamwarn zu Beschwerde #${item.id}`,
+    subtitle: `für ${item.target_name}`,
+    danger: true,
+    content: h(
+      "div",
+      {},
+      h("p", { class: "detail" }, item.reason),
+      h("div", { class: "field" }, h("label", { for: "complaintWarnReason" }, "Grund der Verwarnung"), reason),
+      h("p", { class: "sub" }, "Die Person wird verwarnt (mit DM), die Beschwerde wird als erledigt markiert und der Einreicher benachrichtigt.")
+    ),
+    confirm: "Verwarnen und erledigen",
+    onConfirm: () => act("complaint_warn", { complaint_id: item.id, reason: reason.value }),
+  });
 }
 
 function renderComplaints() {
@@ -1276,6 +1454,333 @@ function openComplaintModal(item) {
     confirm: "Speichern",
     onConfirm: () => act("complaint_status", { complaint_id: item.id, status: select.value, note: note.value }),
   });
+}
+
+// ============================================================
+// BEWERBUNGEN
+// ============================================================
+
+const APP_LABELS = { offen: "Offen", "vorstellungsgespräch": "Vorstellungsgespräch", bestanden: "Bestanden", abgelehnt: "Abgelehnt" };
+
+function applicationRow(item) {
+  const cls = item.open ? "pending" : item.status === "bestanden" ? "done" : "closed";
+  const badge = item.open ? "warn" : item.status === "bestanden" ? "ok" : "";
+
+  return h(
+    "li",
+    { class: "row " + cls },
+    h(
+      "div",
+      { class: "who" },
+      avatar(item.avatar),
+      h(
+        "div",
+        { class: "names" },
+        h("strong", {}, item.name),
+        h("span", { class: "sub" }, `${item.applicant_name || "—"}${item.age ? " · " + item.age + " Jahre" : ""} · ${formatDate(item.created_at)}`)
+      )
+    ),
+    h(
+      "div",
+      { class: "tags" },
+      h("span", { class: "badge " + badge }, APP_LABELS[item.status] || item.status),
+      item.automatic_rejection ? h("span", { class: "badge" }, "Automatisch") : null
+    ),
+    item.thread_url
+      ? h("div", { class: "actions" }, h("a", { class: "btn small", href: item.thread_url, target: "_blank", rel: "noopener noreferrer" }, "Thread öffnen"))
+      : null
+  );
+}
+
+function renderApplications() {
+  const apps = S.data.applications;
+  const key = JSON.stringify([apps, S.data.actor.can_manage_applications]);
+  if (key === S.keys.apps) return;
+  S.keys.apps = key;
+
+  if (!apps || !apps.available) {
+    $("#appHero").replaceChildren();
+    $("#appList").replaceChildren(h("li", { class: "empty" }, "Das Bewerbungssystem ist im Bot nicht geladen."));
+    return;
+  }
+
+  const count = apps.open_count;
+
+  $("#appHero").replaceChildren(
+    h(
+      "div",
+      { class: "hero " + (apps.accepting ? "on" : "off") },
+      h(
+        "div",
+        {},
+        h("strong", {}, apps.accepting ? "Bewerbungen sind geöffnet" : "Bewerbungen sind geschlossen"),
+        h("span", { class: "sub" }, `${count} offene Bewerbung${count === 1 ? "" : "en"}`)
+      ),
+      S.data.actor.can_manage_applications
+        ? button(
+            apps.accepting ? "Bewerbungen schließen" : "Bewerbungen öffnen",
+            () => openAppStatusModal(apps.accepting),
+            apps.accepting ? "danger" : "primary",
+            false,
+            apps.accepting ? "ban" : "unlock"
+          )
+        : h("span", { class: "sub" }, "Nur Administratoren können umschalten.")
+    )
+  );
+
+  $("#appList").replaceChildren(
+    ...(apps.items.length ? apps.items.map(applicationRow) : [h("li", { class: "empty" }, "Noch keine Bewerbungen.")])
+  );
+}
+
+function openAppStatusModal(accepting) {
+  modal({
+    title: accepting ? "Bewerbungen schließen" : "Bewerbungen öffnen",
+    subtitle: "Teambewerbungen",
+    danger: accepting,
+    content: h(
+      "p",
+      { class: "sub" },
+      accepting
+        ? "Neue Bewerbungen sind danach nicht mehr möglich. Panel und Status-Ankündigung werden aktualisiert."
+        : "Bewerbungen sind danach wieder möglich. Panel und Status-Ankündigung werden aktualisiert und die Rolle wird kurz gepingt."
+    ),
+    confirm: accepting ? "Schließen" : "Öffnen",
+    onConfirm: () => act("applications_status", { status: accepting ? "geschlossen" : "offen" }),
+  });
+}
+
+// ============================================================
+// AKTIVITÄT
+// ============================================================
+
+const ACT_LABELS = { inactive: "Inaktiv", absent: "Abgemeldet", unknown: "Erfassung läuft", active: "Aktiv" };
+const ACT_BADGE = { inactive: "bad", absent: "info", unknown: "", active: "ok" };
+const ACT_ROW = { inactive: "pending", absent: "away", unknown: "closed", active: "done" };
+
+function voiceText(seconds) {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  return hours ? `${hours} Std ${minutes} Min` : `${minutes} Min`;
+}
+
+function dayText(day) {
+  if (!day) return "noch nie";
+  return new Date(day + "T12:00:00").toLocaleDateString("de-DE", { dateStyle: "medium" });
+}
+
+function activityRow(item) {
+  return h(
+    "li",
+    { class: "row " + ACT_ROW[item.status] },
+    h(
+      "div",
+      { class: "who" },
+      avatar(item.avatar),
+      h(
+        "div",
+        { class: "names" },
+        h("strong", {}, item.name),
+        h("span", { class: "sub" }, item.rank_name || "Kein Rang")
+      )
+    ),
+    h(
+      "div",
+      { class: "tags" },
+      h("span", { class: "badge " + ACT_BADGE[item.status] }, ACT_LABELS[item.status]),
+      item.absence_end ? h("span", { class: "badge info" }, icon("clock"), "bis " + formatDate(item.absence_end)) : null,
+      item.warns ? h("span", { class: "badge warn" }, icon("alert"), item.warns === 1 ? "1 Verwarnung" : `${item.warns} Verwarnungen`) : null
+    ),
+    h(
+      "p",
+      { class: "metrics" },
+      h("span", {}, h("b", {}, String(item.messages)), " Nachrichten"),
+      h("span", {}, h("b", {}, voiceText(item.voice_seconds)), " Voice"),
+      h("span", {}, "zuletzt aktiv: ", h("b", {}, dayText(item.last_active)))
+    )
+  );
+}
+
+function renderActivity() {
+  const data = S.activity;
+  if (!data) return;
+
+  const key = JSON.stringify(data);
+  if (key === S.keys.activity) return;
+  S.keys.activity = key;
+
+  if (!data.available) {
+    $("#actChips").replaceChildren();
+    $("#actNote").textContent = "";
+    $("#actList").replaceChildren(h("li", { class: "empty" }, "Die Aktivitätserfassung ist im Bot nicht geladen."));
+    return;
+  }
+
+  $("#actChips").replaceChildren(
+    ...["inactive", "absent", "unknown", "active"]
+      .filter((status) => data.counts[status])
+      .map((status) => h("span", { class: "badge " + ACT_BADGE[status] }, `${ACT_LABELS[status]}: ${data.counts[status]}`))
+  );
+
+  $("#actNote").textContent = data.tracking_ready
+    ? `Inaktiv = in den letzten ${data.inactive_after_days} Tagen weder geschrieben noch in Voice und nicht abgemeldet. Gezählt werden nur Teammitglieder.`
+    : `Die Erfassung läuft seit ${formatDate(data.tracking_since)}. Inaktive werden erst nach ${data.inactive_after_days} Tagen Erfassung markiert.`;
+
+  $("#actList").replaceChildren(
+    ...(data.items.length ? data.items.map(activityRow) : [h("li", { class: "empty" }, "Keine Teammitglieder gefunden.")])
+  );
+}
+
+async function loadActivity(force = false) {
+  if (!S.data || !S.data.features || !S.data.features.activity) return;
+
+  const age = Date.now() - S.activityAt;
+  const onTab = S.tab === "activity";
+
+  if (!force && ((onTab && age < 15000) || (!onTab && age < 60000))) return;
+
+  try {
+    const data = await api("activity", { params: { days: S.activityDays } });
+    S.activity = data;
+    S.activityAt = Date.now();
+    S.inactiveCount = (data.counts && data.counts.inactive) || 0;
+    renderTabs();
+    if (S.tab === "activity") renderActivity();
+  } catch (err) {
+    if (err.code === "no_access") setLocked(err.message);
+  }
+}
+
+// ============================================================
+// VERLAUF + CSV-EXPORT
+// ============================================================
+
+const ACTION_LABELS = {
+  hire: "Aufnahme",
+  up: "Beförderung",
+  down: "Degradierung",
+  set: "Rang gesetzt",
+  warn: "Teamwarn",
+  warn_remove: "Warn entfernt",
+  kick: "Teamkick",
+  ban_remove: "Sperre aufgehoben",
+  manual_role: "Rolle manuell geändert",
+  absence: "Abmeldung",
+  absence_approve: "Abmeldung genehmigt",
+  absence_end: "Abmeldung beendet",
+  complaint: "Beschwerde",
+  complaint_status: "Beschwerde-Status",
+};
+
+const ACTION_BADGE = {
+  hire: "ok", up: "ok", warn_remove: "ok", ban_remove: "ok", absence_approve: "ok",
+  down: "warn", warn: "warn", complaint: "warn", complaint_status: "warn",
+  kick: "bad",
+  absence: "info", absence_end: "info", manual_role: "info",
+};
+
+const SOURCE_LABELS = { dashboard: "Dashboard", discord: "Discord", auto: "Automatisch" };
+
+function historyRow(event) {
+  const same = event.actor_id && event.actor_id === event.target_id;
+
+  return h(
+    "li",
+    { class: "row closed" },
+    h(
+      "div",
+      { class: "who" },
+      h(
+        "div",
+        { class: "names" },
+        h("strong", {}, same ? event.target_name : `${event.actor_name} → ${event.target_name}`),
+        h("span", { class: "sub" }, `${formatDate(event.at)} · ${event.ref}`)
+      )
+    ),
+    h(
+      "div",
+      { class: "tags" },
+      h("span", { class: "badge " + (ACTION_BADGE[event.action] || "") }, ACTION_LABELS[event.action] || event.action),
+      h("span", { class: "badge none" }, SOURCE_LABELS[event.source] || event.source)
+    ),
+    event.detail ? h("p", { class: "detail muted" }, event.detail) : null
+  );
+}
+
+function historyParams(limit) {
+  const params = { limit };
+  const q = $("#histSearch").value.trim();
+  const action = $("#histAction").value;
+  const source = $("#histSource").value;
+
+  if (q) params.q = q;
+  if (action) params.action = action;
+  if (source) params.source = source;
+
+  return params;
+}
+
+async function loadHistory() {
+  if (S.tab !== "history" || !S.data) return;
+
+  try {
+    const data = await api("history", { params: historyParams(200) });
+    const key = JSON.stringify(data);
+
+    if (key !== S.keys.history) {
+      S.keys.history = key;
+
+      $("#histList").replaceChildren(
+        ...(data.items.length ? data.items.map(historyRow) : [h("li", { class: "empty" }, "Keine Einträge für diese Filter.")])
+      );
+
+      $("#histNote").textContent =
+        data.total > data.items.length
+          ? `${data.total} Einträge, die neuesten ${data.items.length} werden angezeigt. Der CSV-Export enthält bis zu 5000.`
+          : `${data.total} Eintrag${data.total === 1 ? "" : "e"}.`;
+    }
+  } catch (err) {
+    if (err.code === "no_access") setLocked(err.message);
+  }
+}
+
+function csvCell(value) {
+  let text = String(value ?? "");
+  // Schutz vor Formel-Injection in Excel/Sheets
+  if (/^[=+\-@\t\r]/.test(text)) text = "'" + text;
+  return '"' + text.replace(/"/g, '""') + '"';
+}
+
+async function exportHistory() {
+  try {
+    const data = await api("history", { params: historyParams(5000) });
+
+    const rows = [
+      ["Zeit", "Aktion", "Quelle", "Ausgeführt von", "Betroffen", "Details", "Referenz"],
+      ...data.items.map((event) => [
+        formatDate(event.at),
+        ACTION_LABELS[event.action] || event.action,
+        SOURCE_LABELS[event.source] || event.source,
+        event.actor_name,
+        event.target_name,
+        event.detail,
+        event.ref,
+      ]),
+    ];
+
+    const csv = "\ufeff" + rows.map((row) => row.map(csvCell).join(";")).join("\r\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const link = h("a", { href: url, download: `team-verlauf-${new Date().toISOString().slice(0, 10)}.csv` });
+
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+
+    toast(`${data.items.length} Einträge exportiert.`);
+  } catch (err) {
+    toast(err.message, true);
+  }
 }
 
 function renderSettings() {
@@ -1387,6 +1892,14 @@ function renderTabs() {
     tabs.push(["complaints", "Beschwerden", open, "flag"]);
   }
 
+  if (data.features && data.features.applications) {
+    tabs.push(["applications", "Bewerbungen", (data.applications && data.applications.open_count) || 0, "userPlus"]);
+  }
+
+  if (data.features && data.features.activity) tabs.push(["activity", "Aktivität", S.inactiveCount || 0, "chart"]);
+
+  tabs.push(["history", "Verlauf", null, "history"]);
+
   if (data.actor.is_admin && data.actor.can_config) tabs.push(["settings", "Einstellungen", null, "settings"]);
 
   const key = JSON.stringify([tabs, S.tab]);
@@ -1418,12 +1931,14 @@ function switchTab(id) {
   S.tab = id;
   S.keys.tabs = "";
 
-  for (const panel of ["team", "users", "bans", "absences", "complaints", "settings"]) {
+  for (const panel of ["team", "users", "bans", "absences", "complaints", "applications", "activity", "history", "settings"]) {
     $("#p-" + panel).hidden = panel !== id;
   }
 
   renderAll();
   if (id === "users") loadUsers();
+  if (id === "activity") loadActivity(true);
+  if (id === "history") loadHistory();
 }
 
 function renderAll() {
@@ -1439,6 +1954,8 @@ function renderAll() {
   if (S.tab === "bans") renderBans();
   if (S.tab === "absences") renderAbsences();
   if (S.tab === "complaints") renderComplaints();
+  if (S.tab === "applications") renderApplications();
+  if (S.tab === "activity" && S.activity) renderActivity();
   if (S.tab === "settings") renderSettings();
 }
 
@@ -1475,6 +1992,8 @@ async function refresh() {
     setLive(true, "Live · " + new Date().toLocaleTimeString("de-DE"));
     renderAll();
     await loadUsers();
+    loadActivity();
+    loadHistory();
   } catch (err) {
     if (err.code === "no_session") return showLogin();
 
@@ -1535,6 +2054,24 @@ async function boot() {
       S.userQuery = event.target.value.trim();
       loadUsers();
     }, 300);
+  });
+
+  $("#histAction").replaceChildren(
+    h("option", { value: "" }, "Alle Aktionen"),
+    ...Object.entries(ACTION_LABELS).map(([value, label]) => h("option", { value }, label))
+  );
+
+  $("#histSearch").addEventListener("input", () => {
+    clearTimeout(S.histTimer);
+    S.histTimer = setTimeout(loadHistory, 300);
+  });
+  $("#histAction").addEventListener("change", loadHistory);
+  $("#histSource").addEventListener("change", loadHistory);
+  $("#histExport").addEventListener("click", exportHistory);
+
+  $("#actDays").addEventListener("change", (event) => {
+    S.activityDays = Number(event.target.value) === 30 ? 30 : 7;
+    loadActivity(true);
   });
 
   await refresh();
