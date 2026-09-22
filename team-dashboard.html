@@ -379,6 +379,15 @@ button.badge { cursor: pointer; }
 .metrics b { color: var(--text); font-weight: 600; }
 a.btn { text-decoration: none; }
 
+.stars { color: var(--sunset); letter-spacing: 1px; white-space: nowrap; }
+.stars .off { color: var(--line-strong); }
+.rating-item { background: var(--panel-2); border: 1px solid var(--line); border-radius: 9px; padding: 9px 12px; margin-top: 6px; }
+.rating-item .top { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.rating-item p { margin: 4px 0 0; color: var(--text); font-size: 13.5px; }
+.dist-row { display: grid; grid-template-columns: 34px 1fr 26px; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+.dist-bar { height: 6px; border-radius: 4px; background: var(--line); overflow: hidden; }
+.dist-bar > i { display: block; height: 100%; background: var(--sunset); }
+
 .empty { text-align: center; color: var(--muted); padding: 44px 16px; border: 1px dashed var(--line-strong); border-radius: var(--radius); background: var(--panel); }
 .note { color: var(--muted); font-size: 13px; margin: 12px 0 0; }
 
@@ -613,6 +622,10 @@ a.btn { text-decoration: none; }
         <p class="note" id="histNote"></p>
       </section>
 
+      <section id="p-support" hidden>
+        <ul class="list" id="supportList"></ul>
+      </section>
+
       <section id="p-settings" hidden></section>
     </main>
   </div>
@@ -687,6 +700,8 @@ const ICONS = {
   clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
   chart: '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
   history: '<path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/>',
+  star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/>',
+  headset: '<path d="M3 14v-2a9 9 0 0 1 18 0v2"/><path d="M21 14v4a2 2 0 0 1-2 2h-1v-6h3z"/><path d="M3 14v4a2 2 0 0 0 2 2h1v-6H3z"/>',
   flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>',
 };
 
@@ -712,6 +727,7 @@ const TITLES = {
   applications: ["Bewerbungen", "Teambewerbungen und Status"],
   activity: ["Aktivität", "Nachrichten und Voice-Zeit im Team"],
   history: ["Verlauf", "Alle Aktionen mit Suche, Filter und Export"],
+  support: ["Support", "Bewertungen, Tickets und Voice-Support pro Teammitglied"],
   settings: ["Einstellungen", "Rangleiste festlegen"],
 };
 
@@ -730,6 +746,9 @@ const S = {
   activityDays: 7,
   inactiveCount: 0,
   histTimer: null,
+  support: null,
+  supportAt: 0,
+  ratingsExpanded: new Set(),
 };
 
 // ============================================================
@@ -1783,6 +1802,133 @@ async function exportHistory() {
   }
 }
 
+function starRow(stars, size = 16) {
+  const chars = [];
+
+  for (let i = 1; i <= 5; i++) {
+    chars.push(h("span", { class: i > stars ? "off" : "" }, "★"));
+  }
+
+  return h("span", { class: "stars", style: `font-size:${size}px` }, ...chars);
+}
+
+function ratingDistribution(distribution, total) {
+  if (!total) return null;
+
+  return h(
+    "div",
+    { style: "margin-top: 8px" },
+    ...[5, 4, 3, 2, 1].map((star) => {
+      const count = distribution[String(star)] || 0;
+      const pct = Math.round((count / total) * 100);
+
+      return h(
+        "div",
+        { class: "dist-row" },
+        h("span", {}, `${star}★`),
+        h("div", { class: "dist-bar" }, h("i", { style: `width:${pct}%` })),
+        h("span", {}, String(count))
+      );
+    })
+  );
+}
+
+function supportRatingItem(rating) {
+  return h(
+    "div",
+    { class: "rating-item" },
+    h(
+      "div",
+      { class: "top" },
+      starRow(rating.stars, 14),
+      h("span", { class: "sub" }, formatDate(rating.at))
+    ),
+    rating.feedback ? h("p", {}, rating.feedback) : null
+  );
+}
+
+function supportRow(item) {
+  const open = S.ratingsExpanded.has(item.id);
+  const hasRatings = item.rating_count > 0;
+
+  return h(
+    "li",
+    { class: "row" },
+    h(
+      "div",
+      { class: "who" },
+      avatar(item.avatar),
+      h("div", { class: "names" }, h("strong", {}, item.name))
+    ),
+    h(
+      "div",
+      { class: "tags" },
+      hasRatings
+        ? h(
+            "button",
+            {
+              type: "button",
+              class: "badge",
+              "aria-expanded": String(open),
+              onclick: () => {
+                open ? S.ratingsExpanded.delete(item.id) : S.ratingsExpanded.add(item.id);
+                S.keys.support = "";
+                renderSupport();
+              },
+            },
+            starRow(Math.round(item.rating_average)),
+            ` ${item.rating_average.toFixed(2)} (${item.rating_count})`
+          )
+        : h("span", { class: "badge none" }, "Noch keine Bewertung"),
+      h("span", { class: "badge" }, icon("check"), `${item.tickets_closed} von ${item.tickets_claimed} Tickets geschlossen`),
+      item.voice_sessions
+        ? h("span", { class: "badge info" }, icon("headset"), `${item.voice_sessions}× Voice-Support · ${voiceText(item.voice_seconds)}`)
+        : null
+    ),
+    open && hasRatings
+      ? h(
+          "div",
+          { class: "warns" },
+          ratingDistribution(item.rating_distribution, item.rating_count),
+          h("p", { class: "sub", style: "margin-top: 10px" }, "Einzelne Bewertungen (neueste zuerst):"),
+          ...item.ratings.map(supportRatingItem)
+        )
+      : null
+  );
+}
+
+function renderSupport() {
+  const data = S.support;
+  if (!data) return;
+
+  const key = JSON.stringify([data, [...S.ratingsExpanded]]);
+  if (key === S.keys.support) return;
+  S.keys.support = key;
+
+  if (!data.available) {
+    $("#supportList").replaceChildren(h("li", { class: "empty" }, "Das Ticket-System ist im Bot nicht geladen."));
+    return;
+  }
+
+  $("#supportList").replaceChildren(
+    ...(data.items.length ? data.items.map(supportRow) : [h("li", { class: "empty" }, "Keine Teammitglieder gefunden.")])
+  );
+}
+
+async function loadSupport(force = false) {
+  if (!S.data || !S.data.features || !S.data.features.support) return;
+  if (!force && Date.now() - S.supportAt < 20000) return;
+
+  try {
+    const data = await api("support");
+    S.support = data;
+    S.supportAt = Date.now();
+    if (S.tab === "support") renderSupport();
+  } catch (err) {
+    if (err.code === "no_access") setLocked(err.message);
+  }
+}
+
 function renderSettings() {
   const box = $("#p-settings");
   const data = S.data;
@@ -1898,6 +2044,8 @@ function renderTabs() {
 
   if (data.features && data.features.activity) tabs.push(["activity", "Aktivität", S.inactiveCount || 0, "chart"]);
 
+  if (data.features && data.features.support) tabs.push(["support", "Support", null, "headset"]);
+
   tabs.push(["history", "Verlauf", null, "history"]);
 
   if (data.actor.is_admin && data.actor.can_config) tabs.push(["settings", "Einstellungen", null, "settings"]);
@@ -1931,7 +2079,7 @@ function switchTab(id) {
   S.tab = id;
   S.keys.tabs = "";
 
-  for (const panel of ["team", "users", "bans", "absences", "complaints", "applications", "activity", "history", "settings"]) {
+  for (const panel of ["team", "users", "bans", "absences", "complaints", "applications", "activity", "history", "support", "settings"]) {
     $("#p-" + panel).hidden = panel !== id;
   }
 
@@ -1939,6 +2087,7 @@ function switchTab(id) {
   if (id === "users") loadUsers();
   if (id === "activity") loadActivity(true);
   if (id === "history") loadHistory();
+  if (id === "support") loadSupport(true);
 }
 
 function renderAll() {
@@ -1956,6 +2105,7 @@ function renderAll() {
   if (S.tab === "complaints") renderComplaints();
   if (S.tab === "applications") renderApplications();
   if (S.tab === "activity" && S.activity) renderActivity();
+  if (S.tab === "support" && S.support) renderSupport();
   if (S.tab === "settings") renderSettings();
 }
 
@@ -1994,6 +2144,7 @@ async function refresh() {
     await loadUsers();
     loadActivity();
     loadHistory();
+    loadSupport();
   } catch (err) {
     if (err.code === "no_session") return showLogin();
 
