@@ -15,7 +15,15 @@ import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 const CLIENT_ID = "1547984607255994388";
 const CLIENT_SECRET = "gmsUUBCiRV_5q_OozQejmVV7wnwZ9Ihu";
 const API_KEY = process.env.DASHBOARD_API_KEY;
-const SESSION_SECRET = process.env.SESSION_SECRET || API_KEY;
+// Sicherheit: Sitzungscookies dürfen NICHT mit demselben Geheimnis signiert
+// werden wie die Bot-API (DASHBOARD_API_KEY). Sonst reicht ein Leak dieses
+// einen Keys, um Sitzungen für beliebige Nutzer-IDs zu fälschen.
+// Ohne eigene SESSION_SECRET wird deshalb ein eigenständiger Schlüssel aus
+// dem API-Key ABGELEITET (HMAC mit fixem Kontext) statt ihn zu wiederholen.
+// Empfehlung trotzdem: SESSION_SECRET als eigene Vercel-Env-Variable setzen.
+const SESSION_SECRET =
+  process.env.SESSION_SECRET ||
+  createHmac("sha256", API_KEY).update("td-session-v1").digest("hex");
 const BOT_API_URL = (process.env.TEAM_API_URL || "http://server.infynix.de:40002").replace(/\/$/, "");
 
 const DASHBOARD_PATH = "/team-dashboard";
@@ -44,6 +52,7 @@ const ROUTES = {
   applications_status: ["POST", "/team/applications/status"],
   history: ["GET", "/team/history"],
   activity: ["GET", "/team/activity"],
+  support: ["GET", "/team/support"],
 };
 
 // ============================================================
@@ -198,8 +207,19 @@ async function proxy(req, res, url, action, session) {
 
   if (method === "POST") {
     const origin = req.headers.origin;
+    let originHost = null;
 
-    if (origin && new URL(origin).host !== req.headers.host) {
+    try {
+      originHost = origin ? new URL(origin).host : null;
+    } catch {
+      originHost = null;
+    }
+
+    // Sicherheit: fehlender oder ungueltiger Origin-Header wird abgelehnt
+    // (fail-closed), nicht durchgelassen. Browser senden bei
+    // Cross-Site-Requests mit Cookies immer einen Origin-Header; wenn er
+    // fehlt, ist die Anfrage verdaechtig und wird geblockt.
+    if (originHost !== req.headers.host) {
       return json(res, 403, { ok: false, error: "Ungültige Herkunft.", code: "origin" });
     }
 
