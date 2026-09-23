@@ -316,6 +316,7 @@ async function getAllGuildMembers() {
 
   for (;;) {
     const r = await dapi(`/guilds/${encodeURIComponent(GUILD)}/members?limit=1000&after=${encodeURIComponent(after)}`);
+
     if (!r.ok) {
       throw new Error(`Discord Mitglieder API HTTP ${r.status}`);
     }
@@ -324,6 +325,7 @@ async function getAllGuildMembers() {
     members.push(...page);
 
     if (page.length < 1000) break;
+
     after = String(page[page.length - 1].user.id);
   }
 
@@ -337,7 +339,7 @@ async function getPublicTeam() {
     .filter(m => Array.isArray(m.roles) && m.roles.includes(TEAM_ROLE))
     .map(m => {
       const u = m.user || {};
-      const status = Array.isArray(m.presence?.activities) ? m.presence : null;
+
       const avatarUrl = u.avatar
         ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=128`
         : 'https://cdn.discordapp.com/embed/avatars/0.png';
@@ -347,7 +349,7 @@ async function getPublicTeam() {
         username: u.username || '',
         display_name: m.nick || u.global_name || u.username || 'Unbekannt',
         avatar: avatarUrl,
-        online: !!status
+        online: false
       };
     })
     .sort((a, b) => a.display_name.localeCompare(b.display_name, 'de'));
@@ -383,7 +385,7 @@ const HOME_HTML = `<!doctype html>
     .navlinks{display:flex;gap:22px;color:#b9c7da;font-size:13px}.navlinks a:hover{color:#fff}
     .nav-cta{padding:10px 15px;border-radius:12px;background:#fff;color:#07101c;font-weight:850;font-size:12px}
     .hero{min-height:860px;display:grid;place-items:center;position:relative;padding:150px 20px 100px;isolation:isolate}
-    .hero:before{content:"";position:absolute;inset:0;z-index:-3;background:linear-gradient(180deg,rgba(2,5,12,.2),#040711 82%),url("assets/palmcity-banner.webp") center top/cover no-repeat}
+    .hero:before{content:"";position:absolute;inset:0;z-index:-3;background:linear-gradient(180deg,rgba(2,5,12,.2),#040711 82%),url("logo.png") center top/cover no-repeat}
     .hero:after{content:"";position:absolute;inset:0;z-index:-2;background:radial-gradient(circle at 50% 42%,rgba(36,138,255,.2),transparent 32%),linear-gradient(90deg,rgba(2,6,13,.82),transparent 45%,rgba(2,6,13,.62))}
     .hero-inner{width:min(1120px,100%);display:grid;grid-template-columns:1.15fr .85fr;gap:60px;align-items:center}
     .eyebrow{display:inline-flex;gap:9px;align-items:center;padding:7px 11px;border:1px solid rgba(92,184,255,.24);border-radius:999px;background:rgba(7,17,32,.58);color:#a9d9ff;font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
@@ -514,9 +516,7 @@ const HOME_HTML = `<!doctype html>
 <footer class="footer"><div class="footer-inner"><div>© <span id="year"></span> Palm City RP</div><div>Notruf Hamburg RP · Deine Stadt. Deine Entscheidungen.</div></div></footer>
 
 <script>
-const WIDGET_URL = ${JSON.stringify(WIDGET_URL)};
 const TEAM_API = "/api/team";
-const INVITE = ${JSON.stringify(DISCORD_INVITE)};
 
 document.getElementById("year").textContent = new Date().getFullYear();
 
@@ -571,7 +571,11 @@ async function loadTeam(){
     grid.innerHTML = `<div class="empty">Die Discord-Teamliste konnte nicht geladen werden. Prüfe den Bot-Token und die Vercel-Umgebungsvariable DISCORD_BOT_TOKEN.</div>`;
   }
 }
-function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
+
+function escapeHtml(s){
+  return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+}
+
 loadWidget();
 loadTeam();
 setInterval(loadWidget, 60000);
@@ -693,11 +697,13 @@ module.exports = async (req, res) => {
 
     if (p === '/api/roblox-avatar') {
       const userId = u.searchParams.get('userId');
+
       if (!/^\d+$/.test(String(userId || ''))) {
         return send(res, 400, { error: 'Ungültige Roblox User ID.' });
       }
 
       const image = await robloxAvatarImage(userId);
+
       if (!image) {
         return send(res, 404, { error: 'Roblox Avatar konnte nicht geladen werden.' });
       }
@@ -711,13 +717,19 @@ module.exports = async (req, res) => {
 
     if (p === '/api/roblox-lookup' && req.method === 'GET') {
       const name = String(u.searchParams.get('username') || '').trim();
+
       if (!ROBLOX_NAME.test(name)) {
         return send(res, 400, { error: 'Ungültiger Roblox Benutzername.' });
       }
+
       const profile = await robloxProfile(name);
+
       if (!profile) {
-        return send(res, 404, { error: 'Dieser Roblox Benutzername wurde nicht gefunden. Bitte überprüfe die Schreibweise.' });
+        return send(res, 404, {
+          error: 'Dieser Roblox Benutzername wurde nicht gefunden. Bitte überprüfe die Schreibweise.'
+        });
       }
+
       return send(res, 200, { profile });
     }
 
@@ -736,14 +748,19 @@ module.exports = async (req, res) => {
       let rp = null;
 
       if (rl) {
-        [rp, rc] = await Promise.all([robloxProfile(rl.username), robloxCases(rl.username)]);
+        [rp, rc] = await Promise.all([
+          robloxProfile(rl.username),
+          robloxCases(rl.username)
+        ]);
       }
 
       return send(res, 200, {
         user: me,
         banned: !!b,
         ban: b ? { reason: b.reason } : null,
-        warns: ws.filter(x => ['warn', 'discord_warn'].includes(String(x.action).toLowerCase())),
+        warns: ws.filter(x =>
+          ['warn', 'discord_warn'].includes(String(x.action).toLowerCase())
+        ),
         roblox: {
           username: rl?.username || null,
           profile: rp,
@@ -761,25 +778,46 @@ module.exports = async (req, res) => {
         return send(res, 400, { error: 'Ungültiger Roblox Benutzername.' });
       }
 
-      const existing = await db(`roblox_links?discord_id=eq.${encodeURIComponent(me.id)}&select=*`);
+      const existing = await db(
+        `roblox_links?discord_id=eq.${encodeURIComponent(me.id)}&select=*`
+      );
+
       if (!existing.ok) {
-        return send(res, 500, { error: 'Roblox Verknüpfung konnte nicht geprüft werden.' });
+        return send(res, 500, {
+          error: 'Roblox Verknüpfung konnte nicht geprüft werden.'
+        });
       }
+
       if (existing.data?.length) {
-        return send(res, 409, { error: 'Dein Roblox Benutzername wurde bereits fest hinterlegt und kann nicht geändert werden.' });
+        return send(res, 409, {
+          error: 'Dein Roblox Benutzername wurde bereits fest hinterlegt und kann nicht geändert werden.'
+        });
       }
 
       const diag = [];
       const rp = await robloxProfile(name, diag);
+
       if (!rp?.id) {
         if (diag.length) {
-          return send(res, 502, { error: 'Roblox ist vom Server aus gerade nicht erreichbar (' + diag.join('; ') + '). Bitte versuche es später erneut.' });
+          return send(res, 502, {
+            error:
+              'Roblox ist vom Server aus gerade nicht erreichbar (' +
+              diag.join('; ') +
+              '). Bitte versuche es später erneut.'
+          });
         }
-        return send(res, 404, { error: 'Dieser Roblox Benutzername wurde nicht gefunden. Bitte überprüfe die Schreibweise.' });
+
+        return send(res, 404, {
+          error: 'Dieser Roblox Benutzername wurde nicht gefunden. Bitte überprüfe die Schreibweise.'
+        });
       }
 
       if (x.preview) {
-        return send(res, 200, { ok: true, preview: true, profile: rp });
+        return send(res, 200, {
+          ok: true,
+          preview: true,
+          profile: rp
+        });
       }
 
       const r = await db('roblox_links', {
@@ -794,7 +832,9 @@ module.exports = async (req, res) => {
 
       return r.ok
         ? send(res, 200, { ok: true, profile: rp })
-        : send(res, 500, { error: 'Roblox Name konnte nicht gespeichert werden.' });
+        : send(res, 500, {
+            error: 'Roblox Name konnte nicht gespeichert werden.'
+          });
     }
 
     if (p === '/api/appeals' && req.method === 'POST') {
@@ -803,7 +843,11 @@ module.exports = async (req, res) => {
       const reason = String(x.reason || '').trim();
       const caseId = x.case_id ? String(x.case_id) : null;
 
-      if (!['discord_ban', 'discord_warn', 'roblox'].includes(type) || reason.length < 10 || reason.length > 2000) {
+      if (
+        !['discord_ban', 'discord_warn', 'roblox'].includes(type) ||
+        reason.length < 10 ||
+        reason.length > 2000
+      ) {
         return send(res, 400, { error: 'Ungültiger Antrag.' });
       }
 
@@ -816,28 +860,58 @@ module.exports = async (req, res) => {
       }
 
       if (caseId) {
-        const r = await db(`moderation_cases?guild_id=eq.${encodeURIComponent(GUILD)}&case_id=eq.${encodeURIComponent(caseId)}&select=*`);
+        const r = await db(
+          `moderation_cases?guild_id=eq.${encodeURIComponent(GUILD)}&case_id=eq.${encodeURIComponent(caseId)}&select=*`
+        );
+
         const c = r.ok ? r.data?.[0] : null;
-        if (!c) return send(res, 403, { error: 'Dieser Fall gehört nicht zu dir.' });
+
+        if (!c) {
+          return send(res, 403, {
+            error: 'Dieser Fall gehört nicht zu dir.'
+          });
+        }
 
         let owns = false;
+
         if (type === 'roblox') {
-          const link = await db(`roblox_links?discord_id=eq.${encodeURIComponent(me.id)}&select=*`);
+          const link = await db(
+            `roblox_links?discord_id=eq.${encodeURIComponent(me.id)}&select=*`
+          );
+
           const rl = link.ok ? link.data?.[0] : null;
-          owns = !!rl
-            && String(c.source).toLowerCase() === 'roblox'
-            && String(c.roblox_username || '').toLowerCase() === String(rl.username).toLowerCase();
+
+          owns =
+            !!rl &&
+            String(c.source).toLowerCase() === 'roblox' &&
+            String(c.roblox_username || '').toLowerCase() ===
+              String(rl.username).toLowerCase();
         } else {
           owns = String(c.user_id) === String(me.id);
         }
 
-        if (!owns) return send(res, 403, { error: 'Dieser Fall gehört nicht zu dir.' });
+        if (!owns) {
+          return send(res, 403, {
+            error: 'Dieser Fall gehört nicht zu dir.'
+          });
+        }
       }
 
-      const dupQuery = `appeals?discord_id=eq.${encodeURIComponent(me.id)}&type=eq.${encodeURIComponent(type)}&status=in.(open,pending)&${caseId ? 'case_id=eq.' + encodeURIComponent(caseId) : 'case_id=is.null'}&select=*`;
+      const dupQuery =
+        `appeals?discord_id=eq.${encodeURIComponent(me.id)}` +
+        `&type=eq.${encodeURIComponent(type)}` +
+        `&status=in.(open,pending)` +
+        `&${caseId
+          ? 'case_id=eq.' + encodeURIComponent(caseId)
+          : 'case_id=is.null'}` +
+        `&select=*`;
+
       const dup = await db(dupQuery);
+
       if (dup.ok && dup.data?.length) {
-        return send(res, 409, { error: 'Für diesen Fall läuft bereits ein Antrag.' });
+        return send(res, 409, {
+          error: 'Für diesen Fall läuft bereits ein Antrag.'
+        });
       }
 
       const appealData = {
@@ -853,7 +927,11 @@ module.exports = async (req, res) => {
       let r = await db('appeals', {
         method: 'POST',
         headers: { Prefer: 'return=representation' },
-        body: JSON.stringify({ ...appealData, discord_notified: false, bot_handled: false })
+        body: JSON.stringify({
+          ...appealData,
+          discord_notified: false,
+          bot_handled: false
+        })
       });
 
       if (!r.ok) {
@@ -865,9 +943,21 @@ module.exports = async (req, res) => {
       }
 
       if (!r.ok) {
-        console.error('Supabase appeals insert failed:', r.status, r.data);
+        console.error(
+          'Supabase appeals insert failed:',
+          r.status,
+          r.data
+        );
+
         return send(res, 500, {
-          error: 'Der Antrag konnte nicht gespeichert werden. Supabase: ' + (r.data?.message || r.data?.hint || r.data?.details || ('HTTP ' + r.status))
+          error:
+            'Der Antrag konnte nicht gespeichert werden. Supabase: ' +
+            (
+              r.data?.message ||
+              r.data?.hint ||
+              r.data?.details ||
+              ('HTTP ' + r.status)
+            )
         });
       }
 
@@ -875,40 +965,82 @@ module.exports = async (req, res) => {
       const appealId = appeal?.id ?? appeal?.appeal_id;
 
       if (!appealId) {
-        console.error('Supabase appeal insert returned no id:', r.data);
-        return send(res, 500, { error: 'Der Antrag wurde gespeichert, aber es wurde keine Antrags-ID zurückgegeben.' });
+        console.error(
+          'Supabase appeal insert returned no id:',
+          r.data
+        );
+
+        return send(res, 500, {
+          error:
+            'Der Antrag wurde gespeichert, aber es wurde keine Antrags-ID zurückgegeben.'
+        });
       }
 
-      const title = type === 'discord_ban'
-        ? '🔨 Neuer Entbannungsantrag'
-        : type === 'discord_warn'
-          ? '⚠️ Neuer Warnungs-Widerspruch'
-          : '🎮 Neuer Roblox-Widerspruch';
+      const title =
+        type === 'discord_ban'
+          ? '🔨 Neuer Entbannungsantrag'
+          : type === 'discord_warn'
+            ? '⚠️ Neuer Warnungs-Widerspruch'
+            : '🎮 Neuer Roblox-Widerspruch';
 
-      const detail = caseId ? `Fall: #${caseId}` : 'Kein Fall';
+      const detail = caseId
+        ? `Fall: #${caseId}`
+        : 'Kein Fall';
 
       const msgBody = {
-        content: `**${title}**\n\n**Antrag:** #${appealId}\n**Nutzer:** ${me.username} (${me.id})\n**${detail}**\n**Begründung:** ${reason}`.slice(0, 2000),
-        allowed_mentions: { parse: [] },
+        content:
+          `**${title}**\n\n` +
+          `**Antrag:** #${appealId}\n` +
+          `**Nutzer:** ${me.username} (${me.id})\n` +
+          `**${detail}**\n` +
+          `**Begründung:** ${reason}`.slice(0, 2000),
+
+        allowed_mentions: {
+          parse: []
+        },
+
         components: [
           {
             type: 1,
             components: [
-              { type: 2, style: 3, label: 'Annehmen', emoji: { name: '✅' }, custom_id: `webappeal:accept:${appealId}` },
-              { type: 2, style: 4, label: 'Ablehnen', emoji: { name: '❌' }, custom_id: `webappeal:reject:${appealId}` }
+              {
+                type: 2,
+                style: 3,
+                label: 'Annehmen',
+                emoji: { name: '✅' },
+                custom_id: `webappeal:accept:${appealId}`
+              },
+              {
+                type: 2,
+                style: 4,
+                label: 'Ablehnen',
+                emoji: { name: '❌' },
+                custom_id: `webappeal:reject:${appealId}`
+              }
             ]
           }
         ]
       };
 
-      const dr = await dapi(`/channels/${encodeURIComponent(APPEAL_CHANNEL)}/messages`, {
-        method: 'POST',
-        body: JSON.stringify(msgBody)
-      });
+      const dr = await dapi(
+        `/channels/${encodeURIComponent(APPEAL_CHANNEL)}/messages`,
+        {
+          method: 'POST',
+          body: JSON.stringify(msgBody)
+        }
+      );
 
       if (!dr.ok) {
-        console.error('Discord appeal message failed:', dr.status, dr.data);
-        return send(res, 502, { error: 'Der Antrag wurde gespeichert, konnte aber nicht nach Discord gesendet werden.' });
+        console.error(
+          'Discord appeal message failed:',
+          dr.status,
+          dr.data
+        );
+
+        return send(res, 502, {
+          error:
+            'Der Antrag wurde gespeichert, konnte aber nicht nach Discord gesendet werden.'
+        });
       }
 
       const patch = JSON.stringify({
@@ -916,26 +1048,40 @@ module.exports = async (req, res) => {
         discord_message_id: dr.data?.id || null
       });
 
-      let ur = await db(`appeals?id=eq.${encodeURIComponent(appealId)}`, {
-        method: 'PATCH',
-        headers: { Prefer: 'return=minimal' },
-        body: patch
-      });
-
-      if (!ur.ok) {
-        await db(`appeals?appeal_id=eq.${encodeURIComponent(appealId)}`, {
+      let ur = await db(
+        `appeals?id=eq.${encodeURIComponent(appealId)}`,
+        {
           method: 'PATCH',
           headers: { Prefer: 'return=minimal' },
           body: patch
-        });
+        }
+      );
+
+      if (!ur.ok) {
+        await db(
+          `appeals?appeal_id=eq.${encodeURIComponent(appealId)}`,
+          {
+            method: 'PATCH',
+            headers: { Prefer: 'return=minimal' },
+            body: patch
+          }
+        );
       }
 
-      return send(res, 200, { ok: true, appeal_id: appealId });
+      return send(res, 200, {
+        ok: true,
+        appeal_id: appealId
+      });
     }
 
-    return send(res, 404, { error: 'Nicht gefunden.' });
+    return send(res, 404, {
+      error: 'Nicht gefunden.'
+    });
+
   } catch (e) {
     console.error(e);
-    return send(res, 500, { error: 'Interner Fehler.' });
+    return send(res, 500, {
+      error: 'Interner Fehler.'
+    });
   }
 };
