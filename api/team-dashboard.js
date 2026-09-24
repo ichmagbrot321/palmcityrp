@@ -387,8 +387,6 @@ export default async function handler(req, res) {
 
   const action = url.searchParams.get("action") || "";
 
-  // OAuth darf unabhängig vom Bot-API-Key funktionieren.
-  // Die Bot-API wird erst bei geschützten Dashboard-Aktionen benötigt.
   if (action === "login") {
     if (!CLIENT_ID || !CLIENT_SECRET) {
       return json(res, 500, {
