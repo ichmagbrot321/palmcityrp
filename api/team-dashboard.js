@@ -1,7 +1,4 @@
-from pathlib import Path
-
-# Reconstruct the user's provided API file with the OAuth callback fix applied.
-text = r'''import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
 // ============================================================
 // KONFIGURATION
@@ -146,7 +143,7 @@ function login(req, res) {
     redirect_uri: OAUTH_REDIRECT_URI,
     scope: "identify",
     state,
-    prompt: "none",
+    prompt: "consent",
   });
 
   return redirect(
@@ -438,8 +435,3 @@ export default async function handler(req, res) {
 
   return proxy(req, res, url, action, session);
 }
-'''
-
-path = Path("/mnt/data/team-dashboard-fixed.txt")
-path.write_text(text, encoding="utf-8")
-print(path)
