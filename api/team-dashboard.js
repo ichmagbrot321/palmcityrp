@@ -1,30 +1,29 @@
-import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+from pathlib import Path
+
+# Reconstruct the user's provided API file with the OAuth callback fix applied.
+text = r'''import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
 // ============================================================
 // KONFIGURATION
-//   Client-ID und Client-Secret stehen bewusst direkt in dieser Datei
-//   (die Env-Variablen in Vercel gehören zu einem anderen Bot).
-//
-// Umgebungsvariablen in Vercel:
-//   DASHBOARD_API_KEY      derselbe geheime Key wie im Bot
-//   SESSION_SECRET         optional, sonst wird DASHBOARD_API_KEY genutzt
-//   TEAM_API_URL           optional, Standard: http://server.infynix.de:40002
-//   SITE_URL               optional, z. B. https://deine-domain.de
 // ============================================================
 
 const CLIENT_ID = "1547984607255994388";
-const CLIENT_SECRET = "gmsUUBCiRV_5q_OozQejmVV7wnwZ9Ihu";
+const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
 const API_KEY = process.env.DASHBOARD_API_KEY;
-// Sicherheit: Sitzungscookies dürfen NICHT mit demselben Geheimnis signiert
-// werden wie die Bot-API (DASHBOARD_API_KEY). Sonst reicht ein Leak dieses
-// einen Keys, um Sitzungen für beliebige Nutzer-IDs zu fälschen.
-// Ohne eigene SESSION_SECRET wird deshalb ein eigenständiger Schlüssel aus
-// dem API-Key ABGELEITET (HMAC mit fixem Kontext) statt ihn zu wiederholen.
-// Empfehlung trotzdem: SESSION_SECRET als eigene Vercel-Env-Variable setzen.
+
 const SESSION_SECRET =
   process.env.SESSION_SECRET ||
-  createHmac("sha256", API_KEY).update("td-session-v1").digest("hex");
-const BOT_API_URL = (process.env.TEAM_API_URL || "http://server.infynix.de:40002").replace(/\/$/, "");
+  (API_KEY
+    ? createHmac("sha256", API_KEY).update("td-session-v1").digest("hex")
+    : "");
+
+const BOT_API_URL = (
+  process.env.TEAM_API_URL || "http://server.infynix.de:40002"
+).replace(/\/$/, "");
+
+const SITE_URL = "https://palmcityrp.vercel.app";
+const OAUTH_REDIRECT_URI =
+  "https://palmcityrp.vercel.app/api/team-dashboard?action=callback";
 
 const DASHBOARD_PATH = "/team-dashboard";
 const SESSION_COOKIE = "td_session";
@@ -60,7 +59,9 @@ const ROUTES = {
 // ============================================================
 
 function json(res, status, body) {
-  res.status(status).setHeader("Content-Type", "application/json; charset=utf-8");
+  res
+    .status(status)
+    .setHeader("Content-Type", "application/json; charset=utf-8");
   res.send(JSON.stringify(body));
 }
 
@@ -70,28 +71,28 @@ function redirect(res, location, cookies = []) {
   res.end();
 }
 
-function siteOrigin(req) {
-  if (process.env.SITE_URL) return process.env.SITE_URL.replace(/\/$/, "");
-  const proto = req.headers["x-forwarded-proto"] || "https";
-  return `${proto}://${req.headers.host}`;
-}
-
 function cookie(name, value, maxAge) {
   return `${name}=${value}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`;
 }
 
 function parseCookies(header = "") {
   const out = {};
+
   for (const part of header.split(";")) {
     const index = part.indexOf("=");
+
     if (index === -1) continue;
+
     out[part.slice(0, index).trim()] = part.slice(index + 1).trim();
   }
+
   return out;
 }
 
 function sign(value) {
-  return createHmac("sha256", SESSION_SECRET).update(value).digest("base64url");
+  return createHmac("sha256", SESSION_SECRET)
+    .update(value)
+    .digest("base64url");
 }
 
 function makeToken(payload) {
@@ -106,11 +107,22 @@ function readToken(token) {
   const expected = Buffer.from(sign(body));
   const given = Buffer.from(signature || "");
 
-  if (given.length !== expected.length || !timingSafeEqual(given, expected)) return null;
+  if (
+    given.length !== expected.length ||
+    !timingSafeEqual(given, expected)
+  ) {
+    return null;
+  }
 
   try {
-    const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8"));
-    if (!payload.exp || payload.exp < Date.now() / 1000) return null;
+    const payload = JSON.parse(
+      Buffer.from(body, "base64url").toString("utf8")
+    );
+
+    if (!payload.exp || payload.exp < Date.now() / 1000) {
+      return null;
+    }
+
     return payload;
   } catch {
     return null;
@@ -131,13 +143,17 @@ function login(req, res) {
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
     response_type: "code",
-    redirect_uri: `${siteOrigin(req)}/api/team-dashboard?action=callback`,
+    redirect_uri: OAUTH_REDIRECT_URI,
     scope: "identify",
     state,
     prompt: "none",
   });
 
-  redirect(res, `https://discord.com/oauth2/authorize?${params}`, [cookie(OAUTH_COOKIE, state, 600)]);
+  return redirect(
+    res,
+    `https://discord.com/oauth2/authorize?${params}`,
+    [cookie(OAUTH_COOKIE, state, 600)]
+  );
 }
 
 async function callback(req, res, url) {
@@ -147,37 +163,65 @@ async function callback(req, res, url) {
   const clearOauth = cookie(OAUTH_COOKIE, "", 0);
 
   if (!code || !state || !savedState || state !== savedState) {
-    return redirect(res, `${DASHBOARD_PATH}?error=login`, [clearOauth]);
+    return redirect(
+      res,
+      `${DASHBOARD_PATH}?error=login`,
+      [clearOauth]
+    );
   }
 
   try {
-    const tokenResponse = await fetch("https://discord.com/api/oauth2/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        client_id: CLIENT_ID,
-        client_secret: CLIENT_SECRET,
-        grant_type: "authorization_code",
-        code,
-        redirect_uri: `${siteOrigin(req)}/api/team-dashboard?action=callback`,
-      }),
-    });
+    const tokenResponse = await fetch(
+      "https://discord.com/api/oauth2/token",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          client_id: CLIENT_ID,
+          client_secret: CLIENT_SECRET,
+          grant_type: "authorization_code",
+          code,
+          redirect_uri: OAUTH_REDIRECT_URI,
+        }),
+      }
+    );
 
-    if (!tokenResponse.ok) throw new Error("token");
+    if (!tokenResponse.ok) {
+      const errorText = await tokenResponse.text().catch(() => "");
+
+      console.error(
+        "Discord OAuth Token Fehler:",
+        tokenResponse.status,
+        errorText
+      );
+
+      throw new Error("token");
+    }
 
     const { access_token: accessToken } = await tokenResponse.json();
 
-    const userResponse = await fetch("https://discord.com/api/users/@me", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
+    const userResponse = await fetch(
+      "https://discord.com/api/users/@me",
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
 
-    if (!userResponse.ok) throw new Error("user");
+    if (!userResponse.ok) {
+      throw new Error("user");
+    }
 
     const user = await userResponse.json();
 
     const avatar = user.avatar
       ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64`
-      : `https://cdn.discordapp.com/embed/avatars/${Number((BigInt(user.id) >> 22n) % 6n)}.png`;
+      : `https://cdn.discordapp.com/embed/avatars/${Number(
+          (BigInt(user.id) >> 22n) % 6n
+        )}.png`;
 
     const token = makeToken({
       id: String(user.id),
@@ -186,9 +230,22 @@ async function callback(req, res, url) {
       exp: Math.floor(Date.now() / 1000) + SESSION_TTL,
     });
 
-    redirect(res, DASHBOARD_PATH, [cookie(SESSION_COOKIE, token, SESSION_TTL), clearOauth]);
-  } catch {
-    redirect(res, `${DASHBOARD_PATH}?error=login`, [clearOauth]);
+    return redirect(
+      res,
+      DASHBOARD_PATH,
+      [
+        cookie(SESSION_COOKIE, token, SESSION_TTL),
+        clearOauth,
+      ]
+    );
+  } catch (error) {
+    console.error("Discord Login Fehler:", error);
+
+    return redirect(
+      res,
+      `${DASHBOARD_PATH}?error=login`,
+      [clearOauth]
+    );
   }
 }
 
@@ -200,7 +257,11 @@ async function proxy(req, res, url, action, session) {
   const [method, path] = ROUTES[action];
 
   if (req.method !== method) {
-    return json(res, 405, { ok: false, error: "Methode nicht erlaubt.", code: "method" });
+    return json(res, 405, {
+      ok: false,
+      error: "Methode nicht erlaubt.",
+      code: "method",
+    });
   }
 
   let body;
@@ -215,27 +276,35 @@ async function proxy(req, res, url, action, session) {
       originHost = null;
     }
 
-    // Sicherheit: fehlender oder ungueltiger Origin-Header wird abgelehnt
-    // (fail-closed), nicht durchgelassen. Browser senden bei
-    // Cross-Site-Requests mit Cookies immer einen Origin-Header; wenn er
-    // fehlt, ist die Anfrage verdaechtig und wird geblockt.
     if (originHost !== req.headers.host) {
-      return json(res, 403, { ok: false, error: "Ungültige Herkunft.", code: "origin" });
+      return json(res, 403, {
+        ok: false,
+        error: "Ungültige Herkunft.",
+        code: "origin",
+      });
     }
 
-    body = typeof req.body === "string" ? req.body : JSON.stringify(req.body ?? {});
+    body =
+      typeof req.body === "string"
+        ? req.body
+        : JSON.stringify(req.body ?? {});
   }
 
   const target = new URL(BOT_API_URL + path);
 
   if (method === "GET") {
     for (const [key, value] of url.searchParams) {
-      if (key !== "action") target.searchParams.set(key, value);
+      if (key !== "action") {
+        target.searchParams.set(key, value);
+      }
     }
   }
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), BOT_TIMEOUT_MS);
+  const timer = setTimeout(
+    () => controller.abort(),
+    BOT_TIMEOUT_MS
+  );
 
   try {
     const upstream = await fetch(target, {
@@ -252,6 +321,7 @@ async function proxy(req, res, url, action, session) {
     const text = await upstream.text();
 
     let data = null;
+
     try {
       data = JSON.parse(text);
     } catch {
@@ -261,26 +331,34 @@ async function proxy(req, res, url, action, session) {
     if (upstream.status === 401) {
       return json(res, 502, {
         ok: false,
-        error: "Der API-Key von Vercel und Bot stimmt nicht überein.",
+        error:
+          "Der API-Key von Vercel und Bot stimmt nicht überein.",
         code: "bad_key",
       });
     }
 
     if (!data) {
-      return json(res, 502, { ok: false, error: "Ungültige Antwort vom Bot.", code: "bad_response" });
+      return json(res, 502, {
+        ok: false,
+        error: "Ungültige Antwort vom Bot.",
+        code: "bad_response",
+      });
     }
 
-    json(res, upstream.status, data);
+    return json(res, upstream.status, data);
   } catch (error) {
     if (error && error.name === "AbortError") {
       return json(res, 504, {
         ok: false,
-        error: "Der Bot hat zu lange gebraucht. Die Aktion wurde eventuell trotzdem ausgeführt, bitte Seite neu laden.",
+        error:
+          "Der Bot hat zu lange gebraucht. Die Aktion wurde eventuell trotzdem ausgeführt, bitte Seite neu laden.",
         code: "bot_timeout",
       });
     }
 
-    json(res, 502, {
+    console.error("Bot API Fehler:", error);
+
+    return json(res, 502, {
       ok: false,
       error: "Der Bot ist nicht erreichbar.",
       code: "bot_offline",
@@ -297,40 +375,71 @@ async function proxy(req, res, url, action, session) {
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
 
-  const url = new URL(req.url, `https://${req.headers.host}`);
+  const url = new URL(
+    req.url,
+    `https://${req.headers.host}`
+  );
+
   const action = url.searchParams.get("action") || "";
 
   if (!CLIENT_ID || !CLIENT_SECRET || !API_KEY) {
     return json(res, 500, {
       ok: false,
-      error: "Vercel ist nicht vollständig konfiguriert (DASHBOARD_API_KEY fehlt).",
+      error:
+        "Vercel ist nicht vollständig konfiguriert. Bitte DISCORD_CLIENT_SECRET und DASHBOARD_API_KEY prüfen.",
       code: "config",
     });
   }
 
-  if (action === "login") return login(req, res);
-  if (action === "callback") return callback(req, res, url);
+  if (action === "login") {
+    return login(req, res);
+  }
+
+  if (action === "callback") {
+    return callback(req, res, url);
+  }
 
   if (action === "logout") {
-    return redirect(res, DASHBOARD_PATH, [cookie(SESSION_COOKIE, "", 0)]);
+    return redirect(
+      res,
+      DASHBOARD_PATH,
+      [cookie(SESSION_COOKIE, "", 0)]
+    );
   }
 
   const session = getSession(req);
 
   if (!session) {
-    return json(res, 401, { ok: false, error: "Nicht angemeldet.", code: "no_session" });
+    return json(res, 401, {
+      ok: false,
+      error: "Nicht angemeldet.",
+      code: "no_session",
+    });
   }
 
   if (action === "me") {
     return json(res, 200, {
       ok: true,
-      user: { id: session.id, name: session.name, avatar: session.avatar },
+      user: {
+        id: session.id,
+        name: session.name,
+        avatar: session.avatar,
+      },
     });
   }
 
   if (!ROUTES[action]) {
-    return json(res, 404, { ok: false, error: "Unbekannte Aktion.", code: "not_found" });
+    return json(res, 404, {
+      ok: false,
+      error: "Unbekannte Aktion.",
+      code: "not_found",
+    });
   }
 
   return proxy(req, res, url, action, session);
 }
+'''
+
+path = Path("/mnt/data/team-dashboard-fixed.txt")
+path.write_text(text, encoding="utf-8")
+print(path)
