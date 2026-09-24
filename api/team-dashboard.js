@@ -14,9 +14,22 @@ const SESSION_SECRET =
     ? createHmac("sha256", API_KEY).update("td-session-v1").digest("hex")
     : "");
 
-const BOT_API_URL = (
+// Bot-URL absichern: Leerzeichen entfernen, "http://" ergänzen falls es fehlt,
+// abschließende Schrägstriche entfernen. Eine kaputte URL ließ die Funktion
+// vorher komplett abstürzen (FUNCTION_INVOCATION_FAILED).
+function normalizeBotUrl(raw) {
+  let value = String(raw || "").trim().replace(/\/+$/, "");
+
+  if (value && !/^https?:\/\//i.test(value)) {
+    value = "http://" + value;
+  }
+
+  return value;
+}
+
+const BOT_API_URL = normalizeBotUrl(
   process.env.TEAM_API_URL || "http://server.infynix.de:40002"
-).replace(/\/$/, "");
+);
 
 const SITE_URL = "https://palmcityrp.vercel.app";
 const OAUTH_REDIRECT_URI =
@@ -259,6 +272,14 @@ async function proxy(req, res, url, action, session) {
     });
   }
 
+  if (!BOT_API_URL) {
+    return json(res, 500, {
+      ok: false,
+      error: "TEAM_API_URL ist in Vercel leer oder ungültig.",
+      code: "bot_url_config",
+    });
+  }
+
   const [method, path] = ROUTES[action];
 
   if (req.method !== method) {
@@ -295,16 +316,6 @@ async function proxy(req, res, url, action, session) {
         : JSON.stringify(req.body ?? {});
   }
 
-  const target = new URL(BOT_API_URL + path);
-
-  if (method === "GET") {
-    for (const [key, value] of url.searchParams) {
-      if (key !== "action") {
-        target.searchParams.set(key, value);
-      }
-    }
-  }
-
   const controller = new AbortController();
   const timer = setTimeout(
     () => controller.abort(),
@@ -312,6 +323,29 @@ async function proxy(req, res, url, action, session) {
   );
 
   try {
+    // Die Ziel-URL wird jetzt INNERHALB des try gebaut. Eine kaputte
+    // TEAM_API_URL wirft hier "Invalid URL" und wird sauber gemeldet,
+    // statt die ganze Vercel-Funktion abstürzen zu lassen.
+    let target;
+
+    try {
+      target = new URL(BOT_API_URL + path);
+    } catch {
+      return json(res, 500, {
+        ok: false,
+        error: "TEAM_API_URL in Vercel ist keine gültige Adresse (z. B. http://server.infynix.de:40002).",
+        code: "bot_url_config",
+      });
+    }
+
+    if (method === "GET") {
+      for (const [key, value] of url.searchParams) {
+        if (key !== "action") {
+          target.searchParams.set(key, value);
+        }
+      }
+    }
+
     const upstream = await fetch(target, {
       method,
       headers: {
@@ -377,7 +411,7 @@ async function proxy(req, res, url, action, session) {
 // HANDLER
 // ============================================================
 
-export default async function handler(req, res) {
+async function handle(req, res) {
   res.setHeader("Cache-Control", "no-store");
 
   const url = new URL(
@@ -447,4 +481,35 @@ export default async function handler(req, res) {
   }
 
   return proxy(req, res, url, action, session);
+}
+
+// Sicherheitsnetz: Jeder unerwartete Fehler wird ins Vercel-Log geschrieben
+// und als normale JSON-Antwort zurückgegeben (statt FUNCTION_INVOCATION_FAILED).
+// Der genaue Fehlertext wird nur angemeldeten Nutzern angezeigt.
+export default async function handler(req, res) {
+  try {
+    return await handle(req, res);
+  } catch (error) {
+    console.error("Dashboard Handler Fehler:", error);
+
+    if (res.headersSent) {
+      return;
+    }
+
+    let detail = "";
+
+    try {
+      if (getSession(req)) {
+        detail = ` (${error && error.message ? error.message : String(error)})`;
+      }
+    } catch {
+      detail = "";
+    }
+
+    return json(res, 500, {
+      ok: false,
+      error: `Interner Fehler im Dashboard-Server${detail}`,
+      code: "server_error",
+    });
+  }
 }
