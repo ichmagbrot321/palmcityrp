@@ -379,7 +379,7 @@ async function proxy(req, res, url, action, session) {
     if (!data) {
       return json(res, 502, {
         ok: false,
-        error: "Ungültige Antwort vom Bot.",
+        error: `Ungültige Antwort vom Bot. (HTTP ${upstream.status})`,
         code: "bad_response",
       });
     }
@@ -397,9 +397,16 @@ async function proxy(req, res, url, action, session) {
 
     console.error("Bot API Fehler:", error);
 
+    // Kurzer technischer Grund (z. B. ECONNREFUSED, ENOTFOUND, ETIMEDOUT),
+    // damit man sofort sieht, warum die Verbindung scheitert.
+    const reason =
+      (error && error.cause && error.cause.code) ||
+      (error && error.name) ||
+      "unbekannt";
+
     return json(res, 502, {
       ok: false,
-      error: "Der Bot ist nicht erreichbar.",
+      error: `Der Bot ist nicht erreichbar. (Grund: ${reason})`,
       code: "bot_offline",
     });
   } finally {
