@@ -251,6 +251,14 @@ async function callback(req, res, url) {
 // ============================================================
 
 async function proxy(req, res, url, action, session) {
+  if (!API_KEY) {
+    return json(res, 500, {
+      ok: false,
+      error: "DASHBOARD_API_KEY ist in Vercel nicht gesetzt.",
+      code: "api_key_config",
+    });
+  }
+
   const [method, path] = ROUTES[action];
 
   if (req.method !== method) {
@@ -379,20 +387,27 @@ export default async function handler(req, res) {
 
   const action = url.searchParams.get("action") || "";
 
-  if (!CLIENT_ID || !CLIENT_SECRET || !API_KEY) {
-    return json(res, 500, {
-      ok: false,
-      error:
-        "Vercel ist nicht vollständig konfiguriert. Bitte DISCORD_CLIENT_SECRET und DASHBOARD_API_KEY prüfen.",
-      code: "config",
-    });
-  }
-
+  // OAuth darf unabhängig vom Bot-API-Key funktionieren.
+  // Die Bot-API wird erst bei geschützten Dashboard-Aktionen benötigt.
   if (action === "login") {
+    if (!CLIENT_ID || !CLIENT_SECRET) {
+      return json(res, 500, {
+        ok: false,
+        error: "Discord OAuth ist nicht vollständig konfiguriert. DISCORD_CLIENT_SECRET fehlt.",
+        code: "oauth_config",
+      });
+    }
     return login(req, res);
   }
 
   if (action === "callback") {
+    if (!CLIENT_ID || !CLIENT_SECRET || !SESSION_SECRET) {
+      return json(res, 500, {
+        ok: false,
+        error: "Discord OAuth ist nicht vollständig konfiguriert. DISCORD_CLIENT_SECRET oder SESSION_SECRET fehlt.",
+        code: "oauth_config",
+      });
+    }
     return callback(req, res, url);
   }
 
