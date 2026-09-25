@@ -1223,6 +1223,294 @@ main > section:not([hidden]) {
   * { transition:none !important; }
 }
 </style>
+<style>
+/* ============================================================
+   DESIGN SYSTEM · PRO UI / UI MAKER PASS
+   ============================================================ */
+:root {
+  --accent-blue: #4d9dff;
+  --accent-cyan: #39d6ff;
+  --accent-violet: #9a7bff;
+  --accent-pink: #ff6bb5;
+  --accent-amber: #ffbd66;
+  --accent-green: #45e0ae;
+  --accent-red: #ff6078;
+  --surface-0: #03060d;
+  --surface-1: #070c17;
+  --surface-2: #0b1324;
+  --surface-3: #101b31;
+}
+
+body {
+  background:
+    radial-gradient(75% 55% at 6% -10%, rgba(57,214,255,.08), transparent 60%),
+    radial-gradient(55% 50% at 92% 8%, rgba(154,123,255,.10), transparent 62%),
+    radial-gradient(55% 45% at 70% 100%, rgba(255,107,181,.07), transparent 66%),
+    var(--bg);
+}
+
+body::before {
+  background:
+    radial-gradient(32% 26% at 8% 12%, rgba(57,214,255,.13), transparent 72%),
+    radial-gradient(34% 30% at 96% 16%, rgba(154,123,255,.14), transparent 72%),
+    radial-gradient(28% 24% at 78% 88%, rgba(255,107,181,.10), transparent 72%),
+    radial-gradient(22% 20% at 28% 90%, rgba(69,224,174,.07), transparent 70%);
+}
+
+.side {
+  background:
+    linear-gradient(180deg, rgba(7,13,28,.96), rgba(4,8,18,.98)),
+    radial-gradient(circle at 0% 0%, rgba(57,214,255,.08), transparent 44%);
+  border-right-color: rgba(120,170,255,.12);
+  box-shadow: 18px 0 60px rgba(0,0,0,.18);
+}
+.side::before {
+  opacity: .8;
+  background: linear-gradient(90deg, rgba(77,157,255,.08), transparent 50%, rgba(154,123,255,.04));
+}
+.side-brand .logo {
+  box-shadow: 0 0 0 1px rgba(77,157,255,.48), 0 8px 24px rgba(77,157,255,.18), 0 0 44px rgba(57,214,255,.10);
+}
+.tab-section-label {
+  color: #64779a;
+  font-size: 9px;
+  letter-spacing: .18em;
+  font-weight: 850;
+}
+.tab {
+  position: relative;
+  border: 1px solid transparent;
+  color: #8492ab;
+  background: transparent;
+  transition: transform .18s var(--motion-ease), background .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease;
+}
+.tab:hover {
+  color: #dbe8ff;
+  border-color: rgba(120,170,255,.08);
+  background: linear-gradient(90deg, rgba(77,157,255,.07), rgba(154,123,255,.035));
+}
+.tab[aria-selected="true"] {
+  color: #f4f8ff;
+  border-color: rgba(120,170,255,.14);
+  background: linear-gradient(100deg, rgba(77,157,255,.14), rgba(154,123,255,.07));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.02), 0 8px 24px rgba(0,0,0,.12);
+}
+.tab[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  inset: 7px auto 7px 0;
+  width: 2px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--accent-cyan), var(--accent-violet));
+  box-shadow: 0 0 16px rgba(77,157,255,.42);
+}
+.tab[data-tab="applications"][aria-selected="true"] .ico { color: var(--accent-violet); }
+.tab[data-tab="feedback"][aria-selected="true"] .ico { color: var(--accent-pink); }
+.tab[data-tab="absences"][aria-selected="true"] .ico { color: var(--accent-amber); }
+.tab[data-tab="complaints"][aria-selected="true"] .ico { color: var(--accent-red); }
+.tab[data-tab="activity"][aria-selected="true"] .ico { color: var(--accent-cyan); }
+.tab[data-tab="team"][aria-selected="true"] .ico { color: var(--accent-green); }
+.tab[data-tab="history"][aria-selected="true"] .ico { color: var(--accent-blue); }
+
+.top {
+  background:
+    linear-gradient(180deg, rgba(3,7,15,.95), rgba(3,7,15,.80), transparent),
+    radial-gradient(42% 160% at 88% 0%, rgba(154,123,255,.06), transparent 74%);
+  border-bottom: 1px solid rgba(120,170,255,.055);
+}
+.top h1 {
+  background: linear-gradient(90deg, #f5f8ff 0%, #b9d5ff 55%, #d2c6ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.top p { color: #7a89a4; }
+
+.stat {
+  border-color: rgba(120,170,255,.11);
+  background:
+    linear-gradient(145deg, rgba(12,22,42,.96), rgba(5,10,20,.92)),
+    radial-gradient(circle at 100% 0%, rgba(57,214,255,.08), transparent 48%);
+}
+.stat:nth-child(2) { background: linear-gradient(145deg, rgba(17,16,38,.96), rgba(8,8,21,.92)); }
+.stat:nth-child(3) { background: linear-gradient(145deg, rgba(27,16,31,.94), rgba(10,7,16,.92)); }
+.stat:hover { box-shadow: 0 24px 60px rgba(0,0,0,.24), 0 0 0 1px rgba(77,157,255,.045); }
+
+.row, .hero, .card {
+  border-color: rgba(120,170,255,.105);
+  background: linear-gradient(145deg, rgba(10,18,35,.94), rgba(5,10,20,.92));
+}
+.row:hover, .card:hover {
+  border-color: rgba(120,170,255,.18);
+}
+.badge.info { color: #8bdcff; border-color: rgba(57,214,255,.19); background: rgba(57,214,255,.08); }
+.badge.ok { color: #9cf0cf; border-color: rgba(69,224,174,.19); background: rgba(69,224,174,.08); }
+.badge.warn { color: #ffd29c; border-color: rgba(255,189,102,.20); background: rgba(255,189,102,.08); }
+.badge.bad { color: #ff9cac; border-color: rgba(255,96,120,.20); background: rgba(255,96,120,.08); }
+
+.btn.primary { background: linear-gradient(135deg, #4599ff, #6d72ff); border-color: rgba(153,198,255,.58); }
+.btn.primary:hover:not(:disabled) { background: linear-gradient(135deg, #5aa5ff, #7e82ff); }
+.btn.danger { color: #ff9cad; border-color: rgba(255,96,120,.22); background: linear-gradient(135deg, rgba(255,96,120,.11), rgba(170,44,73,.07)); }
+.btn.ghost:hover:not(:disabled) { background: rgba(154,123,255,.08); border-color: rgba(154,123,255,.19); }
+
+/* Bewerbungs-Center */
+#p-applications { --app-accent: #7f8cff; }
+.applications-hero {
+  position: relative;
+  overflow: hidden;
+  grid-template-columns: minmax(0,1fr) minmax(310px, 430px);
+  gap: 28px;
+  padding: 28px;
+  border: 1px solid rgba(127,140,255,.20);
+  border-radius: 24px;
+  background:
+    radial-gradient(44% 150% at 100% 0%, rgba(154,123,255,.17), transparent 76%),
+    radial-gradient(34% 120% at 0% 100%, rgba(57,214,255,.09), transparent 75%),
+    linear-gradient(145deg, rgba(14,24,48,.97), rgba(5,10,21,.96));
+  box-shadow: 0 28px 80px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.028);
+}
+.applications-hero::before {
+  content: "";
+  position: absolute;
+  width: 320px; height: 320px; right: -120px; top: -190px;
+  border-radius: 50%;
+  border: 1px solid rgba(154,123,255,.16);
+  box-shadow: 0 0 0 26px rgba(154,123,255,.025), 0 0 0 62px rgba(154,123,255,.015);
+  pointer-events: none;
+}
+.applications-hero-copy, .application-stats { position: relative; z-index: 1; }
+.applications-hero .hero-kicker { color: #8297be; letter-spacing: .2em; }
+.applications-hero-title { display:flex; align-items:flex-start; gap:14px; margin-top: 8px; }
+.applications-status-mark { width: 14px; height:14px; flex: none; margin-top: 9px; border-radius:50%; display:grid; place-items:center; }
+.applications-status-mark span { width:8px; height:8px; border-radius:50%; display:block; }
+.applications-status-mark.online { background: rgba(69,224,174,.14); box-shadow: 0 0 0 5px rgba(69,224,174,.05), 0 0 22px rgba(69,224,174,.17); }
+.applications-status-mark.online span { background:#45e0ae; }
+.applications-status-mark.offline { background: rgba(255,96,120,.14); box-shadow: 0 0 0 5px rgba(255,96,120,.05); }
+.applications-status-mark.offline span { background:#ff6078; }
+.applications-hero h2 { font-size: 30px; letter-spacing: -.045em; }
+.applications-hero p { color:#8b9ab7; font-size:12.5px; max-width:760px; }
+.hero-actions { margin-top: 18px; }
+.application-stats { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:11px; }
+.application-stat { min-width:0; position:relative; padding:15px 16px; border-radius:16px; overflow:hidden; border-color:rgba(126,155,211,.12); background:rgba(255,255,255,.028); backdrop-filter: blur(10px); }
+.application-stat::before { content:""; position:absolute; inset:0 auto 0 0; width:3px; border-radius:999px; background:var(--accent-blue); }
+.application-stat b { font-size:24px; }
+.application-stat span { color:#8291ab; font-size:9.5px; letter-spacing:.12em; }
+.application-stat.stat-open::before { background:var(--accent-cyan); box-shadow:0 0 14px rgba(57,214,255,.45); }
+.application-stat.stat-accepted::before { background:var(--accent-green); box-shadow:0 0 14px rgba(69,224,174,.40); }
+.application-stat.stat-rejected::before { background:var(--accent-red); box-shadow:0 0 14px rgba(255,96,120,.40); }
+.application-stat.stat-closed::before { background:var(--accent-violet); box-shadow:0 0 14px rgba(154,123,255,.35); }
+
+.applications-workspace { margin:18px 0 15px; }
+.application-toolbar {
+  display:grid; grid-template-columns:minmax(0,1fr) minmax(420px, 1.15fr); gap:20px; align-items:end;
+  padding:20px; border:1px solid rgba(120,170,255,.10); border-radius:20px;
+  background:linear-gradient(145deg, rgba(10,18,35,.80), rgba(5,10,20,.84));
+}
+.application-toolbar-kicker { color:#7286ad; font-size:9px; text-transform:uppercase; letter-spacing:.18em; font-weight:850; }
+.application-toolbar-heading h3 { margin:5px 0 5px; font-size:17px; letter-spacing:-.025em; }
+.application-toolbar-heading p { margin:0; color:#72819d; font-size:11.5px; max-width:600px; }
+.application-toolbar-controls { display:grid; grid-template-columns:minmax(0,1fr) 180px; gap:9px; }
+.application-search { position:relative; display:flex; align-items:center; }
+.application-search > .ico { position:absolute; left:14px; color:#7e9ac8; z-index:1; }
+.application-search input { width:100%; min-height:46px; padding:11px 13px 11px 42px; border:1px solid rgba(120,170,255,.11); border-radius:14px; background:rgba(3,8,17,.72); }
+.application-toolbar-controls select { min-height:46px; }
+.application-filter-bar { display:flex; flex-wrap:wrap; gap:8px; margin-top:11px; }
+.application-filter {
+  display:inline-flex; align-items:center; gap:8px; min-height:37px; padding:8px 12px; border:1px solid rgba(126,155,211,.10); border-radius:999px;
+  background:rgba(255,255,255,.025); color:#8292ac; cursor:pointer; font-size:11px; font-weight:750;
+  transition: transform .16s var(--motion-ease), background .16s ease, border-color .16s ease, color .16s ease, box-shadow .16s ease;
+}
+.application-filter:hover { transform:translateY(-1px); color:#eaf2ff; border-color:rgba(120,170,255,.18); }
+.application-filter.active { color:#eef5ff; background:linear-gradient(135deg, rgba(77,157,255,.12), rgba(154,123,255,.10)); border-color:rgba(120,170,255,.24); box-shadow:0 8px 22px rgba(0,0,0,.13), inset 0 1px 0 rgba(255,255,255,.03); }
+.application-filter-dot { width:7px; height:7px; border-radius:50%; background:#6f7f99; box-shadow:0 0 8px rgba(120,170,255,.16); }
+.application-filter:nth-child(2) .application-filter-dot { background:var(--accent-cyan); }
+.application-filter:nth-child(3) .application-filter-dot { background:var(--accent-violet); }
+.application-filter:nth-child(4) .application-filter-dot { background:var(--accent-green); }
+.application-filter:nth-child(5) .application-filter-dot { background:var(--accent-red); }
+.application-filter-count { padding-left:2px; color:#dbe7fa; opacity:.72; }
+.application-list-meta { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:12px 2px 10px; }
+.application-result-note { display:flex; align-items:center; gap:8px; color:#72819d; font-size:10.5px; }
+.application-result-dot { width:6px; height:6px; border-radius:50%; background:var(--accent-cyan); box-shadow:0 0 10px rgba(57,214,255,.42); }
+.application-filter-context { padding:6px 10px; border-radius:999px; border:1px solid rgba(126,155,211,.10); background:rgba(255,255,255,.025); color:#8ea1bf; font-size:10px; font-weight:800; }
+
+#p-applications .application-row { padding:0; border-left:0; overflow:hidden; position:relative; background:linear-gradient(145deg, rgba(10,18,35,.95), rgba(5,10,20,.93)); }
+#p-applications .application-row::before { content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--accent-violet); opacity:.92; box-shadow:0 0 16px rgba(154,123,255,.30); }
+#p-applications .application-row.is-open::before { background:linear-gradient(180deg, var(--accent-cyan), var(--accent-blue)); box-shadow:0 0 18px rgba(57,214,255,.28); }
+#p-applications .application-row.is-closed::before { background:linear-gradient(180deg, var(--accent-violet), #59627f); box-shadow:none; }
+#p-applications .application-summary { padding:17px 18px 17px 21px; }
+#p-applications .application-main { gap:13px; }
+#p-applications .application-main img { width:48px; height:48px; }
+#p-applications .application-summary-right { display:flex; align-items:center; gap:12px; }
+.application-date { color:#667693; font-size:10px; white-space:nowrap; }
+.application-row.open .application-date { color:#89a0c4; }
+#p-applications .application-row .open-app { min-width:92px; }
+#p-applications .application-expand { display:inline-block; transition:transform .2s var(--motion-ease); }
+#p-applications .application-row.open .application-expand { transform:rotate(180deg); }
+#p-applications .application-details { grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; padding:16px 18px 18px 21px; background:rgba(2,6,13,.24); border-top:1px solid rgba(126,155,211,.08); }
+#p-applications .application-detail-card { position:relative; min-height:90px; padding:14px; border-radius:15px; border-color:rgba(126,155,211,.08); background:linear-gradient(145deg, rgba(255,255,255,.026), rgba(255,255,255,.012)); overflow:hidden; }
+#p-applications .application-detail-card::after { content:""; position:absolute; right:-36px; top:-42px; width:100px; height:100px; border-radius:50%; opacity:.08; background:currentColor; pointer-events:none; }
+#p-applications .application-detail-card.full { grid-column:1/-1; }
+#p-applications .application-detail-card.accent-blue { color:var(--accent-blue); }
+#p-applications .application-detail-card.accent-cyan { color:var(--accent-cyan); }
+#p-applications .application-detail-card.accent-violet { color:var(--accent-violet); }
+#p-applications .application-detail-card.accent-amber { color:var(--accent-amber); }
+#p-applications .application-detail-card.accent-green { color:var(--accent-green); }
+#p-applications .application-detail-card.accent-pink { color:var(--accent-pink); }
+#p-applications .application-detail-card.accent-red { color:var(--accent-red); }
+#p-applications .application-detail-label { color:#70809d; }
+#p-applications .application-detail-text { color:#e1e8f6; }
+.application-action-card { min-height:0 !important; }
+.application-actions { margin-top:0; }
+.application-actions .success-app { color:#a6efd4; background:linear-gradient(135deg, rgba(69,224,174,.12), rgba(27,131,103,.09)); border-color:rgba(69,224,174,.20); }
+.application-actions .success-app:hover:not(:disabled) { background:linear-gradient(135deg, rgba(69,224,174,.19), rgba(27,131,103,.12)); border-color:rgba(69,224,174,.34); }
+.application-actions .danger-app { color:#ff9cab; background:linear-gradient(135deg, rgba(255,96,120,.10), rgba(156,35,63,.08)); border-color:rgba(255,96,120,.19); }
+.application-actions .danger-app:hover:not(:disabled) { background:linear-gradient(135deg, rgba(255,96,120,.17), rgba(156,35,63,.12)); border-color:rgba(255,96,120,.32); }
+.application-readonly, .application-closed-note { display:inline-flex; align-items:center; gap:7px; color:#74829a; font-size:11px; }
+.application-closed-note .ico { color:var(--accent-violet); }
+.application-confirm { display:flex; gap:12px; align-items:flex-start; padding:13px; border:1px solid rgba(126,155,211,.08); border-radius:15px; background:rgba(255,255,255,.022); }
+.application-confirm-icon { width:38px; height:38px; flex:none; display:grid; place-items:center; border-radius:12px; }
+.application-confirm-icon.is-success { color:var(--accent-green); background:rgba(69,224,174,.10); border:1px solid rgba(69,224,174,.16); }
+.application-confirm-icon.is-danger { color:var(--accent-red); background:rgba(255,96,120,.10); border:1px solid rgba(255,96,120,.16); }
+.application-empty { display:grid; place-items:center; gap:8px; text-align:center; }
+.application-empty .empty-icon { width:44px; height:44px; display:grid; place-items:center; border-radius:14px; color:#7f8cff; background:rgba(127,140,255,.08); border:1px solid rgba(127,140,255,.12); }
+.application-empty strong { font-size:14px; }
+.application-empty span { max-width:520px; color:#75839d; font-size:11.5px; }
+
+/* Sonstige Bereiche stärker differenzieren */
+#p-team .row::before { background:linear-gradient(180deg, var(--accent-green), var(--accent-cyan)); }
+#p-users .row::before { background:linear-gradient(180deg, var(--accent-blue), var(--accent-violet)); }
+#p-absences .row::before { background:linear-gradient(180deg, var(--accent-amber), #ff8b5d); }
+#p-complaints .row::before { background:linear-gradient(180deg, var(--accent-red), var(--accent-pink)); }
+#p-feedback .feedback-staff-row { border:1px solid rgba(126,155,211,.10); }
+#p-history .row::before { background:linear-gradient(180deg, var(--accent-blue), var(--accent-cyan)); }
+#p-support .row::before { background:linear-gradient(180deg, var(--accent-cyan), var(--accent-blue)); }
+
+@media (max-width: 1020px) {
+  .applications-hero { grid-template-columns:1fr; }
+  .application-toolbar { grid-template-columns:1fr; }
+  .application-toolbar-controls { grid-template-columns:minmax(0,1fr) 180px; }
+  #p-applications .application-details { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 700px) {
+  .application-toolbar-controls { grid-template-columns:1fr; }
+  .application-stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  #p-applications .application-summary { grid-template-columns:1fr; }
+  #p-applications .application-summary-right { justify-content:space-between; }
+  #p-applications .application-date { display:none; }
+  #p-applications .application-details { grid-template-columns:1fr; }
+  #p-applications .application-detail-card.full { grid-column:auto; }
+  .application-list-meta { align-items:flex-start; flex-direction:column; }
+}
+@media (max-width: 520px) {
+  .applications-hero { padding:20px; }
+  .applications-hero h2 { font-size:24px; }
+  .application-stats { grid-template-columns:1fr 1fr; }
+  .application-filter-bar { display:grid; grid-template-columns:1fr 1fr; }
+  .application-filter { justify-content:center; }
+  #p-applications .application-summary { padding:15px 14px 15px 17px; }
+  #p-applications .application-main img { width:43px; height:43px; }
+}
+</style>
 </head>
 <body>
 
@@ -1300,6 +1588,7 @@ main > section:not([hidden]) {
 
       <section id="p-applications" hidden>
         <div id="appHero"></div>
+        <div class="applications-workspace" id="appWorkspace"></div>
         <ul class="list" id="appList"></ul>
       </section>
 
@@ -1477,6 +1766,9 @@ const S = {
   ratingsExpanded: new Set(),
   feedback: null,
   feedbackAt: 0,
+  appFilter: "all",
+  appQuery: "",
+  appSort: "newest",
 };
 
 // ============================================================
@@ -2207,12 +2499,43 @@ function openComplaintModal(item) {
 // BEWERBUNGEN
 // ============================================================
 
-const APP_LABELS = { offen: "Offen", "vorstellungsgespräch": "Offen", bestanden: "Angenommen", abgelehnt: "Abgelehnt" };
+const APP_LABELS = {
+  offen: "Offen",
+  "vorstellungsgespräch": "Offen",
+  bestanden: "Angenommen",
+  angenommen: "Angenommen",
+  abgelehnt: "Abgelehnt",
+};
+
+const APP_FILTERS = {
+  all: "Alle",
+  open: "Offen",
+  closed: "Geschlossen",
+  accepted: "Angenommen",
+  rejected: "Abgelehnt",
+};
+
+function applicationIsOpen(item) {
+  return Boolean(item?.open) || item?.status === "offen" || item?.status === "vorstellungsgespräch";
+}
+
+function applicationIsAccepted(item) {
+  return item?.status === "bestanden" || item?.status === "angenommen";
+}
+
+function applicationIsRejected(item) {
+  return item?.status === "abgelehnt";
+}
 
 function applicationStatusClass(status) {
-  if (status === "offen") return "application-open";
-  if (status === "bestanden" || status === "angenommen") return "application-done";
+  if (status === "offen" || status === "vorstellungsgespräch") return "application-open";
+  if (applicationIsAccepted({ status })) return "application-done";
   return "application-closed";
+}
+
+function applicationStatusText(item) {
+  if (applicationIsOpen(item)) return "Offen";
+  return APP_LABELS[item.status] || item.status || "Geschlossen";
 }
 
 function applicationActionLabel(action) {
@@ -2232,11 +2555,15 @@ async function applicationAction(item, action) {
     danger: irreversible,
     content: h(
       "div",
-      {},
-      h("p", { class: "detail" },
-        action === "accept"
-          ? "Die Bewerbung wird angenommen, die konfigurierten Teamrollen werden vergeben und die Bewerbung im Dashboard abgeschlossen."
-          : "Die Bewerbung wird abgelehnt, die Bewerbungssperre wird entfernt und der Bewerber wird per DM informiert."
+      { class: "application-confirm" },
+      h("div", { class: "application-confirm-icon " + (irreversible ? "is-danger" : "is-success") }, icon(irreversible ? "x" : "check")),
+      h("div", {},
+        h("strong", {}, irreversible ? "Bewerbung wirklich ablehnen?" : "Bewerbung wirklich annehmen?"),
+        h("p", { class: "detail" },
+          action === "accept"
+            ? "Die Bewerbung wird angenommen, die konfigurierten Teamrollen werden vergeben und die Bewerbung im Dashboard abgeschlossen."
+            : "Die Bewerbung wird abgelehnt, die Bewerbungssperre wird entfernt und der Bewerber wird per DM informiert."
+        )
       )
     ),
     confirm: title,
@@ -2251,7 +2578,12 @@ function toggleApplicationDetails(row, details) {
 }
 
 function applicationRow(item) {
-  const row = h("li", { class: "row application-row" });
+  const row = h("li", { class: "row application-row " + (applicationIsOpen(item) ? "is-open" : "is-closed") });
+  const statusClass = applicationStatusClass(item.status);
+  const name = item.applicant_name || item.name || "Unbekannter Bewerber";
+  const when = formatDate(item.created_at);
+  const status = applicationStatusText(item);
+
   const summary = h(
     "div",
     { class: "application-summary" },
@@ -2262,87 +2594,277 @@ function applicationRow(item) {
       h(
         "div",
         { class: "names" },
-        h("strong", {}, item.applicant_name || item.name || "Unbekannter Bewerber"),
-        h("span", { class: "sub" }, `${item.name ? item.name + " · " : ""}${item.age ? item.age + " Jahre · " : ""}${formatDate(item.created_at)}`),
+        h("strong", {}, name),
+        h("span", { class: "sub" }, `${item.username ? "@" + item.username.split("#")[0] : "Discord unbekannt"} · ${item.age ? item.age + " Jahre · " : ""}${when || "Datum unbekannt"}`),
         h(
           "div",
           { class: "application-summary-meta" },
-          h("span", { class: "badge " + (item.open ? "warn" : item.status === "bestanden" ? "ok" : "") }, APP_LABELS[item.status] || item.status || "Unbekannt"),
-          item.automatic_rejection ? h("span", { class: "badge" }, "Automatisch abgelehnt") : null,
-          item.username ? h("span", { class: "badge none" }, "@" + item.username.split("#")[0]) : null
+          h("span", { class: "badge " + statusClass }, status),
+          item.automatic_rejection ? h("span", { class: "badge bad" }, "Automatisch abgelehnt") : null,
+          h("span", { class: "badge none" }, `#${item.id}`)
         )
       )
     ),
     h(
       "div",
-      { class: "actions" },
-      h("button", { type: "button", class: "btn small open-app" }, "Details", h("span", { class: "application-expand" }, "⌄"))
+      { class: "application-summary-right" },
+      h("span", { class: "application-date" }, when || ""),
+      h("button", { type: "button", class: "btn small open-app", "aria-expanded": "false" }, "Details", h("span", { class: "application-expand" }, "⌄"))
     )
   );
+
+  const actions = [];
+  if (applicationIsOpen(item)) {
+    if (S.data.actor.can_manage_applications) {
+      actions.push(button("Bewerbung annehmen", () => applicationAction(item, "accept"), "success-app", false, "check"));
+      actions.push(button("Bewerbung ablehnen", () => applicationAction(item, "reject"), "danger-app", false, "x"));
+    } else {
+      actions.push(h("span", { class: "application-readonly" }, "Nur lesbar für deine Berechtigung"));
+    }
+  } else {
+    actions.push(h("span", { class: "application-closed-note" }, icon(applicationIsAccepted(item) ? "check" : "lock"), applicationIsAccepted(item) ? "Abgeschlossen · angenommen" : "Abgeschlossen"));
+  }
 
   const details = h(
     "div",
     { class: "application-details", hidden: true },
-    h("div", { class: "application-detail-card" }, h("div", { class: "application-detail-label" }, "Discord"), h("p", { class: "application-detail-text" }, item.username || "Keine Angabe")),
-    h("div", { class: "application-detail-card" }, h("div", { class: "application-detail-label" }, "Bewerbername"), h("p", { class: "application-detail-text" }, item.applicant_name || "Keine Angabe")),
-    h("div", { class: "application-detail-card" }, h("div", { class: "application-detail-label" }, "RP-Erfahrung"), h("p", { class: "application-detail-text" }, item.rp_experience || "Keine Angabe")),
-    h("div", { class: "application-detail-card full" }, h("div", { class: "application-detail-label" }, "Stärken"), h("p", { class: "application-detail-text" }, item.strengths || "Keine Angabe")),
-    h("div", { class: "application-detail-card full" }, h("div", { class: "application-detail-label" }, "Schwächen"), h("p", { class: "application-detail-text" }, item.weaknesses || "Keine Angabe")),
-    item.reason ? h("div", { class: "application-detail-card full" }, h("div", { class: "application-detail-label" }, "Grund / Entscheidung"), h("p", { class: "application-detail-text" }, item.reason)) : null,
-    h("div", { class: "application-detail-card full" },
-      h("div", { class: "application-detail-label" }, "Aktionen"),
-      h("div", { class: "application-actions" },
-        ["offen", "vorstellungsgespräch"].includes(item.status) ? button("Bewerbung annehmen", () => applicationAction(item, "accept"), "success-app", false, "check") : null,
-        ["offen", "vorstellungsgespräch"].includes(item.status) ? button("Bewerbung ablehnen", () => applicationAction(item, "reject"), "danger-app", false, "x") : null
-      )
+    h("div", { class: "application-detail-card accent-blue" }, h("div", { class: "application-detail-label" }, "Discord"), h("p", { class: "application-detail-text" }, item.username || "Keine Angabe")),
+    h("div", { class: "application-detail-card accent-violet" }, h("div", { class: "application-detail-label" }, "Bewerbername"), h("p", { class: "application-detail-text" }, item.applicant_name || "Keine Angabe")),
+    h("div", { class: "application-detail-card accent-cyan" }, h("div", { class: "application-detail-label" }, "Alter"), h("p", { class: "application-detail-text" }, item.age ? `${item.age} Jahre` : "Keine Angabe")),
+    h("div", { class: "application-detail-card accent-amber" }, h("div", { class: "application-detail-label" }, "Eingegangen"), h("p", { class: "application-detail-text" }, when || "Keine Angabe")),
+    h("div", { class: "application-detail-card full accent-green" }, h("div", { class: "application-detail-label" }, "RP-Erfahrung"), h("p", { class: "application-detail-text" }, item.rp_experience || "Keine Angabe")),
+    h("div", { class: "application-detail-card accent-green" }, h("div", { class: "application-detail-label" }, "Stärken"), h("p", { class: "application-detail-text" }, item.strengths || "Keine Angabe")),
+    h("div", { class: "application-detail-card accent-pink" }, h("div", { class: "application-detail-label" }, "Schwächen"), h("p", { class: "application-detail-text" }, item.weaknesses || "Keine Angabe")),
+    item.reason ? h("div", { class: "application-detail-card full accent-red" }, h("div", { class: "application-detail-label" }, "Grund / Entscheidung"), h("p", { class: "application-detail-text" }, item.reason)) : null,
+    h("div", { class: "application-detail-card full application-action-card" },
+      h("div", { class: "application-detail-label" }, applicationIsOpen(item) ? "Verwaltung" : "Abschluss"),
+      h("div", { class: "application-actions" }, ...actions)
     )
   );
 
-  summary.querySelector("button").addEventListener("click", () => toggleApplicationDetails(row, details));
+  const detailButton = summary.querySelector("button");
+  detailButton.addEventListener("click", () => {
+    toggleApplicationDetails(row, details);
+    detailButton.setAttribute("aria-expanded", String(!details.hidden));
+  });
+
   row.append(summary, details);
   return row;
 }
 
-function renderApplications() {
+function applicationMatches(item, filter, query) {
+  const q = query.trim().toLowerCase();
+  const open = applicationIsOpen(item);
+
+  let statusMatch = true;
+  if (filter === "open") statusMatch = open;
+  if (filter === "closed") statusMatch = !open;
+  if (filter === "accepted") statusMatch = applicationIsAccepted(item);
+  if (filter === "rejected") statusMatch = applicationIsRejected(item);
+
+  if (!statusMatch) return false;
+  if (!q) return true;
+
+  const haystack = [
+    item.id,
+    item.user_id,
+    item.name,
+    item.username,
+    item.applicant_name,
+    item.age,
+    item.strengths,
+    item.weaknesses,
+    item.rp_experience,
+    item.reason,
+    APP_LABELS[item.status],
+  ].filter(Boolean).join(" ").toLowerCase();
+
+  return haystack.includes(q);
+}
+
+function applicationSort(items) {
+  const sorted = [...items];
+  const sort = S.appSort || "newest";
+
+  if (sort === "oldest") {
+    sorted.sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
+  } else if (sort === "name") {
+    sorted.sort((a, b) => String(a.applicant_name || a.name || "").localeCompare(String(b.applicant_name || b.name || ""), "de"));
+  } else if (sort === "status") {
+    sorted.sort((a, b) => applicationStatusText(a).localeCompare(applicationStatusText(b), "de"));
+  } else {
+    sorted.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+  }
+
+  return sorted;
+}
+
+function applicationCountLabel(value, label) {
+  return h("span", { class: "application-filter-count" }, String(value), " ", label);
+}
+
+function renderApplicationList(items) {
+  const filter = S.appFilter || "all";
+  const query = S.appQuery || "";
+  const filtered = applicationSort(items.filter((item) => applicationMatches(item, filter, query)));
+  const total = items.length;
+  const workspace = $("#appWorkspace");
+
+  if (workspace) {
+    const resultNote = h(
+      "div",
+      { class: "application-result-note" },
+      h("span", { class: "application-result-dot" }),
+      `${filtered.length} von ${total} Bewerbungen angezeigt`
+    );
+    workspace.querySelector(".application-result-note")?.replaceWith(resultNote);
+  }
+
+  $("#appList").replaceChildren(
+    ...(filtered.length
+      ? filtered.map(applicationRow)
+      : [h("li", { class: "empty application-empty" },
+          h("div", { class: "empty-icon" }, icon("search")),
+          h("strong", {}, query || filter !== "all" ? "Keine passenden Bewerbungen" : "Noch keine Bewerbungen"),
+          h("span", {}, query || filter !== "all" ? "Ändere den Suchbegriff oder den Statusfilter." : "Sobald eine Bewerbung eingeht, erscheint sie hier."),
+          query || filter !== "all" ? button("Filter zurücksetzen", () => { S.appFilter = "all"; S.appQuery = ""; renderApplications(true); }, "ghost", false, "x") : null
+        )]
+    )
+  );
+}
+
+function renderApplicationWorkspace(items) {
+  const openCount = items.filter(applicationIsOpen).length;
+  const acceptedCount = items.filter(applicationIsAccepted).length;
+  const rejectedCount = items.filter(applicationIsRejected).length;
+  const closedCount = items.filter((item) => !applicationIsOpen(item)).length;
+  const queryValue = S.appQuery || "";
+  const filter = S.appFilter || "all";
+
+  const search = h("input", {
+    id: "appSearch",
+    type: "search",
+    value: queryValue,
+    placeholder: "Bewerbung suchen: Name, Discord, ID, Inhalt ...",
+    autocomplete: "off",
+    "aria-label": "Bewerbungen durchsuchen",
+  });
+  search.addEventListener("input", () => {
+    S.appQuery = search.value;
+    renderApplicationList(items);
+  });
+
+  const sort = h(
+    "select",
+    { id: "appSort", "aria-label": "Bewerbungen sortieren", value: S.appSort || "newest" },
+    h("option", { value: "newest" }, "Neueste zuerst"),
+    h("option", { value: "oldest" }, "Älteste zuerst"),
+    h("option", { value: "name" }, "Nach Name"),
+    h("option", { value: "status" }, "Nach Status")
+  );
+  sort.value = S.appSort || "newest";
+  sort.addEventListener("change", () => {
+    S.appSort = sort.value;
+    renderApplicationList(items);
+  });
+
+  const filterButtons = [
+    ["all", "Alle", totalCount(items)],
+    ["open", "Offen", openCount],
+    ["closed", "Geschlossen", closedCount],
+    ["accepted", "Angenommen", acceptedCount],
+    ["rejected", "Abgelehnt", rejectedCount],
+  ].map(([id, label, count]) => {
+    const active = filter === id;
+    const node = h(
+      "button",
+      {
+        type: "button",
+        class: "application-filter " + (active ? "active" : ""),
+        "aria-pressed": String(active),
+        onclick: () => {
+          S.appFilter = id;
+          renderApplications(true);
+        },
+      },
+      h("span", { class: "application-filter-dot" }),
+      label,
+      applicationCountLabel(count, "")
+    );
+    return node;
+  });
+
+  $("#appWorkspace").replaceChildren(
+    h("div", { class: "application-toolbar" },
+      h("div", { class: "application-toolbar-heading" },
+        h("div", { class: "application-toolbar-kicker" }, "Bewerbungsverwaltung"),
+        h("h3", {}, "Bewerbungen durchsuchen & filtern"),
+        h("p", {}, "Verwalte eingegangene Bewerbungen direkt im Dashboard. Discord dient nur zur Benachrichtigung."),
+      ),
+      h("div", { class: "application-toolbar-controls" },
+        h("label", { class: "application-search" }, icon("search"), search),
+        sort
+      )
+    ),
+    h("div", { class: "application-filter-bar" }, ...filterButtons),
+    h("div", { class: "application-list-meta" },
+      h("div", { class: "application-result-note" }, h("span", { class: "application-result-dot" }), `${items.length} Bewerbungen geladen`),
+      h("div", { class: "application-filter-context" }, APP_FILTERS[filter])
+    )
+  );
+}
+
+function totalCount(items) {
+  return Array.isArray(items) ? items.length : 0;
+}
+
+function renderApplications(force = false) {
   const apps = S.data.applications;
   const key = JSON.stringify([apps, S.data.actor.can_manage_applications]);
-  if (key === S.keys.apps) return;
+  if (!force && key === S.keys.apps) return;
   S.keys.apps = key;
 
   if (!apps || !apps.available) {
     $("#appHero").replaceChildren();
+    $("#appWorkspace").replaceChildren();
     $("#appList").replaceChildren(h("li", { class: "empty" }, "Das Bewerbungssystem ist im Bot nicht geladen."));
     return;
   }
 
   const items = Array.isArray(apps.items) ? apps.items : [];
-  const openCount = Number(apps.open_count || 0);
-  const total = items.length;
-  const acceptedCount = items.filter((item) => item.status === "bestanden" || item.status === "angenommen").length;
+  const openCount = items.filter(applicationIsOpen).length;
+  const acceptedCount = items.filter(applicationIsAccepted).length;
+  const rejectedCount = items.filter(applicationIsRejected).length;
+  const closedCount = items.filter((item) => !applicationIsOpen(item)).length;
 
   $("#appHero").replaceChildren(
     h("div", { class: "applications-hero" },
-      h("div", {},
+      h("div", { class: "applications-hero-copy" },
         h("div", { class: "hero-kicker" }, "Palm City RP · Bewerbungs-Center"),
-        h("h2", {}, apps.accepting ? "🟢 Bewerbungen sind geöffnet" : "🔴 Bewerbungen sind geschlossen"),
-        h("p", {}, "Alle Bewerbungen werden direkt hier verarbeitet. Im Discord-Review-Kanal erscheint nur noch eine kurze Benachrichtigung."),
+        h("div", { class: "applications-hero-title" },
+          h("div", { class: "applications-status-mark " + (apps.accepting ? "online" : "offline") }, h("span", {})),
+          h("div", {},
+            h("h2", {}, apps.accepting ? "Bewerbungen sind geöffnet" : "Bewerbungen sind geschlossen"),
+            h("p", {}, "Alle Bewerbungen werden direkt im Dashboard verwaltet. Im Discord-Review-Kanal erscheint nur eine kurze Eingangsmeldung.")
+          )
+        ),
         S.data.actor.can_manage_applications
-          ? h("div", { class: "application-actions" },
+          ? h("div", { class: "application-actions hero-actions" },
               button(apps.accepting ? "Bewerbungen schließen" : "Bewerbungen öffnen", () => openAppStatusModal(apps.accepting), apps.accepting ? "danger" : "primary", false, apps.accepting ? "ban" : "unlock")
             )
           : null
       ),
       h("div", { class: "application-stats" },
-        h("div", { class: "application-stat" }, h("b", {}, openCount), h("span", {}, "offen")),
-        h("div", { class: "application-stat" }, h("b", {}, acceptedCount), h("span", {}, "angenommen")),
-        h("div", { class: "application-stat" }, h("b", {}, total), h("span", {}, "geladen"))
+        h("div", { class: "application-stat stat-open" }, h("b", {}, openCount), h("span", {}, "Offen")),
+        h("div", { class: "application-stat stat-accepted" }, h("b", {}, acceptedCount), h("span", {}, "Angenommen")),
+        h("div", { class: "application-stat stat-rejected" }, h("b", {}, rejectedCount), h("span", {}, "Abgelehnt")),
+        h("div", { class: "application-stat stat-closed" }, h("b", {}, closedCount), h("span", {}, "Geschlossen"))
       )
     )
   );
 
-  $("#appList").replaceChildren(
-    ...(items.length ? items.map(applicationRow) : [h("li", { class: "empty" }, "Noch keine Bewerbungen eingegangen.")])
-  );
+  renderApplicationWorkspace(items);
+  renderApplicationList(items);
 }
 
 function openAppStatusModal(accepting) {
@@ -2351,11 +2873,17 @@ function openAppStatusModal(accepting) {
     subtitle: "Teambewerbungen",
     danger: accepting,
     content: h(
-      "p",
-      { class: "sub" },
-      accepting
-        ? "Neue Bewerbungen sind danach nicht mehr möglich. Panel und Status-Ankündigung werden aktualisiert."
-        : "Bewerbungen sind danach wieder möglich. Panel und Status-Ankündigung werden aktualisiert und die Rolle wird kurz gepingt."
+      "div",
+      { class: "application-confirm" },
+      h("div", { class: "application-confirm-icon " + (accepting ? "is-danger" : "is-success") }, icon(accepting ? "ban" : "unlock")),
+      h("div", {},
+        h("strong", {}, accepting ? "Bewerbungsannahme schließen?" : "Bewerbungsannahme öffnen?"),
+        h("p", { class: "detail" },
+          accepting
+            ? "Neue Bewerbungen können danach nicht mehr eingesendet werden. Bestehende Bewerbungen bleiben im Dashboard sichtbar."
+            : "Neue Bewerbungen können danach wieder eingesendet werden."
+        )
+      )
     ),
     confirm: accepting ? "Schließen" : "Öffnen",
     onConfirm: () => act("applications_status", { status: accepting ? "geschlossen" : "offen" }),
@@ -3043,6 +3571,7 @@ function renderTabs() {
               class: "tab",
               role: "tab",
               "aria-selected": String(id === S.tab),
+              "data-tab": id,
               onclick: () => switchTab(id),
             },
             icon(iconName),
