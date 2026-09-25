@@ -528,6 +528,13 @@ a.btn { text-decoration: none; }
   .live i { animation: none; }
   * { transition: none !important; }
 }
+
+.feedback-hero{display:flex;justify-content:space-between;gap:24px;align-items:center;padding:22px;margin-bottom:18px;border:1px solid rgba(120,140,255,.16);border-radius:20px;background:linear-gradient(135deg,rgba(70,85,170,.16),rgba(9,13,28,.9));box-shadow:0 18px 50px rgba(0,0,0,.18)}
+.feedback-hero h2{margin:5px 0 6px;font-size:25px}.feedback-hero p{margin:0;max-width:760px;color:var(--muted)}
+.feedback-hero .eyebrow{font-size:11px;letter-spacing:.14em;color:#91a4ff;font-weight:800}.feedback-meta{font-weight:800;white-space:nowrap}
+.feedback-row{border-left:3px solid #7185ff}.feedback-row.lob{border-left-color:#4ade80}.feedback-row.idee{border-left-color:#facc15}.feedback-row.verbesserung{border-left-color:#60a5fa}
+.feedback-content{line-height:1.65;white-space:pre-wrap}.feedback-suggestion{padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.035);color:var(--muted);margin-top:10px}
+@media(max-width:700px){.feedback-hero{display:block}.feedback-meta{margin-top:14px}}
 </style>
 </head>
 <body>
@@ -644,6 +651,18 @@ a.btn { text-decoration: none; }
         <ul class="list" id="supportList"></ul>
       </section>
 
+      <section id="p-feedback" hidden>
+        <div class="feedback-hero">
+          <div>
+            <span class="eyebrow">PALM CITY RP · INTERN</span>
+            <h2>💬 Team-Feedback</h2>
+            <p>Hier landet das Feedback aus dem Discord-Panel. Neue Einträge erscheinen automatisch ganz oben.</p>
+          </div>
+          <div class="feedback-meta" id="feedbackMeta"></div>
+        </div>
+        <ul class="list" id="feedbackList"></ul>
+      </section>
+
       <section id="p-settings" hidden></section>
     </main>
   </div>
@@ -717,7 +736,8 @@ const ICONS = {
   x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
   clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
   chart: '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
-  history: '<path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/>',
+  message: '<path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.6 8.6 0 0 1-4.2-1.1L3 20l1.5-4.4A8.5 8.5 0 1 1 21 11.5Z"/><path d="M8 11h.01M12 11h.01M16 11h.01"/>',
+  history: '<path d="M3 3v5h5"<path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/>',
   star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/>',
   headset: '<path d="M3 14v-2a9 9 0 0 1 18 0v2"/><path d="M21 14v4a2 2 0 0 1-2 2h-1v-6h3z"/><path d="M3 14v4a2 2 0 0 0 2 2h1v-6H3z"/>',
   flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>',
@@ -746,6 +766,7 @@ const TITLES = {
   activity: ["Aktivität", "Nachrichten und Voice-Zeit im Team"],
   history: ["Verlauf", "Alle Aktionen mit Suche, Filter und Export"],
   support: ["Support", "Bewertungen, Tickets und Voice-Support pro Teammitglied"],
+  feedback: ["Team-Feedback", "Rückmeldungen aus dem Discord-Feedback-Panel"],
   settings: ["Einstellungen", "Rangleiste festlegen"],
 };
 
@@ -767,6 +788,8 @@ const S = {
   support: null,
   supportAt: 0,
   ratingsExpanded: new Set(),
+  feedback: null,
+  feedbackAt: 0,
 };
 
 // ============================================================
@@ -1947,6 +1970,58 @@ async function loadSupport(force = false) {
   }
 }
 
+function feedbackRow(item) {
+  const cls = String(item.category || "Sonstiges").toLowerCase();
+  return h(
+    "li",
+    { class: "row feedback-row " + cls },
+    h(
+      "div",
+      { class: "who" },
+      avatar(item.avatar),
+      h("div", { class: "names" },
+        h("strong", {}, `#${item.id} · ${item.category}`),
+        h("span", { class: "sub" }, `${item.user_name} · ${formatDate(item.created_at)}`)
+      )
+    ),
+    h("div", { class: "tags" },
+      h("span", { class: "badge info" }, item.category),
+      h("span", { class: "badge none" }, item.status === "new" ? "Neu" : item.status)
+    ),
+    h("p", { class: "detail feedback-content" }, item.feedback),
+    item.suggestion ? h("div", { class: "feedback-suggestion" }, h("b", {}, "💡 Vorschlag: "), item.suggestion) : null
+  );
+}
+
+function renderFeedback() {
+  const data = S.feedback;
+  if (!data) return;
+  const key = JSON.stringify(data);
+  if (key === S.keys.feedback) return;
+  S.keys.feedback = key;
+
+  $("#feedbackMeta").textContent = `${data.items.length} Einträge`;
+  $("#feedbackList").replaceChildren(
+    ...(data.items.length
+      ? data.items.map(feedbackRow)
+      : [h("li", { class: "empty" }, "Noch kein Feedback eingegangen.")]
+    )
+  );
+}
+
+async function loadFeedback(force = false) {
+  if (!S.data || !S.data.features || !S.data.features.feedback) return;
+  if (!force && Date.now() - S.feedbackAt < 15000) return;
+  try {
+    const data = await api("feedback");
+    S.feedback = data;
+    S.feedbackAt = Date.now();
+    if (S.tab === "feedback") renderFeedback();
+  } catch (err) {
+    if (err.code === "no_access") setLocked(err.message);
+  }
+}
+
 function renderSettings() {
   const box = $("#p-settings");
   const data = S.data;
@@ -2063,6 +2138,9 @@ function renderTabs() {
   if (data.features && data.features.activity) tabs.push(["activity", "Aktivität", S.inactiveCount || 0, "chart"]);
 
   if (data.features && data.features.support) tabs.push(["support", "Support", null, "headset"]);
+  if (data.features && data.features.feedback) {
+    tabs.push(["feedback", "Feedback", (data.feedbacks || []).length || null, "message"]);
+  }
 
   tabs.push(["history", "Verlauf", null, "history"]);
 
@@ -2110,6 +2188,7 @@ function switchTab(id) {
   if (id === "activity") loadActivity(true);
   if (id === "history") loadHistory();
   if (id === "support") loadSupport(true);
+  if (id === "feedback") loadFeedback(true);
 }
 
 function renderAll() {
@@ -2128,6 +2207,7 @@ function renderAll() {
   if (S.tab === "applications") renderApplications();
   if (S.tab === "activity" && S.activity) renderActivity();
   if (S.tab === "support" && S.support) renderSupport();
+  if (S.tab === "feedback" && S.feedback) renderFeedback();
   if (S.tab === "settings") renderSettings();
 }
 
