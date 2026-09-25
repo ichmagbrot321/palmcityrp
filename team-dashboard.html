@@ -1986,6 +1986,7 @@ function feedbackRow(item) {
     ),
     h("div", { class: "tags" },
       h("span", { class: "badge info" }, item.category),
+      h("span", { class: "badge none" }, item.rating ? ("⭐".repeat(item.rating) + "☆".repeat(5 - item.rating)) : "Keine Bewertung"),
       h("span", { class: "badge none" }, item.status === "new" ? "Neu" : item.status)
     ),
     h("p", { class: "detail feedback-content" }, item.feedback),
