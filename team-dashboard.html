@@ -1978,10 +1978,10 @@ function feedbackRow(item) {
     h(
       "div",
       { class: "who" },
-      avatar(item.avatar),
+      avatar(item.target_avatar || item.avatar),
       h("div", { class: "names" },
-        h("strong", {}, `#${item.id} · ${item.category}`),
-        h("span", { class: "sub" }, `${item.user_name} · ${formatDate(item.created_at)}`)
+        h("strong", {}, `#${item.id} · ${item.target_user_name || "Unbekannter Staffler"}`),
+        h("span", { class: "sub" }, `${item.category} · von ${item.user_name} · ${formatDate(item.created_at)}`)
       )
     ),
     h("div", { class: "tags" },
