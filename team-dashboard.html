@@ -2176,8 +2176,9 @@ function switchTab(id) {
   S.tab = id;
   S.keys.tabs = "";
 
-  for (const panel of ["team", "users", "bans", "absences", "complaints", "applications", "activity", "history", "support", "settings"]) {
-    $("#p-" + panel).hidden = panel !== id;
+  for (const panel of ["team", "users", "bans", "absences", "complaints", "applications", "activity", "history", "support", "feedback", "settings"]) {
+    const section = $("#p-" + panel);
+    if (section) section.hidden = panel !== id;
   }
 
   renderAll();
@@ -2241,6 +2242,16 @@ async function refresh() {
   try {
     const data = await api("state");
     S.data = data;
+
+    // Feedback kommt bereits im Haupt-State mit. Dadurch ist der Tab
+    // sofort nach dem Dashboard-Refresh befüllt und hängt nicht davon ab,
+    // ob der separate /team/feedback-Aufruf schon fertig ist.
+    S.feedback = {
+      items: Array.isArray(data.feedbacks) ? data.feedbacks : [],
+    };
+    S.feedbackAt = Date.now();
+    S.keys.feedback = "";
+
     setLocked(null);
     setLive(true, "Live · " + new Date().toLocaleTimeString("de-DE"));
     renderAll();
