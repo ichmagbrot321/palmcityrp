@@ -62,6 +62,7 @@ const ROUTES = {
   history: ["GET", "/team/history"],
   activity: ["GET", "/team/activity"],
   support: ["GET", "/team/support"],
+  feedback: ["GET", "/team/feedback"],
 };
 
 // ============================================================
