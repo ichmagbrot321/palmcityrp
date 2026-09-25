@@ -59,10 +59,10 @@ const ROUTES = {
   absence_approve: ["POST", "/team/absence/approve"],
   absence_reject: ["POST", "/team/absence/reject"],
   applications_status: ["POST", "/team/applications/status"],
+  application_action: ["POST", "/team/applications/action"],
   history: ["GET", "/team/history"],
   activity: ["GET", "/team/activity"],
   support: ["GET", "/team/support"],
-  feedback: ["GET", "/team/feedback"],
 };
 
 // ============================================================
