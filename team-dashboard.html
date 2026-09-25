@@ -536,6 +536,267 @@ a.btn { text-decoration: none; }
 .feedback-content{line-height:1.65;white-space:pre-wrap}.feedback-suggestion{padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.035);color:var(--muted);margin-top:10px}
 .feedback-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.feedback-meta-sep{opacity:.35}
 .feedback-staff-row{padding:0;overflow:hidden;border-left:3px solid #7185ff}.feedback-accordion{width:100%}.feedback-summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:16px 18px;cursor:pointer;min-height:78px}.feedback-summary::-webkit-details-marker{display:none}.feedback-summary:hover{background:rgba(255,255,255,.025)}.feedback-summary::after{content:"⌄";font-size:20px;opacity:.55;transition:transform .2s ease}.feedback-accordion[open] .feedback-summary::after{transform:rotate(180deg)}.feedback-overall{display:flex;flex-direction:column;align-items:flex-end;gap:2px;min-width:220px;text-align:right}.feedback-overall .overall-label{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:800}.feedback-overall strong{font-size:15px}.feedback-details{padding:0 18px 18px;border-top:1px solid rgba(255,255,255,.06)}.feedback-details-title{display:flex;justify-content:space-between;align-items:center;padding:14px 0 10px;font-weight:800}.feedback-detail{padding:14px 0;border-top:1px solid rgba(255,255,255,.045)}.feedback-detail-head{display:flex;align-items:center;justify-content:space-between;gap:16px}.feedback-reviewer{display:flex;align-items:center;gap:10px}.feedback-reviewer img{width:34px;height:34px;border-radius:50%;object-fit:cover}.feedback-detail-rating{display:flex;flex-direction:column;align-items:flex-end;gap:2px;white-space:nowrap}.feedback-detail-rating strong{font-size:13px}.feedback-detail .detail{margin:10px 0 0}@media(max-width:700px){.feedback-hero{display:block}.feedback-meta{margin-top:14px}.feedback-summary{align-items:flex-start;flex-direction:column}.feedback-overall{align-items:flex-start;text-align:left;min-width:0}.feedback-detail-head{align-items:flex-start;flex-direction:column}.feedback-detail-rating{align-items:flex-start}}
+
+
+/* ============================================================
+   PREMIUM MOTION LAYER
+   Subtle motion only: depth, focus, hierarchy, feedback.
+   ============================================================ */
+:root {
+  --motion-ease: cubic-bezier(.22, 1, .36, 1);
+  --motion-fast: 160ms;
+  --motion-med: 260ms;
+  --motion-slow: 520ms;
+}
+
+html { scroll-behavior: smooth; }
+body { overflow-x: hidden; }
+body::before {
+  animation: ambientDrift 18s ease-in-out infinite alternate;
+  transform-origin: 50% 50%;
+}
+body::after {
+  animation: ambientGrid 26s linear infinite;
+}
+
+/* Desktop cursor spotlight. JS updates --mx / --my. */
+.content {
+  --mx: 72%;
+  --my: 18%;
+  position: relative;
+  isolation: isolate;
+}
+.content::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(420px circle at var(--mx) var(--my), rgba(74,145,255,.075), transparent 64%);
+  opacity: .72;
+  transition: opacity 300ms ease;
+}
+
+/* Page entrance */
+main > section:not([hidden]) {
+  animation: pageEnter var(--motion-med) var(--motion-ease) both;
+}
+main > section.motion-refresh { animation: pageEnter var(--motion-med) var(--motion-ease) both; }
+
+/* Sidebar/nav micro-interactions */
+.tab {
+  transition: transform var(--motion-fast) var(--motion-ease),
+              background var(--motion-fast) ease,
+              color var(--motion-fast) ease,
+              box-shadow var(--motion-fast) ease;
+}
+.tab .ico { transition: transform var(--motion-fast) var(--motion-ease), color var(--motion-fast) ease; }
+.tab:hover .ico { transform: translateX(2px) scale(1.04); }
+.tab[aria-selected="true"] .ico { transform: scale(1.05); }
+
+/* Buttons feel tactile without becoming flashy. */
+.btn {
+  transition: transform var(--motion-fast) var(--motion-ease),
+              border-color var(--motion-fast) ease,
+              background var(--motion-fast) ease,
+              box-shadow var(--motion-fast) ease;
+}
+.btn:active:not(:disabled) { transform: translateY(1px) scale(.985); }
+
+/* Stat cards */
+.stat {
+  overflow: hidden;
+  transform-origin: center;
+}
+.stat::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,.055) 47%, transparent 64%);
+  transform: translateX(-120%);
+}
+.stat:hover::before {
+  opacity: 1;
+  animation: sheen 900ms var(--motion-ease) 1;
+}
+
+/* Lists reveal in a clean stagger. */
+.list > .row,
+.list > .empty {
+  animation: itemEnter 420ms var(--motion-ease) both;
+}
+.list > :nth-child(1) { animation-delay: 20ms; }
+.list > :nth-child(2) { animation-delay: 45ms; }
+.list > :nth-child(3) { animation-delay: 70ms; }
+.list > :nth-child(4) { animation-delay: 95ms; }
+.list > :nth-child(5) { animation-delay: 120ms; }
+.list > :nth-child(6) { animation-delay: 145ms; }
+.list > :nth-child(7) { animation-delay: 170ms; }
+.list > :nth-child(8) { animation-delay: 195ms; }
+.list > :nth-child(n+9) { animation-delay: 220ms; }
+
+/* Normal cards get a tiny depth shift. */
+.row,
+.card,
+.hero,
+.stat {
+  will-change: transform;
+}
+
+/* Feedback center */
+#p-feedback .feedback-hero {
+  animation: heroEnter 520ms var(--motion-ease) both;
+}
+#p-feedback .feedback-hero::before {
+  content: "";
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  right: 22%;
+  top: -180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(91,154,255,.11), transparent 68%);
+  filter: blur(2px);
+  pointer-events: none;
+  animation: heroOrb 8s ease-in-out infinite alternate;
+}
+.feedback-staff-row {
+  transition: transform 240ms var(--motion-ease), border-color 180ms ease, box-shadow 240ms ease, background 240ms ease;
+}
+.feedback-staff-row:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 46px rgba(0,0,0,.22), 0 0 34px rgba(74,145,255,.035);
+}
+.feedback-summary::after {
+  transition: transform 260ms var(--motion-ease), opacity 180ms ease, color 180ms ease;
+}
+.feedback-accordion[open] .feedback-summary::after { transform: rotate(180deg) translateY(1px); }
+.feedback-details {
+  transform-origin: top center;
+}
+.feedback-accordion[open] .feedback-details {
+  animation: detailsReveal 300ms var(--motion-ease) both;
+}
+.feedback-detail {
+  animation: detailFade 280ms ease both;
+}
+.feedback-accordion[open] .feedback-detail:nth-child(2) { animation-delay: 20ms; }
+.feedback-accordion[open] .feedback-detail:nth-child(3) { animation-delay: 45ms; }
+.feedback-accordion[open] .feedback-detail:nth-child(4) { animation-delay: 70ms; }
+.feedback-accordion[open] .feedback-detail:nth-child(5) { animation-delay: 95ms; }
+.feedback-accordion[open] .feedback-detail:nth-child(n+6) { animation-delay: 120ms; }
+
+/* Ratings get a very light shimmer, not a constant neon glow. */
+.feedback-detail-rating strong,
+.feedback-overall strong {
+  text-shadow: 0 0 22px rgba(255, 205, 93, .11);
+}
+
+/* Modal / toast motion */
+.backdrop {
+  animation: backdropIn 180ms ease both;
+}
+.modal {
+  animation: modalIn 300ms var(--motion-ease) both;
+}
+.toast {
+  animation: toastIn 360ms var(--motion-ease) both;
+}
+
+/* Inputs */
+.search input,
+.filters select,
+.field input,
+.field select,
+.field textarea {
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease, transform 180ms var(--motion-ease);
+}
+.search input:focus,
+.filters select:focus,
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  transform: translateY(-1px);
+}
+
+@keyframes ambientDrift {
+  0% { transform: translate3d(-1%, -1%, 0) scale(1); }
+  50% { transform: translate3d(1.5%, 1%, 0) scale(1.035); }
+  100% { transform: translate3d(-.5%, 1.5%, 0) scale(1.02); }
+}
+@keyframes ambientGrid {
+  0% { background-position: 0 0; }
+  100% { background-position: 56px 56px; }
+}
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes heroEnter {
+  from { opacity: 0; transform: translateY(12px) scale(.992); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes itemEnter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes sheen {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(120%); }
+}
+@keyframes heroOrb {
+  from { transform: translate3d(-12px, 8px, 0) scale(.92); opacity: .65; }
+  to { transform: translate3d(18px, 20px, 0) scale(1.08); opacity: 1; }
+}
+@keyframes detailsReveal {
+  from { opacity: 0; transform: translateY(-5px) scaleY(.985); }
+  to { opacity: 1; transform: translateY(0) scaleY(1); }
+}
+@keyframes detailFade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes backdropIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(10px) scale(.975); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(10px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 820px) {
+  .content::before { display: none; }
+  .list > .row,
+  .list > .empty { animation-delay: 0ms !important; }
+  #p-feedback .feedback-hero::before { right: -80px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  body::after,
+  main > section:not([hidden]),
+  .list > .row,
+  .list > .empty,
+  #p-feedback .feedback-hero,
+  #p-feedback .feedback-hero::before,
+  .feedback-accordion[open] .feedback-details,
+  .feedback-detail,
+  .backdrop,
+  .modal,
+  .toast,
+  .stat:hover::before {
+    animation: none !important;
+  }
+  .content::before { display: none; }
+}
+
 </style>
 
 <style id="palm-pro-redesign">
@@ -2732,6 +2993,7 @@ function switchTab(id) {
   }
 
   renderAll();
+  replaySectionMotion();
 
   const activeTab = $("#tabs").querySelector('[aria-selected="true"]');
   if (activeTab) activeTab.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
@@ -2894,6 +3156,49 @@ async function boot() {
 }
 
 boot();
+
+
+// ============================================================
+// PREMIUM MOTION: desktop pointer spotlight
+// ============================================================
+(function setupMotionLayer() {
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (window.matchMedia && window.matchMedia('(max-width: 820px)').matches) return;
+
+  let raf = 0;
+  let x = window.innerWidth * 0.72;
+  let y = window.innerHeight * 0.18;
+  let pending = false;
+
+  const paint = () => {
+    raf = 0;
+    const root = document.querySelector('.content');
+    if (!root) return;
+    root.style.setProperty('--mx', `${x}px`);
+    root.style.setProperty('--my', `${y}px`);
+    pending = false;
+  };
+
+  window.addEventListener('pointermove', (event) => {
+    x = event.clientX;
+    y = event.clientY;
+    if (!pending) {
+      pending = true;
+      raf = requestAnimationFrame(paint);
+    }
+  }, { passive: true });
+})();
+
+// Re-run page entrance animation when the active view changes.
+function replaySectionMotion() {
+  const active = document.querySelector('main > section:not([hidden])');
+  if (!active) return;
+  active.classList.remove('motion-refresh');
+  void active.offsetWidth;
+  active.classList.add('motion-refresh');
+  setTimeout(() => active.classList.remove('motion-refresh'), 700);
+}
+
 </script>
 </body>
 </html>
