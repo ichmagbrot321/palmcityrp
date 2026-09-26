@@ -373,12 +373,14 @@ module.exports = async (req, res) => {
         avatar: avatar(me)
       };
 
-      return redirect(res, '/', [sessionCookie(user), setCookie('pc_state', '', 0)]);
+      // Nach dem Login zurück zur Einspruch-Seite, nicht zur Domain-Wurzel
+      return redirect(res, '/einspruch', [sessionCookie(user), setCookie('pc_state', '', 0)]);
     }
 
     /* ---------- Logout ---------- */
     if (p === '/api/logout') {
-      return redirect(res, '/', [setCookie('pc_session', '', 0)]);
+      // Nach dem Logout zurück zur Einspruch-Seite, nicht zur Domain-Wurzel
+      return redirect(res, '/einspruch', [setCookie('pc_session', '', 0)]);
     }
 
     /* ---------- Ab hier nur eingeloggt ---------- */
