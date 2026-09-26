@@ -11,7 +11,7 @@ const CLIENT = process.env.DISCORD_CLIENT_ID || '1547984607255994388';
 const SECRET = process.env.DISCORD_CLIENT_SECRET;
 const SUPA = process.env.SUPABASE_URL;
 const SKEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
-const SITE = process.env.SITE_URL;
+const SITE = process.env.SITE_URL || 'https://palmcityrp.vercel.app';
 const SESSION = process.env.SESSION_SECRET;
 const APPEAL_CHANNEL = process.env.DISCORD_APPEAL_CHANNEL_ID || '1548705694033780867';
 
