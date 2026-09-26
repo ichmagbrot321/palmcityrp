@@ -1826,6 +1826,156 @@ body::after { opacity:.16; background-size:34px 34px; }
 @media (prefers-reduced-motion:reduce){body::before{animation:none}.tab:hover,.row:hover,.stat:hover{transform:none}}
 </style>
 
+
+<style>
+/* ---------- Teamkarten + persönliche Notizen ---------- */
+#p-team .team-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+#p-team .team-card {
+  position: relative;
+  display: block;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(126,155,211,.12);
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(10,18,34,.94), rgba(7,12,24,.90));
+  box-shadow: 0 16px 38px rgba(0,0,0,.14), inset 0 1px 0 rgba(255,255,255,.014);
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+#p-team .team-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--v3-cyan, #39d6ff), var(--v3-blue, #4d9dff));
+  opacity: .9;
+}
+#p-team .team-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(126,170,242,.24);
+  background: linear-gradient(145deg, rgba(12,22,41,.97), rgba(7,13,26,.94));
+  box-shadow: 0 24px 52px rgba(0,0,0,.22), 0 0 0 1px rgba(90,156,255,.035);
+}
+#p-team .team-card.is-open {
+  border-color: rgba(90,156,255,.28);
+  box-shadow: 0 24px 60px rgba(0,0,0,.25), 0 0 30px rgba(43,140,255,.06);
+}
+.team-card-head {
+  width: 100%;
+  min-height: 128px;
+  padding: 18px 18px 15px 21px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.team-card-head:hover { background: rgba(90,156,255,.035); }
+.team-card-head .who { align-items: flex-start; }
+.team-card-head .who img { width: 50px; height: 50px; }
+.team-card-head .names strong { font-size: 15px; }
+.team-card-head .tags { margin-top: 10px; }
+.team-card-chevron {
+  position: absolute;
+  top: 18px;
+  right: 16px;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(126,155,211,.12);
+  border-radius: 9px;
+  color: var(--muted);
+  background: rgba(255,255,255,.025);
+  transition: transform .2s ease, color .2s ease, background .2s ease;
+}
+.team-card.is-open .team-card-chevron {
+  transform: rotate(180deg);
+  color: var(--text);
+  background: rgba(90,156,255,.08);
+}
+.team-card-details {
+  display: grid;
+  gap: 14px;
+  padding: 0 18px 18px 21px;
+  border-top: 1px solid rgba(126,155,211,.08);
+  animation: teamCardOpen .22s ease both;
+}
+.team-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding-top: 14px;
+}
+.team-card-actions .btn { min-height: 38px; }
+.team-card-notes {
+  display: grid;
+  gap: 8px;
+  padding-top: 2px;
+}
+.team-card-notes label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+.team-card-notes textarea {
+  width: 100%;
+  min-height: 92px;
+  resize: vertical;
+  border: 1px solid rgba(126,155,211,.12);
+  border-radius: 12px;
+  padding: 11px 12px;
+  background: rgba(3,8,17,.62);
+  color: var(--text);
+}
+.team-card-notes textarea:focus {
+  outline: none;
+  border-color: rgba(90,156,255,.55);
+  box-shadow: 0 0 0 4px rgba(90,156,255,.09);
+}
+.team-note-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+}
+.team-note-meta {
+  color: var(--muted);
+  font-size: 11px;
+}
+.team-warns {
+  display: grid;
+  gap: 8px;
+}
+.team-warns-title {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+@keyframes teamCardOpen { from { opacity: .2; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@media (max-width: 620px) {
+  #p-team .team-grid { grid-template-columns: 1fr; }
+  .team-card-head { min-height: 118px; }
+  .team-card-actions .btn { flex: 1 1 calc(50% - 7px); }
+  .team-card-actions .seg { display: contents; }
+  .team-card-actions .seg .btn { flex: 1 1 calc(50% - 7px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #p-team .team-card, .team-card-chevron { transition: none; }
+  .team-card-details { animation: none; }
+}
+</style>
+
 </head>
 <body>
 
@@ -2066,6 +2216,7 @@ const S = {
   data: null,
   tab: "team",
   expanded: new Set(),
+  memberNotes: loadMemberNotes(),
   draft: [],
   dirty: false,
   keys: {},
@@ -2085,6 +2236,31 @@ const S = {
   appQuery: "",
   appSort: "newest",
 };
+
+// Persönliche Teamnotizen werden lokal pro Teammitglied gespeichert.
+function loadMemberNotes() {
+  try {
+    const raw = localStorage.getItem("palm-city-team-notes");
+    const data = raw ? JSON.parse(raw) : {};
+    return data && typeof data === "object" && !Array.isArray(data) ? data : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveMemberNote(member, value) {
+  const text = String(value || "").trim().slice(0, 2000);
+  if (text) S.memberNotes[member.id] = text;
+  else delete S.memberNotes[member.id];
+
+  try {
+    localStorage.setItem("palm-city-team-notes", JSON.stringify(S.memberNotes));
+  } catch {
+    // Falls der Browser lokalen Speicher blockiert, bleibt die Notiz bis zum Neuladen erhalten.
+  }
+  toast(text ? "Notiz gespeichert." : "Notiz gelöscht.");
+  renderTeam(true);
+}
 
 // ============================================================
 // API
@@ -2338,50 +2514,66 @@ function rankStyle(member) {
   return member.rank_color ? `--rank:${member.rank_color}` : "";
 }
 
-function memberRow(member) {
+function memberCard(member) {
   const ranks = S.data.ranks;
   const open = S.expanded.has(member.id);
   const count = member.warns.length;
+  const note = S.memberNotes[member.id] || "";
 
-  return h(
-    "li",
-    { class: "row", style: rankStyle(member) },
+  const toggle = () => {
+    if (open) S.expanded.delete(member.id);
+    else S.expanded.add(member.id);
+    renderTeam(true);
+  };
+
+  const head = h(
+    "button",
+    {
+      type: "button",
+      class: "team-card-head",
+      "aria-expanded": String(open),
+      "aria-label": `${member.name} ${open ? "schließen" : "öffnen"}`,
+      onclick: toggle,
+    },
     h(
       "div",
       { class: "who" },
       avatar(member.avatar),
-      h("div", { class: "names" }, h("strong", {}, member.name), h("span", { class: "sub mono" }, "@" + member.username))
+      h(
+        "div",
+        { class: "names" },
+        h("strong", {}, member.name),
+        h("span", { class: "sub mono" }, "@" + member.username),
+        h(
+          "div",
+          { class: "tags" },
+          rankBadge(member),
+          member.absence
+            ? h("span", { class: "badge info", title: member.absence.reason }, icon("clock"), "Abgemeldet")
+            : null,
+          count
+            ? h("span", { class: "badge warn" }, icon("alert"), count === 1 ? "1 Verwarnung" : `${count} Verwarnungen`)
+            : h("span", { class: "badge ok" }, icon("check"), "Keine Verwarnung"),
+          note ? h("span", { class: "badge info" }, icon("message"), "Notiz vorhanden") : null
+        )
+      )
     ),
+    h("span", { class: "team-card-chevron", "aria-hidden": "true" }, "⌄")
+  );
+
+  const noteInput = h("textarea", {
+    maxlength: 2000,
+    placeholder: "Interne Notiz zu diesem Teammitglied …",
+    "aria-label": `Notiz für ${member.name}`,
+    value: note,
+  });
+
+  const details = h(
+    "div",
+    { class: "team-card-details" },
     h(
       "div",
-      { class: "tags" },
-      rankBadge(member),
-      member.absence
-        ? h("span", { class: "badge info", title: member.absence.reason }, icon("clock"), "Abgemeldet bis " + formatDate(member.absence.end))
-        : null,
-      count
-        ? h(
-            "button",
-            {
-              type: "button",
-              class: "badge warn",
-              "aria-expanded": String(open),
-              onclick: () => {
-                open ? S.expanded.delete(member.id) : S.expanded.add(member.id);
-                renderTeam(true);
-              },
-            },
-            icon("alert"),
-            count === 1 ? "1 Verwarnung" : `${count} Verwarnungen`
-          )
-        : null,
-      count >= ((S.data.settings && S.data.settings.warn_escalation) || 3)
-        ? h("span", { class: "badge bad", title: "Downrank oder Teamkick prüfen" }, icon("alert"), "Eskalation prüfen")
-        : null
-    ),
-    h(
-      "div",
-      { class: "actions" },
+      { class: "team-card-actions" },
       h(
         "div",
         { class: "seg" },
@@ -2392,11 +2584,30 @@ function memberRow(member) {
       button("Verwarnen", () => openWarnModal(member), "", false, "alert"),
       button("Entfernen", () => openKickModal(member), "danger", false, "userMinus")
     ),
-    open && count
+    h(
+      "div",
+      { class: "team-card-notes" },
+      h("label", { for: `team-note-${member.id}` }, "Interne Notiz"),
+      h("textarea", {
+        id: `team-note-${member.id}`,
+        maxlength: 2000,
+        placeholder: "Interne Notiz zu diesem Teammitglied …",
+        "aria-label": `Notiz für ${member.name}`,
+      }),
+      h(
+        "div",
+        { class: "team-note-actions" },
+        h("span", { class: "team-note-meta" }, "Wird lokal in diesem Browser gespeichert."),
+        button("Notiz löschen", () => saveMemberNote(member, ""), "ghost", !note, "x"),
+        button("Notiz speichern", () => saveMemberNote(member, noteInput.value), "primary", false, "check")
+      )
+    ),
+    count
       ? h(
           "div",
-          { class: "warns" },
-          member.warns.map((warn) =>
+          { class: "team-warns" },
+          h("div", { class: "team-warns-title" }, "Verwarnungen"),
+          ...member.warns.map((warn) =>
             h(
               "div",
               { class: "warn-item" },
@@ -2412,6 +2623,12 @@ function memberRow(member) {
         )
       : null
   );
+
+  // Das Feld wird erst nach dem Erzeugen eingesetzt, damit der aktuelle Text sauber bleibt.
+  details.querySelector("textarea")?.remove();
+  details.querySelector(".team-card-notes")?.insertBefore(noteInput, details.querySelector(".team-note-actions"));
+
+  return h("li", { class: `team-card${open ? " is-open" : ""}`, style: rankStyle(member) }, head, open ? details : null);
 }
 
 function stat(iconName, value, label, cls = "") {
@@ -2451,6 +2668,7 @@ function renderTeam(force = false) {
   const box = $("#teamList");
 
   if (!list.length) {
+    box.className = "list";
     box.replaceChildren(
       h(
         "li",
@@ -2461,7 +2679,8 @@ function renderTeam(force = false) {
     return;
   }
 
-  box.replaceChildren(...list.map(memberRow));
+  box.className = "team-grid";
+  box.replaceChildren(...list.map(memberCard));
 }
 
 function renderUsers(users, total) {
