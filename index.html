@@ -1521,7 +1521,9 @@ function renderPartners(partners, error){
     return;
   }
 
-  updated.textContent = `${partners.length} offizieller Partner${partners.length === 1 ? "" : "en"}`;
+  updated.textContent = partners.length === 1
+    ? "1 offizieller Partner"
+    : `${partners.length} offizielle Partner`;
 
   if(!partners.length){
     grid.innerHTML = `
