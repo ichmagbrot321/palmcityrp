@@ -104,7 +104,14 @@ function sessionCookie(user) {
 async function db(path, opt = {}) {
   try {
     if (!SUPA || !SKEY) {
-      return { ok: false, status: 500, data: { message: 'Supabase-Konfiguration fehlt.' }, error: 'SUPABASE_URL oder SUPABASE_SERVICE_ROLE_KEY fehlt.' };
+      return {
+        ok: false,
+        status: 500,
+        data: {
+          message: 'Supabase-Konfiguration fehlt.'
+        },
+        error: 'SUPABASE_URL oder SUPABASE_SERVICE_ROLE_KEY fehlt.'
+      };
     }
 
     const r = await fetch(`${SUPA}/rest/v1/${path}`, {
@@ -124,6 +131,7 @@ async function db(path, opt = {}) {
     };
   } catch (error) {
     console.error('[DB]', path, error);
+
     return {
       ok: false,
       status: 500,
@@ -136,7 +144,12 @@ async function db(path, opt = {}) {
 async function dapi(path, opt = {}) {
   try {
     if (!BOT) {
-      return { ok: false, status: 500, data: { message: 'DISCORD_BOT_TOKEN fehlt.' }, error: 'DISCORD_BOT_TOKEN fehlt.' };
+      return {
+        ok: false,
+        status: 500,
+        data: null,
+        error: 'DISCORD_BOT_TOKEN fehlt.'
+      };
     }
 
     const r = await fetch(DISCORD + path, {
@@ -155,6 +168,7 @@ async function dapi(path, opt = {}) {
     };
   } catch (error) {
     console.error('[DISCORD API]', path, error);
+
     return {
       ok: false,
       status: 500,
@@ -459,80 +473,82 @@ module.exports = async (req, res) => {
 
     /* ---------- Übersicht ---------- */
     if (p === '/api/me') {
-      // /api/me darf nicht wegen einer einzelnen externen Abfrage mit 500 abbrechen.
       try {
-        if (SESSION) res.setHeader('Set-Cookie', sessionCookie(me));
+        res.setHeader('Set-Cookie', sessionCookie(me));
       } catch (error) {
-        console.error('[API/ME] Session-Cookie Fehler:', error);
+        console.error('[API/ME] Session-Cookie:', error);
       }
 
-      /* Roblox-Profil separat nachladen */
+      /* Nur das Roblox-Profil nachladen */
       if (u.searchParams.get('roblox')) {
+        let link = { ok: false, data: [] };
+
         try {
-          const link = await db(`roblox_links?discord_id=eq.${encodeURIComponent(me.id)}&select=*`);
-          const rl = link.ok ? (link.data || [])[0] : null;
-
-          if (!rl) return send(res, 200, { profile: null, error: null });
-
-          const diag = [];
-          const profile = await robloxProfile(rl.username, diag);
-
-          return send(res, 200, {
-            profile,
-            error: profile ? null : (diag.join('; ') || 'Profil nicht gefunden')
-          });
+          link = await db(
+            `roblox_links?discord_id=eq.${encodeURIComponent(me.id)}&select=*`
+          );
         } catch (error) {
-          console.error('[API/ME] Roblox-Profil Fehler:', error);
-          return send(res, 200, {
-            profile: null,
-            error: error?.message || 'Roblox-Profil konnte nicht geladen werden.'
-          });
+          console.error('[API/ME] roblox_links:', error);
         }
+
+        const rl = link.ok ? (link.data || [])[0] : null;
+
+        if (!rl) {
+          return send(res, 200, { profile: null });
+        }
+
+        const diag = [];
+        let profile = null;
+
+        try {
+          profile = await robloxProfile(rl.username, diag);
+        } catch (error) {
+          console.error('[API/ME] robloxProfile:', error);
+          diag.push(error?.message || String(error));
+        }
+
+        return send(res, 200, {
+          profile,
+          error: profile
+            ? null
+            : (diag.join('; ') || 'Profil nicht gefunden')
+        });
       }
 
       let b = null;
       let ws = [];
-      let rl = null;
-      let appeals = [];
+      let link = { ok: false, data: [] };
+      let ap = { ok: false, data: [] };
 
       try {
         b = await ban(me.id);
       } catch (error) {
-        console.error('[API/ME] Discord-Bann-Abfrage:', error);
+        console.error('[API/ME] ban:', error);
       }
 
       try {
-        const result = await cases(me.id, 'discord');
-        ws = Array.isArray(result) ? result : [];
+        ws = await cases(me.id, 'discord');
       } catch (error) {
-        console.error('[API/ME] Discord-Fälle:', error);
+        console.error('[API/ME] cases:', error);
       }
 
       try {
-        const link = await db(
-          `roblox_links?discord_id=eq.${encodeURIComponent(me.id)}&select=*`
+        link = await db(
+          `roblox_links?discord_id=${encodeURIComponent(me.id)}&select=*`
         );
-        if (link.ok && Array.isArray(link.data)) {
-          rl = link.data[0] || null;
-        } else if (!link.ok) {
-          console.error('[API/ME] Roblox-Link:', link.status, link.data);
-        }
       } catch (error) {
-        console.error('[API/ME] Roblox-Link Fehler:', error);
+        console.error('[API/ME] roblox_links:', error);
       }
 
       try {
-        const ap = await db(
-          `appeals?discord_id=eq.${encodeURIComponent(me.id)}&order=created_at.desc&select=*`
+        ap = await db(
+          `appeals?discord_id=${encodeURIComponent(me.id)}&order=created_at.desc&select=*`
         );
-        if (ap.ok && Array.isArray(ap.data)) {
-          appeals = ap.data;
-        } else if (!ap.ok) {
-          console.error('[API/ME] Appeals:', ap.status, ap.data);
-        }
       } catch (error) {
-        console.error('[API/ME] Appeals Fehler:', error);
+        console.error('[API/ME] appeals:', error);
       }
+
+      const rl = link.ok ? (link.data || [])[0] : null;
 
       let rc = [];
       let rp = null;
@@ -541,23 +557,29 @@ module.exports = async (req, res) => {
         try {
           rc = await robloxCases(rl.username);
         } catch (error) {
-          console.error('[API/ME] Roblox-Fälle:', error);
+          console.error('[API/ME] robloxCases:', error);
           rc = [];
         }
 
+        /*
+         * Profil nicht zwingend bei jedem /api/me erneut von Roblox laden.
+         * Falls es nicht im Cache ist, bleibt profile zunächst null.
+         */
         try {
           rp = cachedRobloxProfile(rl.username);
         } catch (error) {
-          console.error('[API/ME] Roblox-Profil Cache:', error);
+          console.error('[API/ME] cachedRobloxProfile:', error);
           rp = null;
         }
       }
 
-      const warns = ws.filter(x =>
-        ['warn', 'discord_warn'].includes(
-          String(x?.action || '').toLowerCase()
-        )
-      );
+      const warns = Array.isArray(ws)
+        ? ws.filter(x =>
+            ['warn', 'discord_warn'].includes(
+              String(x?.action || '').toLowerCase()
+            )
+          )
+        : [];
 
       return send(res, 200, {
         user: me,
@@ -569,59 +591,220 @@ module.exports = async (req, res) => {
           profile: rp,
           cases: rc
         },
-        appeals
+        appeals: ap.ok && Array.isArray(ap.data)
+          ? ap.data
+          : []
       });
     }
 
     /* ---------- Roblox Namen verknüpfen ---------- */
     if (p === '/api/roblox' && req.method === 'POST') {
-      const x = await readJson(req);
+      let x;
+
+      try {
+        x = await readJson(req);
+      } catch (error) {
+        console.error('[API/ROBLOX] JSON:', error);
+        return send(res, 400, {
+          error: 'Ungültige Anfrage.'
+        });
+      }
+
       const name = String(x.username || '').trim();
+      const preview = x.preview === true;
 
       if (!ROBLOX_NAME.test(name)) {
-        return send(res, 400, { error: 'Ungültiger Roblox Benutzername.' });
+        return send(res, 400, {
+          error: 'Ungültiger Roblox Benutzername.'
+        });
       }
 
-      const existing = await db(`roblox_links?discord_id=eq.${encodeURIComponent(me.id)}&select=*`);
+      /*
+       * ======================================================
+       * VORSCHAU
+       * ======================================================
+       *
+       * Bei preview=true wird KEIN Supabase-Zugriff gemacht.
+       * So kann ein Fehler in roblox_links die Vorschau nicht
+       * mehr mit HTTP 500 abbrechen.
+       */
+      if (preview) {
+        const diag = [];
+        let rp = null;
+
+        try {
+          rp = await robloxProfile(name, diag);
+        } catch (error) {
+          console.error(
+            '[API/ROBLOX] Vorschau:',
+            error
+          );
+
+          diag.push(
+            error?.message || String(error)
+          );
+        }
+
+        if (rp?.id) {
+          return send(res, 200, {
+            ok: true,
+            preview: true,
+            profile: rp,
+            unverified: false
+          });
+        }
+
+        /*
+         * Roblox konnte vom Vercel-Server gerade nicht erreicht
+         * werden. Die Vorschau bleibt trotzdem benutzbar.
+         */
+        console.error(
+          '[API/ROBLOX] Roblox Vorschau nicht verfügbar:',
+          diag.join('; ')
+        );
+
+        return send(res, 200, {
+          ok: true,
+          preview: true,
+          unverified: true,
+          profile: {
+            id: null,
+            username: name,
+            displayName: name,
+            avatarData: null,
+            avatarUrl: null,
+            avatarProxy: null,
+            unverified: true
+          }
+        });
+      }
+
+      /*
+       * ======================================================
+       * ECHTES SPEICHERN
+       * ======================================================
+       */
+
+      let existing;
+
+      try {
+        existing = await db(
+          `roblox_links?discord_id=${encodeURIComponent(me.id)}&select=*`
+        );
+      } catch (error) {
+        console.error(
+          '[API/ROBLOX] bestehende Verknüpfung:',
+          error
+        );
+
+        return send(res, 500, {
+          error:
+            'Roblox Verknüpfung konnte nicht geprüft werden.'
+        });
+      }
+
       if (!existing.ok) {
-        return send(res, 500, { error: 'Roblox Verknüpfung konnte nicht geprüft werden.' });
-      }
-      if (existing.data?.length) {
-        return send(res, 409, { error: 'Dein Roblox Benutzername wurde bereits fest hinterlegt und kann nicht geändert werden.' });
+        console.error(
+          '[API/ROBLOX] Supabase roblox_links:',
+          existing.status,
+          existing.data,
+          existing.error || ''
+        );
+
+        return send(res, 500, {
+          error:
+            'Roblox Verknüpfung konnte nicht geprüft werden.'
+        });
       }
 
+      if (existing.data?.length) {
+        return send(res, 409, {
+          error:
+            'Dein Roblox Benutzername wurde bereits fest hinterlegt und kann nicht geändert werden.'
+        });
+      }
+
+      /*
+       * Roblox beim tatsächlichen Speichern erneut prüfen.
+       */
       const diag = [];
-      let rp = await robloxProfile(name, diag);
-      let unverified = false;
+      let rp = null;
+
+      try {
+        rp = await robloxProfile(name, diag);
+      } catch (error) {
+        console.error(
+          '[API/ROBLOX] Roblox Prüfung beim Speichern:',
+          error
+        );
+      }
 
       if (!rp?.id) {
-        if (!diag.length) {
-          return send(res, 404, { error: 'Dieser Roblox Benutzername wurde nicht gefunden. Bitte überprüfe die Schreibweise.' });
+        if (diag.length) {
+          console.error(
+            '[API/ROBLOX] Roblox nicht erreichbar:',
+            diag.join('; ')
+          );
+
+          return send(res, 502, {
+            error:
+              'Roblox konnte gerade nicht erreicht werden. Bitte versuche es gleich erneut.'
+          });
         }
-        /* Roblox ist vom Server aus nicht erreichbar: Name trotzdem zulassen, Profil kommt später */
-        console.error('Roblox nicht erreichbar, Name ohne Prüfung:', diag.join('; '));
-        unverified = true;
-        rp = { id: null, username: name, displayName: name, avatarData: null, avatarUrl: null, avatarProxy: null, unverified: true };
+
+        return send(res, 404, {
+          error:
+            'Dieser Roblox Benutzername wurde nicht gefunden. Bitte überprüfe die Schreibweise.'
+        });
       }
 
-      /* Nur Vorschau: nichts speichern */
-      if (x.preview) {
-        return send(res, 200, { ok: true, preview: true, profile: rp, unverified });
+      /*
+       * Roblox-Verknüpfung speichern.
+       */
+      let r;
+
+      try {
+        r = await db('roblox_links', {
+          method: 'POST',
+          headers: {
+            Prefer: 'return=minimal'
+          },
+          body: JSON.stringify({
+            discord_id: me.id,
+            username: rp.username,
+            updated_at: new Date().toISOString()
+          })
+        });
+      } catch (error) {
+        console.error(
+          '[API/ROBLOX] Speichern:',
+          error
+        );
+
+        return send(res, 500, {
+          error:
+            'Roblox Name konnte nicht gespeichert werden.'
+        });
       }
 
-      const r = await db('roblox_links', {
-        method: 'POST',
-        headers: { Prefer: 'return=minimal' },
-        body: JSON.stringify({
-          discord_id: me.id,
-          username: rp.username,
-          updated_at: new Date().toISOString()
-        })
+      if (!r.ok) {
+        console.error(
+          '[API/ROBLOX] Supabase Insert:',
+          r.status,
+          r.data,
+          r.error || ''
+        );
+
+        return send(res, 500, {
+          error:
+            'Roblox Name konnte nicht gespeichert werden.'
+        });
+      }
+
+      return send(res, 200, {
+        ok: true,
+        profile: rp
       });
-
-      return r.ok
-        ? send(res, 200, { ok: true, profile: rp })
-        : send(res, 500, { error: 'Roblox Name konnte nicht gespeichert werden.' });
     }
 
     /* ---------- Anträge ---------- */
