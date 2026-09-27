@@ -102,28 +102,66 @@ function sessionCookie(user) {
 }
 
 async function db(path, opt = {}) {
-  const r = await fetch(`${SUPA}/rest/v1/${path}`, {
-    ...opt,
-    headers: {
-      apikey: SKEY,
-      Authorization: `Bearer ${SKEY}`,
-      'Content-Type': 'application/json',
-      ...(opt.headers || {})
+  try {
+    if (!SUPA || !SKEY) {
+      return { ok: false, status: 500, data: { message: 'Supabase-Konfiguration fehlt.' }, error: 'SUPABASE_URL oder SUPABASE_SERVICE_ROLE_KEY fehlt.' };
     }
-  });
-  return { ok: r.ok, status: r.status, data: await r.json().catch(() => null) };
+
+    const r = await fetch(`${SUPA}/rest/v1/${path}`, {
+      ...opt,
+      headers: {
+        apikey: SKEY,
+        Authorization: `Bearer ${SKEY}`,
+        'Content-Type': 'application/json',
+        ...(opt.headers || {})
+      }
+    });
+
+    return {
+      ok: r.ok,
+      status: r.status,
+      data: await r.json().catch(() => null)
+    };
+  } catch (error) {
+    console.error('[DB]', path, error);
+    return {
+      ok: false,
+      status: 500,
+      data: null,
+      error: error?.message || String(error)
+    };
+  }
 }
 
 async function dapi(path, opt = {}) {
-  const r = await fetch(DISCORD + path, {
-    ...opt,
-    headers: {
-      Authorization: `Bot ${BOT}`,
-      'Content-Type': 'application/json',
-      ...(opt.headers || {})
+  try {
+    if (!BOT) {
+      return { ok: false, status: 500, data: { message: 'DISCORD_BOT_TOKEN fehlt.' }, error: 'DISCORD_BOT_TOKEN fehlt.' };
     }
-  });
-  return { ok: r.ok, status: r.status, data: await r.json().catch(() => null) };
+
+    const r = await fetch(DISCORD + path, {
+      ...opt,
+      headers: {
+        Authorization: `Bot ${BOT}`,
+        'Content-Type': 'application/json',
+        ...(opt.headers || {})
+      }
+    });
+
+    return {
+      ok: r.ok,
+      status: r.status,
+      data: await r.json().catch(() => null)
+    };
+  } catch (error) {
+    console.error('[DISCORD API]', path, error);
+    return {
+      ok: false,
+      status: 500,
+      data: null,
+      error: error?.message || String(error)
+    };
+  }
 }
 
 function avatar(u) {
@@ -421,40 +459,117 @@ module.exports = async (req, res) => {
 
     /* ---------- Übersicht ---------- */
     if (p === '/api/me') {
-      res.setHeader('Set-Cookie', sessionCookie(me));
-
-      /* Nur das Roblox-Profil nachladen (langsame Roblox-Abfrage getrennt von der Übersicht) */
-      if (u.searchParams.get('roblox')) {
-        const link = await db(`roblox_links?discord_id=eq.${encodeURIComponent(me.id)}&select=*`);
-        const rl = link.ok ? (link.data || [])[0] : null;
-        if (!rl) return send(res, 200, { profile: null });
-        const diag = [];
-        const profile = await robloxProfile(rl.username, diag);
-        return send(res, 200, { profile, error: profile ? null : (diag.join('; ') || 'Profil nicht gefunden') });
+      // /api/me darf nicht wegen einer einzelnen externen Abfrage mit 500 abbrechen.
+      try {
+        if (SESSION) res.setHeader('Set-Cookie', sessionCookie(me));
+      } catch (error) {
+        console.error('[API/ME] Session-Cookie Fehler:', error);
       }
 
-      const [b, ws, link, ap] = await Promise.all([
-        ban(me.id),
-        cases(me.id, 'discord'),
-        db(`roblox_links?discord_id=eq.${encodeURIComponent(me.id)}&select=*`),
-        db(`appeals?discord_id=eq.${encodeURIComponent(me.id)}&order=created_at.desc&select=*`)
-      ]);
+      /* Roblox-Profil separat nachladen */
+      if (u.searchParams.get('roblox')) {
+        try {
+          const link = await db(`roblox_links?discord_id=eq.${encodeURIComponent(me.id)}&select=*`);
+          const rl = link.ok ? (link.data || [])[0] : null;
 
-      const rl = link.ok ? (link.data || [])[0] : null;
-      const rc = rl ? await robloxCases(rl.username) : [];
-      const rp = rl ? cachedRobloxProfile(rl.username) : null;
+          if (!rl) return send(res, 200, { profile: null, error: null });
+
+          const diag = [];
+          const profile = await robloxProfile(rl.username, diag);
+
+          return send(res, 200, {
+            profile,
+            error: profile ? null : (diag.join('; ') || 'Profil nicht gefunden')
+          });
+        } catch (error) {
+          console.error('[API/ME] Roblox-Profil Fehler:', error);
+          return send(res, 200, {
+            profile: null,
+            error: error?.message || 'Roblox-Profil konnte nicht geladen werden.'
+          });
+        }
+      }
+
+      let b = null;
+      let ws = [];
+      let rl = null;
+      let appeals = [];
+
+      try {
+        b = await ban(me.id);
+      } catch (error) {
+        console.error('[API/ME] Discord-Bann-Abfrage:', error);
+      }
+
+      try {
+        const result = await cases(me.id, 'discord');
+        ws = Array.isArray(result) ? result : [];
+      } catch (error) {
+        console.error('[API/ME] Discord-Fälle:', error);
+      }
+
+      try {
+        const link = await db(
+          `roblox_links?discord_id=eq.${encodeURIComponent(me.id)}&select=*`
+        );
+        if (link.ok && Array.isArray(link.data)) {
+          rl = link.data[0] || null;
+        } else if (!link.ok) {
+          console.error('[API/ME] Roblox-Link:', link.status, link.data);
+        }
+      } catch (error) {
+        console.error('[API/ME] Roblox-Link Fehler:', error);
+      }
+
+      try {
+        const ap = await db(
+          `appeals?discord_id=eq.${encodeURIComponent(me.id)}&order=created_at.desc&select=*`
+        );
+        if (ap.ok && Array.isArray(ap.data)) {
+          appeals = ap.data;
+        } else if (!ap.ok) {
+          console.error('[API/ME] Appeals:', ap.status, ap.data);
+        }
+      } catch (error) {
+        console.error('[API/ME] Appeals Fehler:', error);
+      }
+
+      let rc = [];
+      let rp = null;
+
+      if (rl?.username) {
+        try {
+          rc = await robloxCases(rl.username);
+        } catch (error) {
+          console.error('[API/ME] Roblox-Fälle:', error);
+          rc = [];
+        }
+
+        try {
+          rp = cachedRobloxProfile(rl.username);
+        } catch (error) {
+          console.error('[API/ME] Roblox-Profil Cache:', error);
+          rp = null;
+        }
+      }
+
+      const warns = ws.filter(x =>
+        ['warn', 'discord_warn'].includes(
+          String(x?.action || '').toLowerCase()
+        )
+      );
 
       return send(res, 200, {
         user: me,
         banned: !!b,
-        ban: b ? { reason: b.reason } : null,
-        warns: ws.filter(x => ['warn', 'discord_warn'].includes(String(x.action).toLowerCase())),
+        ban: b ? { reason: b.reason || null } : null,
+        warns,
         roblox: {
           username: rl?.username || null,
           profile: rp,
           cases: rc
         },
-        appeals: ap.ok ? ap.data || [] : []
+        appeals
       });
     }
 
