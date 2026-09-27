@@ -1,3 +1,5 @@
+"use strict";
+
 const API = "/api/team-dashboard";
 const POLL_MS = 5000;
 
