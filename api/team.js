@@ -1,7 +1,7 @@
 const GUILD_ID = "1548652649866596473";
 const TEAM_ROLE_ID = "1551649116675768414";
 const DISCORD_API = "https://discord.com/api/v10";
-const BOT_API_BASE = "http://server.infynix.de:40002";
+const BOT_API_BASE = "http://server.infynix.de:40377";
 
 function send(res, status, data) {
   return res.status(status).json(data);
