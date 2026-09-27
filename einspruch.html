@@ -167,7 +167,8 @@ input:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(45
 textarea{min-height:150px;resize:vertical}
 .counter{text-align:right;font-size:12px;color:#6d8098;margin-top:6px}
 .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:14px}
-.toast{position:fixed;right:18px;bottom:18px;z-index:40;max-width:360px;padding:12px 16px;background:#12233a;border:1px solid var(--line-strong);border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.toast{position:fixed;right:18px;bottom:18px;z-index:40;max-width:360px;padding:12px 16px;background:#12233a;border:1px solid var(--line-strong);border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.5);cursor:pointer;font-size:12px;font-family:ui-monospace,monospace}
+.toast[style*="pre-wrap"]{max-width:min(640px,calc(100vw - 36px))}
 
 footer{border-top:1px solid var(--line);padding:22px 0 30px;text-align:center;color:#607289;font-size:12px}
 
@@ -319,7 +320,7 @@ footer{border-top:1px solid var(--line);padding:22px 0 30px;text-align:center;co
   </div>
 </div>
 
-<div id="toast" class="toast hidden" role="status"></div>
+<div id="toast" class="toast hidden" role="status" onclick="this.classList.add('hidden')" title="Zum Schließen klicken"></div>
 
 <script>
 const $ = id => document.getElementById(id);
@@ -340,6 +341,7 @@ async function api(url, options = {}) {
   if (!res.ok) {
     const err = new Error(data.error || 'Etwas ist schiefgelaufen.');
     err.status = res.status;
+    err.debug = data.debug || null;
     throw err;
   }
   return data;
@@ -356,12 +358,28 @@ function fmtDate(v) {
   return d.toLocaleString('de-DE', {dateStyle:'medium', timeStyle:'short'});
 }
 
-function toast(message) {
+function toast(message, opts = {}) {
   const t = $('toast');
   t.textContent = message;
+  t.style.whiteSpace = opts.pre ? 'pre-wrap' : '';
+  t.style.maxHeight = opts.pre ? '60vh' : '';
+  t.style.overflowY = opts.pre ? 'auto' : '';
+  t.style.userSelect = 'text';
   t.classList.remove('hidden');
   clearTimeout(window.__toastTimer);
-  window.__toastTimer = setTimeout(() => t.classList.add('hidden'), 4000);
+  if (!opts.sticky) {
+    window.__toastTimer = setTimeout(() => t.classList.add('hidden'), 4000);
+  }
+}
+
+/* Fehler inkl. Debug-Info gut lesbar anzeigen, damit man ihn direkt
+   von der Seite kopieren kann, ohne die Browser-Konsole zu öffnen. */
+function toastError(e) {
+  let text = e.message || 'Etwas ist schiefgelaufen.';
+  if (e.debug) {
+    text += '\n\n--- Debug-Info (bitte komplett kopieren) ---\n' + JSON.stringify(e.debug, null, 2);
+  }
+  toast(text, { pre: !!e.debug, sticky: !!e.debug });
 }
 
 function show(id) {
@@ -706,7 +724,7 @@ $('save').onclick = async () => {
     $('rbx').value = '';
     await load();
   } catch (e) {
-    toast(e.message);
+    toastError(e);
   } finally {
     btn.disabled = false;
     btn.textContent = 'Ja, verknüpfen';
