@@ -4,8 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#07101f">
-  <meta name="description" content="Palm City RP – neuer Notruf Hamburg RP Server. Baue mit uns eine Stadt, in der Entscheidungen Geschichten schreiben.">
-  <title>Palm City RP — Deine Stadt. Deine Entscheidungen.</title>
+  <meta name="description" content="Notruf Craftopia – neuer Notruf Hamburg RP Server. Baue mit uns eine Stadt, in der Entscheidungen Geschichten schreiben.">
+  <link rel="canonical" href="https://notrufcraftopia.vercel.app/">
+  <title>Notruf Craftopia — Deine Stadt. Deine Entscheidungen.</title>
 
   <style>
     :root{
@@ -466,6 +467,177 @@
       color:#8292aa
     }
 
+    .partners-section{
+      position:relative;
+    }
+
+    .partner-live{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      margin-top:9px;
+      padding:6px 10px;
+      border:1px solid rgba(81,229,139,.16);
+      border-radius:999px;
+      background:rgba(81,229,139,.06);
+      color:#9cebbd;
+      font-size:11px;
+      font-weight:800;
+    }
+
+    .partner-live i{
+      width:7px;
+      height:7px;
+      border-radius:50%;
+      background:var(--green);
+      box-shadow:0 0 12px rgba(81,229,139,.75);
+    }
+
+    .partner-meta{
+      display:flex;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:9px;
+      color:#71839e;
+      font-size:11px;
+    }
+
+    .partners-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:14px;
+    }
+
+    .partner-card{
+      position:relative;
+      overflow:hidden;
+      padding:20px;
+      border:1px solid rgba(110,170,255,.13);
+      border-radius:22px;
+      background:
+        radial-gradient(circle at 100% 0%,rgba(74,168,255,.12),transparent 35%),
+        linear-gradient(145deg,rgba(12,25,47,.82),rgba(5,11,21,.88));
+      box-shadow:0 18px 55px rgba(0,0,0,.22);
+      transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;
+    }
+
+    .partner-card:before{
+      content:"";
+      position:absolute;
+      inset:0 auto 0 0;
+      width:3px;
+      background:linear-gradient(180deg,var(--cyan),var(--blue),transparent);
+      opacity:.9;
+    }
+
+    .partner-card:hover{
+      transform:translateY(-4px);
+      border-color:rgba(94,231,255,.3);
+      box-shadow:0 25px 70px rgba(0,0,0,.32),0 0 30px rgba(74,168,255,.08);
+    }
+
+    .partner-top{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .partner-icon{
+      width:48px;
+      height:48px;
+      flex:none;
+      display:grid;
+      place-items:center;
+      border:1px solid rgba(94,231,255,.17);
+      border-radius:15px;
+      background:linear-gradient(145deg,rgba(74,168,255,.16),rgba(123,75,216,.13));
+      font-size:21px;
+      box-shadow:inset 0 0 22px rgba(94,231,255,.04);
+    }
+
+    .partner-name{
+      font-size:17px;
+      font-weight:900;
+      line-height:1.2;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .partner-owner{
+      margin-top:4px;
+      color:#71839e;
+      font-size:11px;
+    }
+
+    .partner-description{
+      min-height:64px;
+      margin-top:17px;
+      color:#9eacc1;
+      font-size:13px;
+      line-height:1.65;
+    }
+
+    .partner-bottom{
+      display:flex;
+      align-items:center;
+      gap:9px;
+      margin-top:18px;
+    }
+
+    .partner-members{
+      padding:7px 10px;
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:11px;
+      background:rgba(255,255,255,.035);
+      color:#dbe8f8;
+      font-size:11px;
+      font-weight:800;
+    }
+
+    .partner-link{
+      margin-left:auto;
+      padding:8px 11px;
+      border:1px solid rgba(94,231,255,.16);
+      border-radius:11px;
+      background:rgba(94,231,255,.07);
+      color:#bfefff;
+      font-size:11px;
+      font-weight:900;
+    }
+
+    .partner-link:hover{
+      background:rgba(94,231,255,.14);
+      border-color:rgba(94,231,255,.3);
+    }
+
+    .partner-empty{
+      grid-column:1/-1;
+      padding:40px 25px;
+      border:1px dashed rgba(122,160,216,.2);
+      border-radius:22px;
+      background:rgba(255,255,255,.025);
+      color:#8394ac;
+      text-align:center;
+    }
+
+    .partner-empty strong{
+      display:block;
+      margin-bottom:5px;
+      color:#dce9f8;
+      font-size:15px;
+    }
+
+    .partners-fade{
+      animation:partnersIn .45s ease both;
+    }
+
+    @keyframes partnersIn{
+      from{opacity:0;transform:translateY(12px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+
+
     .skeleton{
       height:78px;
       border-radius:17px;
@@ -651,7 +823,8 @@
         grid-template-columns:1fr 1fr
       }
 
-      .team-grid{
+      .team-grid,
+      .partners-grid{
         grid-template-columns:1fr 1fr
       }
 
@@ -674,7 +847,8 @@
       }
 
       .features,
-      .team-grid{
+      .team-grid,
+      .partners-grid{
         grid-template-columns:1fr
       }
 
@@ -709,7 +883,7 @@
   <a class="brand" href="#home">
     <div class="brand-mark"></div>
     <div>
-      <span>PALM CITY RP</span>
+      <span>NOTRUF CRAFTOPIA</span>
       <small>NOTRUF HAMBURG RP</small>
     </div>
   </a>
@@ -717,6 +891,7 @@
   <div class="navlinks">
     <a href="#mission">Mission</a>
     <a href="#team">Team</a>
+    <a href="#partner">Partner</a>
     <a href="#discord">Discord</a>
     <a href="#einspruch">Widerspruch</a>
   </div>
@@ -749,7 +924,7 @@
         </h1>
 
         <p>
-          Palm City RP entsteht gerade von Grund auf.
+          Notruf Craftopia entsteht gerade von Grund auf.
           Wir wollen keinen Server, auf dem alles nach einer Session
           vergessen ist. Wir bauen eine Stadt, in der Entscheidungen
           Konsequenzen haben und Charaktere ihre eigene Geschichte schreiben.
@@ -763,12 +938,12 @@
             target="_blank"
             rel="noopener"
           >
-            🌴 Discord beitreten
+            🚨 Discord beitreten
           </a>
 
           <a
             class="btn btn-secondary"
-            href="https://palmcityrp.vercel.app/einspruch"
+            href="https://notrufcraftopia.vercel.app/einspruch"
             target="_blank"
             rel="noopener"
           >
@@ -783,7 +958,7 @@
 
         <img
           src="logo.png"
-          alt="Palm City RP"
+          alt="Notruf Craftopia"
         >
 
         <div class="mini-status">
@@ -819,7 +994,7 @@
       </div>
 
       <p>
-        Wir wollen Palm City gemeinsam mit der Community entwickeln
+        Wir wollen Notruf Craftopia gemeinsam mit der Community entwickeln
         und von Anfang an eine Basis schaffen, auf der langfristige
         Geschichten entstehen können.
       </p>
@@ -886,7 +1061,7 @@
     <div class="section-head">
 
       <div>
-        <div class="kicker">Palm City</div>
+        <div class="kicker">Notruf Craftopia</div>
         <h2>Was uns wichtig ist.</h2>
       </div>
 
@@ -922,7 +1097,7 @@
         <div class="icon">🌴</div>
         <strong>Gemeinsam bauen</strong>
         <span>
-          Du kannst Palm City von Anfang an mitprägen.
+          Du kannst Notruf Craftopia von Anfang an mitprägen.
         </span>
       </div>
 
@@ -936,12 +1111,12 @@
 
       <div>
         <div class="kicker">Das Team</div>
-        <h2>Die Menschen hinter Palm City.</h2>
+        <h2>Die Menschen hinter Notruf Craftopia.</h2>
       </div>
 
       <p>
         Die Teamliste wird automatisch aus Discord geladen.
-        Dafür wird die Palm-City-Teamrolle verwendet.
+        Dafür wird die Notruf-Craftopia-Teamrolle verwendet.
       </p>
 
     </div>
@@ -978,6 +1153,36 @@
 
   </section>
 
+  <section id="partner" class="partners-section">
+
+    <div class="section-head">
+
+      <div>
+        <div class="kicker">Offizielle Partnerschaften</div>
+        <h2>Unsere Partner.</h2>
+        <div class="partner-meta">
+          <span class="partner-live"><i></i> Live synchronisiert</span>
+          <span id="partnerUpdated">Partner werden geladen…</span>
+        </div>
+      </div>
+
+      <p>
+        Offizielle Partnerserver von Notruf Craftopia werden automatisch aus
+        unserem Partnerschaftssystem übernommen. Sobald eine Partnerschaft
+        angenommen oder beendet wird, aktualisiert sich die Liste automatisch.
+      </p>
+
+    </div>
+
+    <div class="partners-grid" id="partnersGrid">
+      <div class="partner-empty">
+        <strong>🤝 Partnerschaften werden geladen</strong>
+        Einen Moment bitte…
+      </div>
+    </div>
+
+  </section>
+
   <section id="discord">
 
     <div class="discord-box">
@@ -989,12 +1194,12 @@
           <div class="kicker">Discord</div>
 
           <h2>
-            Werde Teil von Palm City.
+            Werde Teil von Notruf Craftopia.
           </h2>
 
           <p style="color:#aebbd0;margin-top:12px;max-width:600px">
             Wir sind noch am Anfang. Genau deshalb kannst du nicht nur
-            zuschauen, sondern mitbestimmen, wie Palm City am Ende aussieht.
+            zuschauen, sondern mitbestimmen, wie Notruf Craftopia am Ende aussieht.
           </p>
 
           <div class="stats">
@@ -1043,7 +1248,7 @@
                 class="widget-name"
                 id="widgetName"
               >
-                Palm City RP
+                Notruf Craftopia
               </div>
 
               <div
@@ -1101,7 +1306,7 @@
       <a
         class="btn btn-secondary"
         style="border-color:rgba(255,95,110,.3)"
-        href="https://palmcityrp.vercel.app/einspruch"
+        href="https://notrufcraftopia.vercel.app/einspruch"
         target="_blank"
         rel="noopener"
       >
@@ -1119,7 +1324,7 @@
   <div class="footer-inner">
 
     <div>
-      © <span id="year"></span> Palm City RP
+      © <span id="year"></span> Notruf Craftopia
     </div>
 
     <div>
@@ -1207,7 +1412,7 @@ async function loadWidget(){
     document.getElementById(
       "widgetName"
     ).textContent =
-      d.name || "Palm City RP";
+      d.name || "Notruf Craftopia";
 
     if(d.instant_invite){
 
@@ -1285,6 +1490,86 @@ async function loadWidget(){
 
 }
 
+function safePartnerUrl(value){
+
+  try{
+    const url = new URL(String(value || ""));
+    if(url.protocol === "https:" || url.protocol === "http:") return url.href;
+  }catch(e){}
+
+  return "";
+
+}
+
+function renderPartners(partners, error){
+
+  const grid = document.getElementById("partnersGrid");
+  const updated = document.getElementById("partnerUpdated");
+
+  if(!grid || !updated) return;
+
+  grid.innerHTML = "";
+
+  if(error){
+    updated.textContent = "Partner-API momentan nicht erreichbar";
+    grid.innerHTML = `
+      <div class="partner-empty">
+        <strong>⚠️ Partnerschaften konnten nicht geladen werden</strong>
+        Die Verbindung zum Partnerschaftssystem ist momentan nicht verfügbar.
+      </div>
+    `;
+    return;
+  }
+
+  updated.textContent = `${partners.length} offizieller Partner${partners.length === 1 ? "" : "en"}`;
+
+  if(!partners.length){
+    grid.innerHTML = `
+      <div class="partner-empty partners-fade">
+        <strong>🤝 Noch keine offiziellen Partnerserver</strong>
+        Sobald eine Partnerschaft angenommen wurde, erscheint sie hier automatisch.
+      </div>
+    `;
+    return;
+  }
+
+  partners.forEach((partner,index) => {
+
+    const card = document.createElement("article");
+    card.className = "partner-card partners-fade";
+    card.style.animationDelay = `${Math.min(index * 55,350)}ms`;
+
+    const name = escapeHtml(partner.server_name || "Unbekannter Server");
+    const owner = escapeHtml(partner.owner_name || "Unbekannt");
+    const text = escapeHtml(
+      partner.advertisement || "Offizieller Partnerserver von Notruf Craftopia."
+    );
+    const members = Number(partner.member_count || 0).toLocaleString("de-DE");
+    const url = safePartnerUrl(partner.server_link);
+
+    card.innerHTML = `
+      <div class="partner-top">
+        <div class="partner-icon">🤝</div>
+        <div style="min-width:0">
+          <div class="partner-name">${name}</div>
+          <div class="partner-owner">Ansprechpartner: ${owner}</div>
+        </div>
+      </div>
+
+      <div class="partner-description">${text}</div>
+
+      <div class="partner-bottom">
+        <div class="partner-members">👥 ${members} Mitglieder</div>
+        ${url ? `<a class="partner-link" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">Server öffnen ↗</a>` : ""}
+      </div>
+    `;
+
+    grid.appendChild(card);
+
+  });
+
+}
+
 async function loadTeam(){
 
   const grid =
@@ -1316,6 +1601,11 @@ async function loadTeam(){
       )
         ? data.members
         : [];
+
+    renderPartners(
+      Array.isArray(data.partners) ? data.partners : [],
+      data.partners_error || null
+    );
 
     document.getElementById(
       "teamCount"
@@ -1376,7 +1666,7 @@ async function loadTeam(){
           </div>
 
           <div class="member-role">
-            Palm City Team
+            Notruf Craftopia Team
           </div>
 
         </div>
@@ -1414,6 +1704,8 @@ async function loadTeam(){
         Prüfe den Bot-Token und die Team-API.
       </div>
     `;
+
+    renderPartners([], "team_api_error");
 
   }
 
