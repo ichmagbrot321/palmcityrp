@@ -43,6 +43,7 @@ const BOT_TIMEOUT_MS = 8000;
 
 // Aktion -> [Methode, Pfad in der Bot-API]
 const ROUTES = {
+  health: ["GET", "/team/health"],
   state: ["GET", "/team/state"],
   users: ["GET", "/team/users"],
   hire: ["POST", "/team/hire"],
@@ -281,13 +282,27 @@ async function proxy(req, res, url, action, session) {
     });
   }
 
-  const [method, path] = ROUTES[action];
+  const route = ROUTES[action];
+
+  if (!route) {
+    return json(res, 404, {
+      ok: false,
+      error: `Unbekannte Dashboard-Aktion: ${action}`,
+      code: "route_not_found",
+    });
+  }
+
+  const [method, path] = route;
 
   if (req.method !== method) {
     return json(res, 405, {
       ok: false,
-      error: "Methode nicht erlaubt.",
+      error: `Methode nicht erlaubt. Aktion "${action}" erwartet ${method}, erhalten wurde ${req.method}.`,
       code: "method",
+      action,
+      expected_method: method,
+      received_method: req.method,
+      route: path,
     });
   }
 
@@ -318,23 +333,20 @@ async function proxy(req, res, url, action, session) {
   }
 
   const controller = new AbortController();
-  const timer = setTimeout(
-    () => controller.abort(),
-    BOT_TIMEOUT_MS
-  );
+  const timer = setTimeout(() => controller.abort(), BOT_TIMEOUT_MS);
 
   try {
-    // Die Ziel-URL wird jetzt INNERHALB des try gebaut. Eine kaputte
-    // TEAM_API_URL wirft hier "Invalid URL" und wird sauber gemeldet,
-    // statt die ganze Vercel-Funktion abstürzen zu lassen.
     let target;
 
     try {
       target = new URL(BOT_API_URL + path);
-    } catch {
+    } catch (error) {
+      console.error("Ungültige TEAM_API_URL:", BOT_API_URL, error);
+
       return json(res, 500, {
         ok: false,
-        error: "TEAM_API_URL in Vercel ist keine gültige Adresse (z. B. http://server.infynix.de:40002).",
+        error:
+          "TEAM_API_URL in Vercel ist keine gültige Adresse. Beispiel: http://server.infynix.de:40002",
         code: "bot_url_config",
       });
     }
@@ -350,6 +362,7 @@ async function proxy(req, res, url, action, session) {
     const upstream = await fetch(target, {
       method,
       headers: {
+        Accept: "application/json",
         "Content-Type": "application/json",
         "X-API-Key": API_KEY,
         "X-Actor-Id": session.id,
@@ -358,15 +371,27 @@ async function proxy(req, res, url, action, session) {
       signal: controller.signal,
     });
 
+    const contentType = upstream.headers.get("content-type") || "";
     const text = await upstream.text();
 
     let data = null;
 
     try {
-      data = JSON.parse(text);
+      data = text ? JSON.parse(text) : null;
     } catch {
       data = null;
     }
+
+    // Sehr ausführliches Server-Logging, damit 405/502 nicht mehr
+    // nur als "Ungültige Antwort" erscheinen.
+    console.error("Dashboard -> Bot", {
+      action,
+      method,
+      target: target.toString(),
+      status: upstream.status,
+      contentType,
+      responsePreview: text.slice(0, 1500),
+    });
 
     if (upstream.status === 401) {
       return json(res, 502, {
@@ -374,34 +399,77 @@ async function proxy(req, res, url, action, session) {
         error:
           "Der API-Key von Vercel und Bot stimmt nicht überein.",
         code: "bad_key",
+        action,
+        upstream_status: upstream.status,
+        upstream_url: target.toString(),
+        upstream_content_type: contentType,
+        upstream_response: text.slice(0, 1000),
+      });
+    }
+
+    // 405 vom Bot: Das ist besonders wichtig, weil damit sichtbar wird,
+    // ob tatsächlich der aiohttp-Endpunkt oder ein vorgeschalteter Proxy
+    // die falsche HTTP-Methode ablehnt.
+    if (upstream.status === 405) {
+      return json(res, 502, {
+        ok: false,
+        error:
+          `Der Bot/Proxy hat HTTP 405 (Method Not Allowed) zurückgegeben. ` +
+          `Gesendet: ${method} ${target.pathname}.`,
+        code: "bot_method_not_allowed",
+        action,
+        request_method: method,
+        request_path: target.pathname,
+        upstream_status: 405,
+        upstream_url: target.toString(),
+        upstream_allow: upstream.headers.get("allow") || null,
+        upstream_content_type: contentType,
+        upstream_response: text.slice(0, 1500),
       });
     }
 
     if (!data) {
       return json(res, 502, {
         ok: false,
-        error: `Ungültige Antwort vom Bot. (HTTP ${upstream.status})`,
+        error:
+          `Ungültige Antwort vom Bot. (HTTP ${upstream.status})`,
         code: "bad_response",
+        action,
+        request_method: method,
+        request_path: target.pathname,
+        upstream_status: upstream.status,
+        upstream_url: target.toString(),
+        upstream_content_type: contentType,
+        upstream_response: text.slice(0, 1500),
       });
     }
 
     return json(res, upstream.status, data);
   } catch (error) {
     if (error && error.name === "AbortError") {
+      console.error("Bot API Timeout:", {
+        action,
+        method,
+        url: `${BOT_API_URL}${path}`,
+        timeout_ms: BOT_TIMEOUT_MS,
+      });
+
       return json(res, 504, {
         ok: false,
         error:
           "Der Bot hat zu lange gebraucht. Die Aktion wurde eventuell trotzdem ausgeführt, bitte Seite neu laden.",
         code: "bot_timeout",
+        action,
+        timeout_ms: BOT_TIMEOUT_MS,
+        upstream_url: `${BOT_API_URL}${path}`,
       });
     }
 
     console.error("Bot API Fehler:", error);
 
-    // Kurzer technischer Grund (z. B. ECONNREFUSED, ENOTFOUND, ETIMEDOUT),
-    // damit man sofort sieht, warum die Verbindung scheitert.
     const reason =
       (error && error.cause && error.cause.code) ||
+      (error && error.code) ||
       (error && error.name) ||
       "unbekannt";
 
@@ -409,7 +477,154 @@ async function proxy(req, res, url, action, session) {
       ok: false,
       error: `Der Bot ist nicht erreichbar. (Grund: ${reason})`,
       code: "bot_offline",
+      action,
+      upstream_url: `${BOT_API_URL}${path}`,
+      reason,
+      detail: error && error.message ? error.message : String(error),
     });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Prüft den Bot separat über GET /team/health.
+// Dadurch lässt sich unterscheiden:
+// - Bot/Port nicht erreichbar
+// - API-Key falsch
+// - /team/health selbst liefert 405
+// - Bot läuft, aber TeamModerationCog fehlt
+async function checkBotHealth(session) {
+  if (!API_KEY) {
+    return {
+      ok: false,
+      status: 500,
+      code: "api_key_config",
+      error: "DASHBOARD_API_KEY ist in Vercel nicht gesetzt.",
+    };
+  }
+
+  let target;
+
+  try {
+    target = new URL(BOT_API_URL + "/team/health");
+  } catch {
+    return {
+      ok: false,
+      status: 500,
+      code: "bot_url_config",
+      error:
+        "TEAM_API_URL in Vercel ist keine gültige Adresse.",
+    };
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), BOT_TIMEOUT_MS);
+
+  try {
+    const upstream = await fetch(target, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "X-API-Key": API_KEY,
+        "X-Actor-Id": session.id,
+      },
+      signal: controller.signal,
+    });
+
+    const contentType = upstream.headers.get("content-type") || "";
+    const text = await upstream.text();
+
+    let data = null;
+
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch {
+      data = null;
+    }
+
+    console.error("Dashboard Bot Health", {
+      target: target.toString(),
+      status: upstream.status,
+      contentType,
+      responsePreview: text.slice(0, 1000),
+    });
+
+    if (upstream.status === 405) {
+      return {
+        ok: false,
+        status: 502,
+        code: "bot_health_method_not_allowed",
+        error:
+          "GET /team/health wurde vom Bot/Proxy mit HTTP 405 abgelehnt.",
+        upstream_status: 405,
+        upstream_url: target.toString(),
+        upstream_allow: upstream.headers.get("allow") || null,
+        upstream_content_type: contentType,
+        upstream_response: text.slice(0, 1000),
+      };
+    }
+
+    if (upstream.status === 401) {
+      return {
+        ok: false,
+        status: 502,
+        code: "bad_key",
+        error:
+          "Der API-Key von Vercel und Bot stimmt nicht überein.",
+        upstream_status: 401,
+        upstream_url: target.toString(),
+        upstream_response: text.slice(0, 1000),
+      };
+    }
+
+    if (!data) {
+      return {
+        ok: false,
+        status: 502,
+        code: "bot_health_bad_response",
+        error:
+          `Der Bot-Health-Endpunkt lieferte keine gültige JSON-Antwort (HTTP ${upstream.status}).`,
+        upstream_status: upstream.status,
+        upstream_url: target.toString(),
+        upstream_content_type: contentType,
+        upstream_response: text.slice(0, 1000),
+      };
+    }
+
+    return {
+      ok: upstream.ok && data.ok !== false,
+      status: upstream.status,
+      code: upstream.ok ? "ok" : "bot_health_error",
+      data,
+      upstream_status: upstream.status,
+      upstream_url: target.toString(),
+    };
+  } catch (error) {
+    if (error && error.name === "AbortError") {
+      return {
+        ok: false,
+        status: 504,
+        code: "bot_health_timeout",
+        error: "Der Bot-Health-Endpunkt hat nicht rechtzeitig geantwortet.",
+        upstream_url: target.toString(),
+      };
+    }
+
+    const reason =
+      (error && error.cause && error.cause.code) ||
+      (error && error.code) ||
+      (error && error.name) ||
+      "unbekannt";
+
+    return {
+      ok: false,
+      status: 502,
+      code: "bot_health_offline",
+      error: `Der Bot ist über /team/health nicht erreichbar. (Grund: ${reason})`,
+      reason,
+      detail: error && error.message ? error.message : String(error),
+      upstream_url: target.toString(),
+    };
   } finally {
     clearTimeout(timer);
   }
@@ -486,6 +701,31 @@ async function handle(req, res) {
       error: "Unbekannte Aktion.",
       code: "not_found",
     });
+  }
+
+  if (action === "health") {
+    if (req.method !== "GET") {
+      return json(res, 405, {
+        ok: false,
+        error: `Health erwartet GET, erhalten wurde ${req.method}.`,
+        code: "method",
+      });
+    }
+
+    const health = await checkBotHealth(session);
+
+    return json(
+      res,
+      health.status || (health.ok ? 200 : 502),
+      health.ok
+        ? {
+            ok: true,
+            bot: health.data || null,
+            upstream_status: health.upstream_status,
+            upstream_url: health.upstream_url,
+          }
+        : health
+    );
   }
 
   return proxy(req, res, url, action, session);
