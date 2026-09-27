@@ -33,7 +33,7 @@ const BOT_API_URL = normalizeBotUrl(
 
 const SITE_URL = "https://palmcityrp.vercel.app";
 const OAUTH_REDIRECT_URI =
-  "https://palmcityrp.vercel.app/api/team-dashboard?action=callback";
+  "https://notruf-craftopia.vercel.app/api/team-dashboard?action=callback";
 
 const DASHBOARD_PATH = "/team-dashboard";
 const SESSION_COOKIE = "td_session";
