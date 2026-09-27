@@ -1,9 +1,53 @@
 const GUILD_ID = "1548652649866596473";
 const TEAM_ROLE_ID = "1551649116675768414";
 const DISCORD_API = "https://discord.com/api/v10";
+const BOT_API_BASE = "http://server.infynix.de:40002";
 
 function send(res, status, data) {
   return res.status(status).json(data);
+}
+
+async function fetchPartners() {
+  const apiKey = process.env.DASHBOARD_API_KEY;
+
+  if (!apiKey) {
+    return { partners: [], partners_error: "dashboard_api_key_missing" };
+  }
+
+  try {
+    const response = await fetch(`${BOT_API_BASE}/team/partners`, {
+      method: "GET",
+      headers: {
+        "X-API-Key": apiKey,
+        Accept: "application/json"
+      },
+      cache: "no-store"
+    });
+
+    const text = await response.text();
+    let data;
+
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch {
+      return { partners: [], partners_error: "bot_api_invalid_response" };
+    }
+
+    if (!response.ok || !data || data.ok === false) {
+      return {
+        partners: [],
+        partners_error: data?.code || data?.error || `bot_api_status_${response.status}`
+      };
+    }
+
+    return {
+      partners: Array.isArray(data.partners) ? data.partners : [],
+      partners_error: null
+    };
+  } catch (error) {
+    console.error("Palm City Partner API Fehler:", error);
+    return { partners: [], partners_error: "bot_api_unreachable" };
+  }
 }
 
 export default async function handler(req, res) {
@@ -115,6 +159,8 @@ export default async function handler(req, res) {
       )
     );
 
+    const { partners, partners_error } = await fetchPartners();
+
     res.setHeader(
       "Cache-Control",
       "s-maxage=30, stale-while-revalidate=60"
@@ -126,6 +172,8 @@ export default async function handler(req, res) {
       role_id: TEAM_ROLE_ID,
       count: members.length,
       members,
+      partners,
+      partners_error,
       updated_at: new Date().toISOString()
     });
   } catch (error) {
