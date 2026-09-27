@@ -806,28 +806,6 @@ main > section.motion-refresh { animation: pageEnter var(--motion-med) var(--mot
   .content::before { display: none; }
 }
 
-
-/* ============================================================
-   DEPARTURES + TEAM GRID UX PATCH
-   ============================================================ */
-#p-team .team-grid { align-items: start !important; }
-#p-team .team-card { align-self: start !important; height: fit-content; }
-.departure-toolbar { display:grid; grid-template-columns:minmax(220px,1fr) 180px auto; gap:10px; margin:18px 0; }
-.departure-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:0 0 16px; }
-.departure-stat { border:1px solid var(--line,rgba(255,255,255,.08)); background:rgba(8,13,25,.68); border-radius:16px; padding:16px; }
-.departure-stat strong { display:block; font-size:24px; line-height:1; margin-bottom:7px; }
-.departure-stat span { color:var(--muted,#7f8ba8); font-size:12px; }
-.departure-stat.voluntary strong { color:#65e6b5; }
-.departure-stat.moderated strong { color:#ff8a8a; }
-.departure-stat.teamkick strong { color:#f4bd6b; }
-.departure-row { position:relative; overflow:hidden; }
-.departure-row::before { content:""; position:absolute; left:0; top:10px; bottom:10px; width:3px; border-radius:3px; background:#65e6b5; }
-.departure-row.moderated::before { background:#ff6f7f; }
-.departure-row.teamkick::before { background:#f4bd6b; }
-.departure-kind { min-width:145px; justify-content:center; }
-.departure-empty { padding:36px 20px !important; text-align:center; }
-.departure-export { white-space:nowrap; }
-@media (max-width: 900px) { .departure-toolbar { grid-template-columns:1fr; } .departure-stats { grid-template-columns:1fr; } }
 </style>
 
 <style id="palm-pro-redesign">
@@ -2632,28 +2610,6 @@ main > section:not([hidden]) { animation: pageIn .28s var(--ease) both; }
         <ul class="list" id="actList"></ul>
       </section>
 
-      <section id="p-departures" hidden>
-        <div class="section-head">
-          <div>
-            <h2>👋 Austritte</h2>
-            <p>Automatisch erkannte Team-Austritte. Freiwillige Austritte werden vom Bot anhand des Discord-Audit-Logs und der Team-Akten von moderierten Austritten unterschieden.</p>
-          </div>
-          <div class="feedback-meta" id="departureMeta"></div>
-        </div>
-        <div class="departure-stats" id="departureStats"></div>
-        <div class="departure-toolbar">
-          <label class="search" aria-label="Austritte durchsuchen"><span data-icon="search"></span><input id="departureSearch" type="search" placeholder="Name, Benutzername, Rang oder Grund suchen" autocomplete="off"></label>
-          <select id="departureFilter" aria-label="Austritte filtern">
-            <option value="all">Alle Austritte</option>
-            <option value="voluntary">Freiwillig</option>
-            <option value="teamkick">Teamkick</option>
-            <option value="moderated">Moderiert / Server-Aktion</option>
-          </select>
-          <button id="departureExport" class="btn departure-export" type="button">CSV exportieren</button>
-        </div>
-        <ul class="list" id="departureList"></ul>
-      </section>
-
       <section id="p-history" hidden>
         <div class="filters">
           <label class="search">
@@ -2791,7 +2747,6 @@ const TITLES = {
   applications: ["Bewerbungen", "Teambewerbungen und Status"],
   activity: ["Aktivität", "Nachrichten und Voice-Zeit im Team"],
   history: ["Verlauf", "Alle Aktionen mit Suche, Filter und Export"],
-  departures: ["Austritte", "Freiwillige Austritte und erkannte Server-Aktionen"],
   support: ["Support", "Bewertungen, Tickets und Voice-Support pro Teammitglied"],
   feedback: ["Team-Feedback", "Rückmeldungen aus dem Discord-Feedback-Panel"],
   settings: ["Einstellungen", "Rangleiste festlegen"],
@@ -3444,76 +3399,6 @@ function absenceRow(item) {
     notes.length ? h("p", { class: "detail muted" }, notes.join(" · ")) : null,
     actions
   );
-}
-
-const DEPARTURE_LABELS = { voluntary: "Freiwilliger Austritt", teamkick: "Teamkick", moderated: "Server-Aktion" };
-
-function departureKind(item) {
-  const status = String(item?.status || "moderated");
-  return DEPARTURE_LABELS[status] ? status : "moderated";
-}
-
-function departureRow(item) {
-  const kind = departureKind(item);
-  const label = DEPARTURE_LABELS[kind];
-  const statusClass = kind === "voluntary" ? "ok" : kind === "teamkick" ? "warn" : "bad";
-  const reason = item.reason || (kind === "voluntary" ? "Freiwillig aus dem Server ausgetreten" : "Server-Aktion erkannt");
-  const details = [
-    item.rank_name ? `Letzter Rang: ${item.rank_name}` : "",
-    item.moderator_name ? `Ausgeführt von: ${item.moderator_name}` : "",
-    item.detection ? `Erkennung: ${item.detection}` : "",
-  ].filter(Boolean).join(" · ");
-
-  return h("li", { class: `row departure-row ${kind}` },
-    h("div", { class: "who" }, avatar(item.avatar),
-      h("div", { class: "names" },
-        h("strong", {}, item.name || item.username || "Unbekannter Nutzer"),
-        h("span", { class: "sub mono" }, `@${item.username || "unknown"} · ${item.user_id || "–"}`)
-      )
-    ),
-    h("div", { class: "tags" },
-      h("span", { class: `badge ${statusClass} departure-kind` }, label),
-      h("span", { class: "badge" }, icon("clock"), formatDate(item.departed_at))
-    ),
-    h("p", { class: "detail" }, reason),
-    details ? h("p", { class: "detail muted" }, details) : null
-  );
-}
-
-function renderDepartures() {
-  const all = Array.isArray(S.data.departures) ? S.data.departures : [];
-  const query = String($("#departureSearch")?.value || "").trim().toLowerCase();
-  const filter = $("#departureFilter")?.value || "all";
-  const filtered = all.filter(item => {
-    const kind = departureKind(item);
-    if (filter !== "all" && kind !== filter) return false;
-    if (!query) return true;
-    return [item.name, item.username, item.user_id, item.rank_name, item.reason, item.moderator_name, item.detection]
-      .filter(Boolean).join(" ").toLowerCase().includes(query);
-  });
-  const counts = all.reduce((acc, item) => { const k = departureKind(item); acc[k] = (acc[k] || 0) + 1; return acc; }, { voluntary: 0, teamkick: 0, moderated: 0 });
-  $("#departureStats")?.replaceChildren(
-    h("div", { class: "departure-stat voluntary" }, h("strong", {}, counts.voluntary), h("span", {}, "Freiwillige Austritte")),
-    h("div", { class: "departure-stat teamkick" }, h("strong", {}, counts.teamkick), h("span", {}, "Teamkicks")),
-    h("div", { class: "departure-stat moderated" }, h("strong", {}, counts.moderated), h("span", {}, "Server-Aktionen"))
-  );
-  const meta = $("#departureMeta");
-  if (meta) meta.textContent = `${filtered.length} von ${all.length} Austritten`;
-  const list = $("#departureList");
-  if (!list) return;
-  list.replaceChildren(...(filtered.length ? filtered.map(departureRow) : [h("li", { class: "empty departure-empty" }, all.length ? "Keine Austritte passen zu deinem Filter." : "Noch keine Team-Austritte erfasst.")]));
-}
-
-function exportDeparturesCsv() {
-  const rows = Array.isArray(S.data?.departures) ? S.data.departures : [];
-  const esc = value => `"${String(value ?? "").replaceAll('"', '""')}"`;
-  const header = ["Zeitpunkt", "Name", "Username", "User-ID", "Status", "Letzter Rang", "Grund", "Moderator", "Erkennung"];
-  const data = rows.map(item => [item.departed_at, item.name, item.username, item.user_id, departureKind(item), item.rank_name, item.reason, item.moderator_name, item.detection]);
-  const csv = [header, ...data].map(row => row.map(esc).join(",")).join("\r\n");
-  const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a"); a.href = url; a.download = `team-austritte-${new Date().toISOString().slice(0,10)}.csv`;
-  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 }
 
 function renderAbsences() {
@@ -4717,11 +4602,6 @@ function renderTabs() {
     tabs.push(["complaints", "Beschwerden", open, "flag"]);
   }
 
-  if (data.features && data.features.departures) {
-    const departures = (data.departures || []).length;
-    tabs.push(["departures", "Austritte", departures || null, "logout"]);
-  }
-
   if (data.features && data.features.applications) {
     tabs.push(["applications", "Bewerbungen", (data.applications && data.applications.open_count) || 0, "userPlus"]);
   }
@@ -4745,7 +4625,7 @@ function renderTabs() {
 
   const groups = [
     { label: "Übersicht", ids: ["team", "users", "activity"] },
-    { label: "Team", ids: ["applications", "absences", "departures", "complaints", "feedback"] },
+    { label: "Team", ids: ["applications", "absences", "complaints", "feedback"] },
     { label: "Kontrolle", ids: ["bans", "support", "history"] },
     { label: "System", ids: ["settings"] },
   ];
@@ -4788,7 +4668,7 @@ function switchTab(id) {
   S.tab = id;
   S.keys.tabs = "";
 
-  for (const panel of ["team", "users", "bans", "absences", "departures", "complaints", "applications", "activity", "history", "support", "feedback", "settings"]) {
+  for (const panel of ["team", "users", "bans", "absences", "complaints", "applications", "activity", "history", "support", "feedback", "settings"]) {
     const section = $("#p-" + panel);
     if (section) section.hidden = panel !== id;
   }
@@ -4818,7 +4698,6 @@ function renderAll() {
   if (S.tab === "team") renderTeam();
   if (S.tab === "bans") renderBans();
   if (S.tab === "absences") renderAbsences();
-  if (S.tab === "departures") renderDepartures();
   if (S.tab === "complaints") renderComplaints();
   if (S.tab === "applications") renderApplications();
   if (S.tab === "activity" && S.activity) renderActivity();
@@ -4926,13 +4805,6 @@ async function boot() {
   $("#meAvatar").src = S.me.avatar;
 
   $("#teamSearch").addEventListener("input", () => renderTeam());
-
-  const departureSearch = $("#departureSearch");
-  const departureFilter = $("#departureFilter");
-  const departureExport = $("#departureExport");
-  if (departureSearch) departureSearch.addEventListener("input", renderDepartures);
-  if (departureFilter) departureFilter.addEventListener("change", renderDepartures);
-  if (departureExport) departureExport.addEventListener("click", exportDeparturesCsv);
 
   $("#userSearch").addEventListener("input", (event) => {
     clearTimeout(S.userTimer);
