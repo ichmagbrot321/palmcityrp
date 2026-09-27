@@ -59,7 +59,6 @@ const ICONS = {
   star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/>',
   headset: '<path d="M3 14v-2a9 9 0 0 1 18 0v2"/><path d="M21 14v4a2 2 0 0 1-2 2h-1v-6h3z"/><path d="M3 14v4a2 2 0 0 0 2 2h1v-6H3z"/>',
   flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>',
-  door: '<path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5"/><path d="m14 8 5 4-5 4"/><path d="M19 12H9"/>',
 };
 
 function icon(name) {
@@ -84,7 +83,7 @@ const TITLES = {
   applications: ["Bewerbungen", "Teambewerbungen und Status"],
   activity: ["Aktivität", "Nachrichten und Voice-Zeit im Team"],
   history: ["Verlauf", "Alle Aktionen mit Suche, Filter und Export"],
-  departures: ["Austritte", "Freiwillige Team-Austritte und automatisch erkannte Server-Aktionen"],
+  departures: ["Austritte", "Freiwillige Austritte und erkannte Server-Aktionen"],
   support: ["Support", "Bewertungen, Tickets und Voice-Support pro Teammitglied"],
   feedback: ["Team-Feedback", "Rückmeldungen aus dem Discord-Feedback-Panel"],
   settings: ["Einstellungen", "Rangleiste festlegen"],
@@ -737,6 +736,76 @@ function absenceRow(item) {
     notes.length ? h("p", { class: "detail muted" }, notes.join(" · ")) : null,
     actions
   );
+}
+
+const DEPARTURE_LABELS = { voluntary: "Freiwilliger Austritt", teamkick: "Teamkick", moderated: "Server-Aktion" };
+
+function departureKind(item) {
+  const status = String(item?.status || "moderated");
+  return DEPARTURE_LABELS[status] ? status : "moderated";
+}
+
+function departureRow(item) {
+  const kind = departureKind(item);
+  const label = DEPARTURE_LABELS[kind];
+  const statusClass = kind === "voluntary" ? "ok" : kind === "teamkick" ? "warn" : "bad";
+  const reason = item.reason || (kind === "voluntary" ? "Freiwillig aus dem Server ausgetreten" : "Server-Aktion erkannt");
+  const details = [
+    item.rank_name ? `Letzter Rang: ${item.rank_name}` : "",
+    item.moderator_name ? `Ausgeführt von: ${item.moderator_name}` : "",
+    item.detection ? `Erkennung: ${item.detection}` : "",
+  ].filter(Boolean).join(" · ");
+
+  return h("li", { class: `row departure-row ${kind}` },
+    h("div", { class: "who" }, avatar(item.avatar),
+      h("div", { class: "names" },
+        h("strong", {}, item.name || item.username || "Unbekannter Nutzer"),
+        h("span", { class: "sub mono" }, `@${item.username || "unknown"} · ${item.user_id || "–"}`)
+      )
+    ),
+    h("div", { class: "tags" },
+      h("span", { class: `badge ${statusClass} departure-kind` }, label),
+      h("span", { class: "badge" }, icon("clock"), formatDate(item.departed_at))
+    ),
+    h("p", { class: "detail" }, reason),
+    details ? h("p", { class: "detail muted" }, details) : null
+  );
+}
+
+function renderDepartures() {
+  const all = Array.isArray(S.data.departures) ? S.data.departures : [];
+  const query = String($("#departureSearch")?.value || "").trim().toLowerCase();
+  const filter = $("#departureFilter")?.value || "all";
+  const filtered = all.filter(item => {
+    const kind = departureKind(item);
+    if (filter !== "all" && kind !== filter) return false;
+    if (!query) return true;
+    return [item.name, item.username, item.user_id, item.rank_name, item.reason, item.moderator_name, item.detection]
+      .filter(Boolean).join(" ").toLowerCase().includes(query);
+  });
+  const counts = all.reduce((acc, item) => { const k = departureKind(item); acc[k] = (acc[k] || 0) + 1; return acc; }, { voluntary: 0, teamkick: 0, moderated: 0 });
+  $("#departureStats")?.replaceChildren(
+    h("div", { class: "departure-stat voluntary" }, h("strong", {}, counts.voluntary), h("span", {}, "Freiwillige Austritte")),
+    h("div", { class: "departure-stat teamkick" }, h("strong", {}, counts.teamkick), h("span", {}, "Teamkicks")),
+    h("div", { class: "departure-stat moderated" }, h("strong", {}, counts.moderated), h("span", {}, "Server-Aktionen"))
+  );
+  const meta = $("#departureMeta");
+  if (meta) meta.textContent = `${filtered.length} von ${all.length} Austritten`;
+  const list = $("#departureList");
+  if (!list) return;
+  list.replaceChildren(...(filtered.length ? filtered.map(departureRow) : [h("li", { class: "empty departure-empty" }, all.length ? "Keine Austritte passen zu deinem Filter." : "Noch keine Team-Austritte erfasst.")]));
+}
+
+function exportDeparturesCsv() {
+  const rows = Array.isArray(S.data?.departures) ? S.data.departures : [];
+  const esc = value => `"${String(value ?? "").replaceAll('"', '""')}"`;
+  const header = ["Zeitpunkt", "Name", "Username", "User-ID", "Status", "Letzter Rang", "Grund", "Moderator", "Erkennung"];
+  const data = rows.map(item => [item.departed_at, item.name, item.username, item.user_id, departureKind(item), item.rank_name, item.reason, item.moderator_name, item.detection]);
+  const csv = [header, ...data].map(row => row.map(esc).join(",")).join("\r\n");
+  const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href = url; a.download = `team-austritte-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 }
 
 function renderAbsences() {
@@ -1408,107 +1477,6 @@ async function loadActivity(force = false) {
 }
 
 // ============================================================
-// AUSTRITTE
-// ============================================================
-
-function departureStatusLabel(status) {
-  return ({
-    voluntary: "Freiwillig",
-    moderated: "Kick / Ban / Prune",
-    teamkick: "Nach Teamkick",
-  })[status] || "Unbekannt";
-}
-
-function departureRow(item) {
-  const status = String(item.status || "");
-  const statusClass = status || "unknown";
-  const moderator = item.moderator_name ? ` · ${item.moderator_name}` : "";
-  const rank = item.rank_name || "Kein Rang gespeichert";
-
-  return h(
-    "li",
-    { class: `row departure-row ${statusClass}` },
-    h(
-      "div",
-      { class: "who" },
-      avatar(item.avatar),
-      h(
-        "div",
-        { class: "departure-main" },
-        h("strong", {}, item.name || `User ${item.user_id}`),
-        h("span", { class: "sub mono" }, `@${item.username || "unbekannt"} · ${rank}`),
-        h("span", { class: "sub" }, `${formatDate(item.departed_at)}${moderator}`)
-      )
-    ),
-    h(
-      "div",
-      { class: "tags" },
-      h("span", { class: `badge ${status === "voluntary" ? "warn" : "bad"}` }, icon(status === "voluntary" ? "door" : "ban"), departureStatusLabel(status)),
-      status === "voluntary"
-        ? h("span", { class: "badge info" }, "gezählt als freiwillig")
-        : h("span", { class: "badge none" }, item.detection || "Erkennung")
-    )
-  );
-}
-
-function departureMatches(item, query, status) {
-  if (status && item.status !== status) return false;
-  if (!query) return true;
-  const haystack = [item.name, item.username, item.rank_name, item.reason, item.moderator_name, item.detection]
-    .filter(Boolean).join(" ").toLowerCase();
-  return haystack.includes(query.toLowerCase());
-}
-
-function renderDepartures() {
-  const items = Array.isArray(S.data?.departures) ? S.data.departures : [];
-  const query = $("#departureSearch")?.value.trim() || "";
-  const status = $("#departureStatus")?.value || "";
-  const filtered = items.filter((item) => departureMatches(item, query, status));
-  const voluntary = items.filter((item) => item.status === "voluntary").length;
-  const moderated = items.filter((item) => item.status !== "voluntary").length;
-
-  $("#departureSummary").replaceChildren(
-    h("div", { class: "metric" }, h("strong", {}, voluntary), h("span", {}, "Freiwillig")),
-    h("div", { class: "metric" }, h("strong", {}, moderated), h("span", {}, "Moderiert / Teamkick")),
-    h("div", { class: "metric" }, h("strong", {}, items.length), h("span", {}, "Gesamt erfasst"))
-  );
-
-  $("#departureList").replaceChildren(
-    ...(filtered.length ? filtered.map(departureRow) : [h("li", { class: "empty" }, "Keine Austritte für diesen Filter.")])
-  );
-
-  $("#departureNote").textContent = items.length
-    ? `${filtered.length} von ${items.length} gespeicherten Austritten angezeigt. Freiwillig wird nur gezählt, wenn kein zeitnaher Kick/Ban/Prune- oder Teamkick-Hinweis erkannt wurde.`
-    : "Noch keine Team-Austritte erfasst.";
-}
-
-function exportDepartures() {
-  const items = Array.isArray(S.data?.departures) ? S.data.departures : [];
-  const rows = [
-    ["Zeit", "Name", "Username", "Status", "Rang", "Erkennung", "Moderator", "Grund", "User-ID"],
-    ...items.map((item) => [
-      formatDate(item.departed_at),
-      item.name,
-      item.username,
-      departureStatusLabel(item.status),
-      item.rank_name || "",
-      item.detection || "",
-      item.moderator_name || "",
-      item.reason || "",
-      item.user_id,
-    ]),
-  ];
-  const csv = "\ufeff" + rows.map((row) => row.map(csvCell).join(";")).join("\r\n");
-  const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
-  const link = h("a", { href: url, download: `team-austritte-${new Date().toISOString().slice(0,10)}.csv` });
-  document.body.append(link);
-  link.click();
-  link.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1500);
-  toast(`${items.length} Austritte exportiert.`);
-}
-
-// ============================================================
 // VERLAUF + CSV-EXPORT
 // ============================================================
 
@@ -1522,9 +1490,6 @@ const ACTION_LABELS = {
   kick: "Teamkick",
   ban_remove: "Sperre aufgehoben",
   manual_role: "Rolle manuell geändert",
-  departure: "Freiwilliger Austritt",
-  departure_kick: "Austritt nach Teamkick",
-  departure_moderated: "Kick / Ban / Prune",
   absence: "Abmeldung",
   absence_approve: "Abmeldung genehmigt",
   absence_end: "Abmeldung beendet",
@@ -1536,7 +1501,6 @@ const ACTION_BADGE = {
   hire: "ok", up: "ok", warn_remove: "ok", ban_remove: "ok", absence_approve: "ok",
   down: "warn", warn: "warn", complaint: "warn", complaint_status: "warn",
   kick: "bad",
-  departure: "warn", departure_kick: "bad", departure_moderated: "bad",
   absence: "info", absence_end: "info", manual_role: "info",
 };
 
@@ -2045,6 +2009,11 @@ function renderTabs() {
     tabs.push(["complaints", "Beschwerden", open, "flag"]);
   }
 
+  if (data.features && data.features.departures) {
+    const departures = (data.departures || []).length;
+    tabs.push(["departures", "Austritte", departures || null, "logout"]);
+  }
+
   if (data.features && data.features.applications) {
     tabs.push(["applications", "Bewerbungen", (data.applications && data.applications.open_count) || 0, "userPlus"]);
   }
@@ -2057,10 +2026,6 @@ function renderTabs() {
   }
 
   tabs.push(["history", "Verlauf", null, "history"]);
-  if (data.features && data.features.departures) {
-    const voluntary = (data.departures || []).filter((item) => item.status === "voluntary").length;
-    tabs.push(["departures", "Austritte", voluntary || null, "door"]);
-  }
 
   if (data.actor.is_admin && data.actor.can_config) tabs.push(["settings", "Einstellungen", null, "settings"]);
 
@@ -2072,8 +2037,8 @@ function renderTabs() {
 
   const groups = [
     { label: "Übersicht", ids: ["team", "users", "activity"] },
-    { label: "Team", ids: ["applications", "absences", "complaints", "feedback"] },
-    { label: "Kontrolle", ids: ["bans", "support", "history", "departures"] },
+    { label: "Team", ids: ["applications", "absences", "departures", "complaints", "feedback"] },
+    { label: "Kontrolle", ids: ["bans", "support", "history"] },
     { label: "System", ids: ["settings"] },
   ];
 
@@ -2115,7 +2080,7 @@ function switchTab(id) {
   S.tab = id;
   S.keys.tabs = "";
 
-  for (const panel of ["team", "users", "bans", "absences", "complaints", "applications", "activity", "history", "departures", "support", "feedback", "settings"]) {
+  for (const panel of ["team", "users", "bans", "absences", "departures", "complaints", "applications", "activity", "history", "support", "feedback", "settings"]) {
     const section = $("#p-" + panel);
     if (section) section.hidden = panel !== id;
   }
@@ -2145,10 +2110,10 @@ function renderAll() {
   if (S.tab === "team") renderTeam();
   if (S.tab === "bans") renderBans();
   if (S.tab === "absences") renderAbsences();
+  if (S.tab === "departures") renderDepartures();
   if (S.tab === "complaints") renderComplaints();
   if (S.tab === "applications") renderApplications();
   if (S.tab === "activity" && S.activity) renderActivity();
-  if (S.tab === "departures") renderDepartures();
   if (S.tab === "support" && S.support) renderSupport();
   if (S.tab === "feedback" && S.feedback) renderFeedback();
   if (S.tab === "settings") renderSettings();
@@ -2254,6 +2219,13 @@ async function boot() {
 
   $("#teamSearch").addEventListener("input", () => renderTeam());
 
+  const departureSearch = $("#departureSearch");
+  const departureFilter = $("#departureFilter");
+  const departureExport = $("#departureExport");
+  if (departureSearch) departureSearch.addEventListener("input", renderDepartures);
+  if (departureFilter) departureFilter.addEventListener("change", renderDepartures);
+  if (departureExport) departureExport.addEventListener("click", exportDeparturesCsv);
+
   $("#userSearch").addEventListener("input", (event) => {
     clearTimeout(S.userTimer);
     S.userTimer = setTimeout(() => {
@@ -2274,10 +2246,6 @@ async function boot() {
   $("#histAction").addEventListener("change", loadHistory);
   $("#histSource").addEventListener("change", loadHistory);
   $("#histExport").addEventListener("click", exportHistory);
-
-  $("#departureSearch").addEventListener("input", renderDepartures);
-  $("#departureStatus").addEventListener("change", renderDepartures);
-  $("#departureExport").addEventListener("click", exportDepartures);
 
   $("#actDays").addEventListener("change", (event) => {
     S.activityDays = Number(event.target.value) === 30 ? 30 : 7;
@@ -2331,3 +2299,4 @@ function replaySectionMotion() {
   active.classList.add('motion-refresh');
   setTimeout(() => active.classList.remove('motion-refresh'), 700);
 }
+
