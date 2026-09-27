@@ -665,7 +665,15 @@ module.exports = async (req, res) => {
 
       if (!existing.ok) {
         console.error('[API/ROBLOX] Supabase roblox_links:', existing.status, existing.data, existing.error || '');
-        return send(res, 500, { error: 'Roblox Verknüpfung konnte nicht geprüft werden.' });
+        return send(res, 500, {
+          error: 'Roblox Verknüpfung konnte nicht geprüft werden.',
+          debug: {
+            step: 'existing-check',
+            status: existing.status,
+            supabase: existing.data,
+            fetchError: existing.error || null
+          }
+        });
       }
 
       if (existing.data?.length) {
@@ -702,7 +710,15 @@ module.exports = async (req, res) => {
 
       if (!r.ok) {
         console.error('[API/ROBLOX] Supabase Insert:', r.status, r.data, r.error || '');
-        return send(res, 500, { error: 'Roblox Name konnte nicht gespeichert werden.' });
+        return send(res, 500, {
+          error: 'Roblox Name konnte nicht gespeichert werden.',
+          debug: {
+            step: 'insert',
+            status: r.status,
+            supabase: r.data,
+            fetchError: r.error || null
+          }
+        });
       }
 
       return send(res, 200, { ok: true, profile: rp });
