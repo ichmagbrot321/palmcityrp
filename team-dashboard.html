@@ -1843,11 +1843,15 @@ body::after { opacity:.16; background-size:34px 34px; }
   min-width: 0;
   padding: 0;
   overflow: hidden;
+  isolation: isolate;
+  -webkit-mask-image: -webkit-radial-gradient(circle, #fff 100%, #fff 100%);
+  mask-image: radial-gradient(circle, #fff 100%, #fff 100%);
   border: 1px solid rgba(126,155,211,.12);
   border-radius: 18px;
   background: linear-gradient(145deg, rgba(10,18,34,.94), rgba(7,12,24,.90));
   box-shadow: 0 16px 38px rgba(0,0,0,.14), inset 0 1px 0 rgba(255,255,255,.014);
   transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
+  will-change: transform;
 }
 #p-team .team-card::before {
   content: "";
@@ -2335,11 +2339,15 @@ main > section:not([hidden]) { animation: pageIn .28s var(--ease) both; }
   height:fit-content;
   min-width:0;
   overflow:hidden;
+  isolation:isolate;
+  -webkit-mask-image: -webkit-radial-gradient(circle, #fff 100%, #fff 100%);
+  mask-image: radial-gradient(circle, #fff 100%, #fff 100%);
   border:1px solid var(--line);
   border-radius:15px;
   background:linear-gradient(145deg, rgba(11,18,30,.97), rgba(6,11,20,.97));
   box-shadow:var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,.02);
   transition:transform .2s var(--ease), border-color .2s ease, box-shadow .2s ease;
+  will-change:transform;
 }
 #p-team .team-card::before {
   width:2px;
@@ -4088,13 +4096,15 @@ const ACTION_LABELS = {
   absence_end: "Abmeldung beendet",
   complaint: "Beschwerde",
   complaint_status: "Beschwerde-Status",
+  leave_voluntary: "Freiwilliger Austritt",
+  leave_kicked: "Server-Kick/Ban",
 };
 
 const ACTION_BADGE = {
   hire: "ok", up: "ok", warn_remove: "ok", ban_remove: "ok", absence_approve: "ok",
   down: "warn", warn: "warn", complaint: "warn", complaint_status: "warn",
-  kick: "bad",
-  absence: "info", absence_end: "info", manual_role: "info",
+  kick: "bad", leave_kicked: "bad",
+  absence: "info", absence_end: "info", manual_role: "info", leave_voluntary: "info",
 };
 
 const SOURCE_LABELS = { dashboard: "Dashboard", discord: "Discord", auto: "Automatisch" };
