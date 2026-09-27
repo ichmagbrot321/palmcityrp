@@ -534,7 +534,7 @@ module.exports = async (req, res) => {
 
       try {
         link = await db(
-          `roblox_links?discord_id=${encodeURIComponent(me.id)}&select=*`
+          `roblox_links?discord_id=eq.${encodeURIComponent(me.id)}&select=*`
         );
       } catch (error) {
         console.error('[API/ME] roblox_links:', error);
@@ -542,7 +542,7 @@ module.exports = async (req, res) => {
 
       try {
         ap = await db(
-          `appeals?discord_id=${encodeURIComponent(me.id)}&order=created_at.desc&select=*`
+          `appeals?discord_id=eq.${encodeURIComponent(me.id)}&order=created_at.desc&select=*`
         );
       } catch (error) {
         console.error('[API/ME] appeals:', error);
@@ -689,7 +689,7 @@ module.exports = async (req, res) => {
 
       try {
         existing = await db(
-          `roblox_links?discord_id=${encodeURIComponent(me.id)}&select=*`
+          `roblox_links?discord_id=eq.${encodeURIComponent(me.id)}&select=*`
         );
       } catch (error) {
         console.error(
