@@ -3044,6 +3044,7 @@ const S = {
   rulesPw: "",
   rulesOpen: new Set(),
   rulesAt: 0,
+  rulesError: "",
 };
 
 // Persönliche Teamnotizen werden lokal pro Teammitglied gespeichert.
@@ -4873,7 +4874,7 @@ const RULE_FIELDS = {
 };
 
 async function loadRules(force = false) {
-  if (!S.data || !S.data.features || !S.data.features.rules) return;
+  if (!S.data) return;
   if (!force && Date.now() - S.rulesAt < 15000) return;
 
   try {
@@ -4882,11 +4883,14 @@ async function loadRules(force = false) {
     S.rulesCanEdit = !!data.can_edit;
     S.rulesPwSet = data.password_configured !== false;
     S.rulesAt = Date.now();
+    S.rulesError = "";
     if (!S.rulesCanEdit) S.rulesPw = "";
     if (S.tab === "rules") renderRules();
   } catch (err) {
     if (err.code === "no_access") setLocked(err.message);
-    else toast(err.message, true);
+    S.rulesError = err.message;
+    S.keys.rules = "";
+    if (S.tab === "rules") renderRules();
   }
 }
 
@@ -5039,7 +5043,12 @@ function renderRules() {
   const rules = S.rules;
 
   if (!rules) {
-    box.replaceChildren(emptyState("p", "Regelwerk wird geladen …"));
+    box.replaceChildren(
+      S.rulesError
+        ? h("div", { class: "card" }, h("h2", {}, "Regelwerk nicht verfügbar"), h("p", {}, S.rulesError),
+            button("Erneut versuchen", () => loadRules(true), "", false))
+        : emptyState("p", "Regelwerk wird geladen …")
+    );
     return;
   }
 
@@ -5164,7 +5173,7 @@ function renderTabs() {
     tabs.push(["feedback", "Feedback", (data.feedbacks || []).length || null, "message"]);
   }
 
-  if (data.features && data.features.rules) tabs.push(["rules", "Regelwerk", null, "book"]);
+  tabs.push(["rules", "Regelwerk", null, "book"]);
 
   tabs.push(["history", "Verlauf", null, "history"]);
 
