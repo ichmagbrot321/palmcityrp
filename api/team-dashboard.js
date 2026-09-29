@@ -64,6 +64,11 @@ const ROUTES = {
   history: ["GET", "/team/history"],
   activity: ["GET", "/team/activity"],
   support: ["GET", "/team/support"],
+  feedback: ["GET", "/team/feedback"],
+  // Regelwerk (Rolle + Passwort werden im Bot geprüft)
+  rules: ["GET", "/team/rules"],
+  rules_unlock: ["POST", "/team/rules/unlock"],
+  rules_edit: ["POST", "/team/rules/edit"],
 };
 
 // ============================================================
@@ -382,15 +387,14 @@ async function proxy(req, res, url, action, session) {
       data = null;
     }
 
-    // Sehr ausführliches Server-Logging, damit 405/502 nicht mehr
-    // nur als "Ungültige Antwort" erscheinen.
+    // Logging OHNE Antwortinhalt bei Regelwerk-Aktionen (enthalten Passwörter/Texte).
     console.error("Dashboard -> Bot", {
       action,
       method,
       target: target.toString(),
       status: upstream.status,
       contentType,
-      responsePreview: text.slice(0, 1500),
+      responsePreview: action.startsWith("rules") ? "(nicht geloggt)" : text.slice(0, 1500),
     });
 
     if (upstream.status === 401) {
@@ -425,6 +429,21 @@ async function proxy(req, res, url, action, session) {
         upstream_allow: upstream.headers.get("allow") || null,
         upstream_content_type: contentType,
         upstream_response: text.slice(0, 1500),
+      });
+    }
+
+    // 404 vom Bot: Route existiert im Bot (noch) nicht, z. B. weil die neue
+    // team_dashboard_api.py nicht geladen wurde.
+    if (upstream.status === 404 && !data) {
+      return json(res, 502, {
+        ok: false,
+        error:
+          `Der Bot kennt diese Route nicht (${method} ${target.pathname}). ` +
+          `Läuft die neue team_dashboard_api.py?`,
+        code: "bot_route_missing",
+        action,
+        upstream_status: 404,
+        upstream_url: target.toString(),
       });
     }
 
