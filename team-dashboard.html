@@ -2883,6 +2883,8 @@ section:not([hidden]) > .list, section:not([hidden]) > .stats { animation:ds-ris
         <ul class="list" id="feedbackList"></ul>
       </section>
 
+      <section id="p-rules" hidden></section>
+
       <section id="p-settings" hidden></section>
     </main>
   </div>
@@ -2962,6 +2964,9 @@ const ICONS = {
   headset: '<path d="M3 14v-2a9 9 0 0 1 18 0v2"/><path d="M21 14v4a2 2 0 0 1-2 2h-1v-6h3z"/><path d="M3 14v4a2 2 0 0 0 2 2h1v-6H3z"/>',
   bulb: '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
   inbox: '<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+  book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+  edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+  trash: '<path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>',
   flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>',
 };
 
@@ -3005,6 +3010,7 @@ const TITLES = {
   history: ["Verlauf", "Alle Aktionen mit Suche, Filter und Export"],
   support: ["Support", "Bewertungen, Tickets und Voice-Support pro Teammitglied"],
   feedback: ["Team-Feedback", "Rückmeldungen aus dem Discord-Feedback-Panel"],
+  rules: ["Regelwerk", "Regeln ansehen und (mit Rolle + Passwort) bearbeiten"],
   settings: ["Einstellungen", "Rangleiste festlegen"],
 };
 
@@ -3032,6 +3038,12 @@ const S = {
   appFilter: "all",
   appQuery: "",
   appSort: "newest",
+  rules: null,
+  rulesCanEdit: false,
+  rulesPwSet: true,
+  rulesPw: "",
+  rulesOpen: new Set(),
+  rulesAt: 0,
 };
 
 // Persönliche Teamnotizen werden lokal pro Teammitglied gespeichert.
@@ -4850,6 +4862,280 @@ function renderSettings() {
   );
 }
 
+// ============================================================
+// REGELWERK (Rolle + gemeinsames Passwort)
+// ============================================================
+
+const RULE_FIELDS = {
+  title: ["Titel", 100, false],
+  intro: ["Einleitung", 4000, true],
+  footer: ["Hinweis", 2000, true],
+};
+
+async function loadRules(force = false) {
+  if (!S.data || !S.data.features || !S.data.features.rules) return;
+  if (!force && Date.now() - S.rulesAt < 15000) return;
+
+  try {
+    const data = await api("rules");
+    S.rules = data.rules;
+    S.rulesCanEdit = !!data.can_edit;
+    S.rulesPwSet = data.password_configured !== false;
+    S.rulesAt = Date.now();
+    if (!S.rulesCanEdit) S.rulesPw = "";
+    if (S.tab === "rules") renderRules();
+  } catch (err) {
+    if (err.code === "no_access") setLocked(err.message);
+    else toast(err.message, true);
+  }
+}
+
+/** Eine Änderung senden. Bei falschem Passwort/fehlender Rolle wird neu gesperrt. */
+async function rulesEdit(op, payload = {}) {
+  try {
+    const data = await api("rules_edit", { method: "POST", body: { op, password: S.rulesPw, ...payload } });
+    if (data.rules) S.rules = data.rules;
+    S.rulesAt = Date.now();
+    toast(data.message || "Gespeichert.");
+    renderRules();
+    return data;
+  } catch (err) {
+    if (["rules_password", "rules_locked", "rules_no_role"].includes(err.code)) {
+      S.rulesPw = "";
+      if (err.code === "rules_no_role") S.rulesCanEdit = false;
+      renderRules();
+    }
+    throw err;
+  }
+}
+
+function lockRules() {
+  S.rulesPw = "";
+  renderRules();
+  toast("Regelwerk-Bearbeitung gesperrt.");
+}
+
+async function unlockRules(input, errBox, btn) {
+  const value = input.value;
+  if (!value) return;
+  btn.disabled = true;
+  errBox.hidden = true;
+
+  try {
+    await api("rules_unlock", { method: "POST", body: { password: value } });
+    S.rulesPw = value;
+    toast("Regelwerk-Bearbeitung freigeschaltet.");
+    renderRules();
+  } catch (err) {
+    errBox.textContent = err.message;
+    errBox.hidden = false;
+    input.value = "";
+    btn.disabled = false;
+    input.focus();
+  }
+}
+
+function openRuleFieldModal(key) {
+  const [label, max, multi] = RULE_FIELDS[key];
+  const input = multi
+    ? h("textarea", { id: "ruleField", maxlength: max, style: "min-height:180px" })
+    : h("input", { id: "ruleField", type: "text", maxlength: max });
+  input.value = S.rules[key] || "";
+
+  modal({
+    title: label + " bearbeiten",
+    subtitle: "Änderungen sind sofort für alle sichtbar und werden im Team-Log protokolliert.",
+    content: h("div", { class: "field" }, h("label", { for: "ruleField" }, label), input),
+    confirm: "Speichern",
+    onConfirm: () => rulesEdit("field", { key, value: input.value }),
+  });
+}
+
+function openRuleSectionModal(index) {
+  const sec = index == null ? null : S.rules.sections[index];
+  const name = h("input", { id: "rsName", type: "text", maxlength: 100 });
+  const emoji = h("input", { id: "rsEmoji", type: "text", maxlength: 10 });
+  const desc = h("textarea", { id: "rsDesc", maxlength: 1000 });
+  const list = h("textarea", { id: "rsRules", maxlength: 13000, style: "min-height:220px", placeholder: "Eine Regel pro Zeile" });
+
+  name.value = sec ? sec.name : "";
+  emoji.value = sec ? sec.emoji : "📌";
+  desc.value = sec ? sec.description : "";
+  list.value = sec ? sec.rules.join("\n") : "";
+
+  modal({
+    title: sec ? `§${sec.number} bearbeiten` : "Neuer Paragraph",
+    subtitle: "Eine Regel pro Zeile. Änderungen werden im Team-Log protokolliert.",
+    content: h(
+      "div",
+      {},
+      h("div", { class: "field" }, h("label", { for: "rsName" }, "Name"), name),
+      h("div", { class: "field" }, h("label", { for: "rsEmoji" }, "Emoji"), emoji),
+      h("div", { class: "field" }, h("label", { for: "rsDesc" }, "Beschreibung (optional)"), desc),
+      h("div", { class: "field" }, h("label", { for: "rsRules" }, "Regeln"), list)
+    ),
+    confirm: "Speichern",
+    onConfirm: async () => {
+      const data = await rulesEdit("section_save", {
+        index: sec ? index : null,
+        expected_name: sec ? sec.name : null,
+        name: name.value,
+        emoji: emoji.value,
+        description: desc.value,
+        rules: list.value.split(/\r?\n/).map((line) => line.trim()).filter(Boolean),
+      });
+      if (data.index != null) S.rulesOpen.add(data.index);
+      renderRules();
+    },
+  });
+}
+
+function openRuleDeleteModal(index) {
+  const sec = S.rules.sections[index];
+
+  modal({
+    title: "Paragraph löschen",
+    subtitle: `§${sec.number} ${sec.name}`,
+    danger: true,
+    content: h("p", { class: "sub" }, "Das kann nicht rückgängig gemacht werden. Die übrigen Paragraphen werden neu nummeriert."),
+    confirm: "Löschen",
+    onConfirm: async () => {
+      S.rulesOpen.clear();
+      await rulesEdit("section_delete", { index, expected_name: sec.name });
+    },
+  });
+}
+
+async function moveRuleSection(index, delta) {
+  try {
+    const data = await rulesEdit("section_move", { index, delta, expected_name: S.rules.sections[index].name });
+    S.rulesOpen.clear();
+    if (data.index != null) S.rulesOpen.add(data.index);
+    renderRules();
+  } catch (err) {
+    toast(err.message, true);
+    if (err.code === "rules_conflict") loadRules(true);
+  }
+}
+
+function openRuleResetModal() {
+  const input = h("input", { id: "ruleReset", type: "text", maxlength: 20, placeholder: "ZURÜCKSETZEN", autocomplete: "off" });
+
+  modal({
+    title: "Standard wiederherstellen",
+    subtitle: "Alle eigenen Änderungen am Regelwerk gehen verloren.",
+    danger: true,
+    content: h("div", { class: "field" }, h("label", { for: "ruleReset" }, "Zur Bestätigung „ZURÜCKSETZEN“ eingeben"), input),
+    confirm: "Zurücksetzen",
+    onConfirm: async () => {
+      S.rulesOpen.clear();
+      await rulesEdit("reset", { confirm: input.value });
+    },
+  });
+}
+
+function renderRules() {
+  const box = $("#p-rules");
+  const rules = S.rules;
+
+  if (!rules) {
+    box.replaceChildren(emptyState("p", "Regelwerk wird geladen …"));
+    return;
+  }
+
+  const unlocked = S.rulesCanEdit && !!S.rulesPw;
+  const key = JSON.stringify([rules, S.rulesCanEdit, S.rulesPwSet, unlocked, [...S.rulesOpen]]);
+  if (key === S.keys.rules) return;
+  S.keys.rules = key;
+
+  const sections = rules.sections || [];
+  const nodes = [];
+
+  // --- Zugriff ---
+  if (!S.rulesPwSet) {
+    nodes.push(h("div", { class: "card" }, h("h2", {}, "Bearbeitung nicht verfügbar"), h("p", {}, "Im Bot ist noch kein Regelwerk-Passwort hinterlegt (Umgebungsvariable REGELWERK_PASSWORD).")));
+  } else if (!S.rulesCanEdit) {
+    nodes.push(h("div", { class: "card" }, h("h2", {}, "Nur Ansicht"), h("p", {}, "Zum Bearbeiten des Regelwerks brauchst du die Regelwerk-Rolle.")));
+  } else if (!unlocked) {
+    const pw = h("input", { id: "rulesPw", type: "password", autocomplete: "off", placeholder: "Team-Passwort" });
+    const err = h("p", { class: "err", hidden: true });
+    const go = button("Freischalten", () => unlockRules(pw, err, go), "primary", false, "unlock");
+    pw.addEventListener("keydown", (event) => { if (event.key === "Enter") go.click(); });
+    nodes.push(
+      h("div", { class: "card" },
+        h("h2", {}, "Bearbeitung freischalten"),
+        h("p", {}, "Gib das gemeinsame Team-Passwort ein, um das Regelwerk zu bearbeiten. Jede Änderung wird mit deinem Namen im Team-Log protokolliert."),
+        h("div", { class: "field" }, h("label", { for: "rulesPw" }, "Passwort"), pw),
+        err,
+        go
+      )
+    );
+  } else {
+    nodes.push(
+      h("div", { class: "card" },
+        h("h2", {}, "Bearbeitung freigeschaltet"),
+        h("p", {}, "Änderungen sind sofort für alle im Discord sichtbar. Das Passwort wird nur im Speicher dieser Seite gehalten."),
+        button("Wieder sperren", lockRules, "", false, "lock")
+      )
+    );
+  }
+
+  // --- Allgemeine Felder ---
+  nodes.push(
+    h("div", { class: "card" },
+      h("h2", {}, "Allgemein"),
+      ...Object.entries(RULE_FIELDS).map(([field, [label]]) => {
+        const text = String(rules[field] || "").replace(/\s+/g, " ");
+        return h("div", { class: "field" },
+          h("label", {}, label),
+          h("p", { class: "sub" }, text.length > 220 ? text.slice(0, 217) + "…" : text),
+          button(label + " bearbeiten", () => openRuleFieldModal(field), "", !unlocked, "edit")
+        );
+      })
+    )
+  );
+
+  // --- Paragraphen ---
+  const max = 25;
+  const head = h("div", { class: "card" },
+    h("h2", {}, `Paragraphen (${sections.length}/${max})`),
+    h("div", { class: "actions" },
+      button("Neuer Paragraph", () => openRuleSectionModal(null), "primary", !unlocked || sections.length >= max, "plus"),
+      button("Standard wiederherstellen", openRuleResetModal, "danger", !unlocked)
+    )
+  );
+
+  const list = h("ul", { class: "list" },
+    ...sections.map((sec, index) => {
+      const open = S.rulesOpen.has(index);
+      const names = h("div", { class: "names" },
+        h("strong", {}, `${sec.emoji} §${sec.number} ${sec.name}`),
+        h("span", { class: "sub" }, `${sec.rules.length} Regeln` + (sec.description ? " · " + sec.description : ""))
+      );
+
+      if (open) {
+        names.append(h("ul", { class: "sub", style: "margin:8px 0 0;padding-left:18px" }, ...sec.rules.map((rule) => h("li", {}, rule))));
+      }
+
+      return h("li", { class: "row wide-actions" },
+        h("div", { class: "who" }, names),
+        h("div", { class: "actions" },
+          button(open ? "Zuklappen" : "Ansehen", () => {
+            if (open) S.rulesOpen.delete(index); else S.rulesOpen.add(index);
+            renderRules();
+          }),
+          button("Bearbeiten", () => openRuleSectionModal(index), "", !unlocked, "edit"),
+          button("Hoch", () => moveRuleSection(index, -1), "", !unlocked || index === 0, "up"),
+          button("Runter", () => moveRuleSection(index, 1), "", !unlocked || index === sections.length - 1, "down"),
+          button("Löschen", () => openRuleDeleteModal(index), "danger", !unlocked || sections.length <= 1, "trash")
+        )
+      );
+    })
+  );
+
+  box.replaceChildren(...nodes, head, list);
+}
+
 function renderTabs() {
   const data = S.data;
 
@@ -4878,6 +5164,8 @@ function renderTabs() {
     tabs.push(["feedback", "Feedback", (data.feedbacks || []).length || null, "message"]);
   }
 
+  if (data.features && data.features.rules) tabs.push(["rules", "Regelwerk", null, "book"]);
+
   tabs.push(["history", "Verlauf", null, "history"]);
 
   if (data.actor.is_admin && data.actor.can_config) tabs.push(["settings", "Einstellungen", null, "settings"]);
@@ -4891,7 +5179,7 @@ function renderTabs() {
   const groups = [
     { label: "Übersicht", ids: ["team", "users", "activity"] },
     { label: "Team", ids: ["applications", "absences", "complaints", "feedback"] },
-    { label: "Kontrolle", ids: ["bans", "support", "history"] },
+    { label: "Kontrolle", ids: ["bans", "support", "rules", "history"] },
     { label: "System", ids: ["settings"] },
   ];
 
@@ -4933,7 +5221,7 @@ function switchTab(id) {
   S.tab = id;
   S.keys.tabs = "";
 
-  for (const panel of ["team", "users", "bans", "absences", "complaints", "applications", "activity", "history", "support", "feedback", "settings"]) {
+  for (const panel of ["team", "users", "bans", "absences", "complaints", "applications", "activity", "history", "support", "feedback", "rules", "settings"]) {
     const section = $("#p-" + panel);
     if (section) section.hidden = panel !== id;
   }
@@ -4949,6 +5237,7 @@ function switchTab(id) {
   if (id === "history") loadHistory();
   if (id === "support") loadSupport(true);
   if (id === "feedback") loadFeedback(true);
+  if (id === "rules") loadRules(true);
 }
 
 function renderAll() {
@@ -4968,6 +5257,7 @@ function renderAll() {
   if (S.tab === "activity" && S.activity) renderActivity();
   if (S.tab === "support" && S.support) renderSupport();
   if (S.tab === "feedback" && S.feedback) renderFeedback();
+  if (S.tab === "rules") renderRules();
   if (S.tab === "settings") renderSettings();
 }
 
