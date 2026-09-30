@@ -810,7 +810,20 @@ main > section.motion-refresh { animation: pageEnter var(--motion-med) var(--mot
 /* ============================================================
    PROBEZEIT UI
    ============================================================ */
-.probation-box{margin-top:14px;padding:14px;border:1px solid var(--border,rgba(255,255,255,.12));border-radius:14px;background:var(--panel,rgba(255,255,255,.035))}.probation-box.active{border-color:rgba(245,158,11,.45)}.probation-box.done{border-color:rgba(34,197,94,.35)}.probation-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}.probation-title{font-weight:700}.probation-meta{color:var(--muted,#9ca3af);font-size:.86rem}.probation-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.probation-counts{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}.probation-time{font-weight:700}
+.probation-box{margin-top:14px;padding:18px;border:1px solid var(--border,rgba(255,255,255,.12));border-radius:16px;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018));box-shadow:0 10px 30px rgba(0,0,0,.12)}
+.probation-box.active{border-color:rgba(245,158,11,.45)}
+.probation-box.done{border-color:rgba(34,197,94,.35)}
+.probation-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.probation-title{font-weight:800;font-size:1rem}.probation-meta{color:var(--muted,#9ca3af);font-size:.86rem;line-height:1.5}.probation-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px}.probation-counts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}.probation-time{font-weight:800}
+.probation-info-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:12px}
+.probation-info{padding:10px 12px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(0,0,0,.12)}
+.probation-info-label{display:block;font-size:.72rem;color:var(--muted,#9ca3af);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}.probation-info-value{font-weight:750;font-size:.9rem}
+.probation-progress{height:9px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:12px}.probation-progress>span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#f59e0b,#f97316);transition:width .35s ease}
+.probation-progress-label{display:flex;justify-content:space-between;gap:10px;margin-top:6px;font-size:.76rem;color:var(--muted,#9ca3af)}
+.probation-rules{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.probation-rules .badge{font-size:.76rem}
+.probation-row{display:flex!important;align-items:stretch!important;gap:18px!important}.probation-row>.who{flex:1;min-width:220px}.probation-row>.actions{flex:2;min-width:0}.probation-row .probation-box{margin-top:0;width:100%;box-sizing:border-box}
+@media (max-width:900px){.probation-info-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.probation-row{flex-direction:column!important}.probation-row>.who{min-width:0}.probation-counts{grid-template-columns:1fr}}
+@media (max-width:560px){.probation-info-grid{grid-template-columns:1fr}}
 </style>
 
 <style id="palm-pro-redesign">
@@ -3231,121 +3244,59 @@ function openProbationAbortModal(member){const r=h("textarea",{id:"probationAbor
 function probationPanel(member) {
   const p = probationData(member);
   if (!p && !hasTestRole(member)) return null;
-
   if (!p) {
-    return h(
-      "div",
-      { class: "probation-box active" },
-      h(
-        "div",
-        { class: "probation-head" },
-        h("span", { class: "probation-title" }, "🟠 Probezeit"),
+    return h("div", { class: "probation-box active" },
+      h("div", { class: "probation-head" },
+        h("div", {}, h("div", { class: "probation-title" }, "🟠 Probezeit"), h("div", { class: "probation-meta" }, "Die Probezeit wird gerade vom Bot initialisiert.")),
         h("span", { class: "badge warn" }, "Testrolle")
-      ),
-      h(
-        "p",
-        { class: "probation-meta" },
-        "Probezeitstatus wird vom Bot erwartet."
       )
     );
   }
-
-  const active =
-    p.active === true ||
-    p.status === "active" ||
-    (!p.status && p.ends_at);
-
+  const active = p.active === true || p.status === "active" || (!p.status && p.ends_at);
   const { complaints, badFeedback } = probationCounts(p);
+  const start = p.started_at || p.start_at || p.start || p.created_at;
   const end = p.ends_at || p.end_at || p.end;
   const status = String(p.status || "").toLowerCase();
   const done = ["passed", "completed", "accepted", "ended"].includes(status);
+  const extensions = Number(p.extensions || 0);
+  const startMs = start ? new Date(start).getTime() : NaN;
+  const endMs = end ? new Date(end).getTime() : NaN;
+  const now = Date.now();
+  let progress = 0;
+  if (Number.isFinite(startMs) && Number.isFinite(endMs) && endMs > startMs) progress = Math.max(0, Math.min(100, ((now - startMs) / (endMs - startMs)) * 100));
+  const remaining = end ? probationRemaining(end) : "unbekannt";
+  const totalDays = Number.isFinite(startMs) && Number.isFinite(endMs) ? Math.max(0, (endMs - startMs) / 86400000) : 14;
+  const durationText = totalDays >= 1 ? `${totalDays.toFixed(totalDays % 1 ? 1 : 0)} Tage` : `${Math.round(totalDays * 24)} Std.`;
+  const rank = member.rank_name || p.rank_name || "Unbekannter Rang";
 
-  if (!active && !done) return null;
-
-  const box = h(
-    "div",
-    { class: `probation-box ${done ? "done" : "active"}` },
-    h(
-      "div",
-      { class: "probation-head" },
-      h(
-        "span",
-        { class: "probation-title" },
-        done ? "🟢 Probezeit abgeschlossen" : "🟠 Probezeit aktiv"
-      ),
-      h(
-        "span",
-        { class: `badge ${done ? "ok" : "warn"}` },
-        done ? "Angenommen" : "14 Tage / Testphase"
-      )
+  const box = h("div", { class: `probation-box ${done ? "done" : "active"}` },
+    h("div", { class: "probation-head" },
+      h("div", {}, h("div", { class: "probation-title" }, done ? "🟢 Probezeit abgeschlossen" : "🟠 Probezeit aktiv"), h("div", { class: "probation-meta" }, `Rang: ${rank}`)),
+      h("span", { class: `badge ${done ? "ok" : "warn"}` }, done ? "Angenommen" : "In Probezeit")
+    ),
+    h("div", { class: "probation-info-grid" },
+      h("div", { class: "probation-info" }, h("span", { class: "probation-info-label" }, "Dauer"), h("span", { class: "probation-info-value" }, durationText)),
+      h("div", { class: "probation-info" }, h("span", { class: "probation-info-label" }, "Gestartet"), h("span", { class: "probation-info-value" }, start ? formatDate(start) : "Unbekannt")),
+      h("div", { class: "probation-info" }, h("span", { class: "probation-info-label" }, "Ende"), h("span", { class: "probation-info-value" }, end ? formatDate(end) : "Unbekannt")),
+      h("div", { class: "probation-info" }, h("span", { class: "probation-info-label" }, "Verlängerungen"), h("span", { class: "probation-info-value" }, String(extensions)))
+    ),
+    !done && end ? h("div", { class: "probation-progress" }, h("span", { style: `width:${progress.toFixed(1)}%` })) : null,
+    !done ? h("div", { class: "probation-progress-label" }, h("span", {}, `${progress.toFixed(0)} % vergangen`), h("span", { class: "probation-time" }, `Noch ${remaining}`)) : null,
+    h("div", { class: "probation-counts" },
+      h("span", { class: `badge ${complaints >= 1 ? "bad" : "ok"}` }, `⚑ Beschwerden: ${complaints} / 1`),
+      h("span", { class: `badge ${badFeedback >= 2 ? "bad" : "ok"}` }, `★ Schlechte Feedbacks: ${badFeedback} / 2`)
+    ),
+    h("div", { class: "probation-rules" },
+      h("span", { class: "badge info" }, "14 Tage Basis-Probezeit"),
+      h("span", { class: "badge warn" }, "2 schlechte Feedbacks = Teamkick"),
+      h("span", { class: "badge warn" }, "1 Beschwerde = Teamkick")
     )
   );
-
-  if (end) {
-    box.append(
-      h(
-        "p",
-        { class: "probation-meta" },
-        "Ende: ",
-        h("strong", {}, formatDate(end)),
-        !done
-          ? h(
-              "span",
-              { class: "probation-time" },
-              ` · verbleibend: ${probationRemaining(end)}`
-            )
-          : null
-      )
-    );
-  }
-
-  box.append(
-    h(
-      "div",
-      { class: "probation-counts" },
-      h(
-        "span",
-        { class: `badge ${complaints ? "warn" : "ok"}` },
-        `Beschwerden: ${complaints}`
-      ),
-      h(
-        "span",
-        { class: `badge ${badFeedback >= 2 ? "warn" : "ok"}` },
-        `Schlechte Feedbacks: ${badFeedback}`
-      )
-    )
-  );
-
-  if (active) {
-    box.append(
-      h(
-        "div",
-        { class: "probation-actions" },
-        button(
-          "✓ Probezeit beenden & annehmen",
-          () => openProbationAcceptModal(member),
-          "primary",
-          false,
-          "check"
-        ),
-        button(
-          "＋ Verlängern",
-          () => openProbationExtendModal(member),
-          "",
-          false,
-          "clock"
-        ),
-        button(
-          "✕ Abbrechen & Teamkick",
-          () => openProbationAbortModal(member),
-          "danger",
-          false,
-          "userMinus"
-        )
-      )
-    );
-  }
-
+  if (active) box.append(h("div", { class: "probation-actions" },
+    button("✓ Beenden & Uprank", () => openProbationAcceptModal(member), "primary", false, "check"),
+    button("＋ Verlängern", () => openProbationExtendModal(member), "", false, "clock"),
+    button("✕ Abbrechen & Teamkick", () => openProbationAbortModal(member), "danger", false, "userMinus")
+  ));
   return box;
 }
 
@@ -3366,13 +3317,14 @@ function renderProbation() {
     stats.replaceChildren(
       h("div", { class: "stat" }, h("strong", {}, String(active.length)), h("span", {}, "Aktiv")),
       h("div", { class: "stat" }, h("strong", {}, String(members.length)), h("span", {}, "In Probezeit")),
-      h("div", { class: "stat" }, h("strong", {}, String(completed.length)), h("span", {}, "Abgeschlossen"))
+      h("div", { class: "stat" }, h("strong", {}, String(completed.length)), h("span", {}, "Abgeschlossen")),
+      h("div", { class: "stat" }, h("strong", {}, "14 Tage"), h("span", {}, "Basisdauer"))
     );
   }
 
   const note = $("#probationNote");
   if (note) {
-    note.textContent = "14 Tage Probezeit. 2 schlechte Feedbacks oder 1 Beschwerde beenden die Probezeit automatisch mit Teamkick.";
+    note.textContent = "14 Tage Basis-Probezeit. Das Dashboard zeigt Start, Ende, Restzeit, Fortschritt, Verlängerungen und die beiden automatischen Abbruchgrenzen. Bei 2 schlechten Feedbacks oder 1 Beschwerde erfolgt automatisch Teamkick.";
   }
 
   const list = $("#probationList");
