@@ -821,7 +821,7 @@ main > section.motion-refresh { animation: pageEnter var(--motion-med) var(--mot
 .probation-progress{height:9px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:12px}.probation-progress>span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#f59e0b,#f97316);transition:width .35s ease}
 .probation-progress-label{display:flex;justify-content:space-between;gap:10px;margin-top:6px;font-size:.76rem;color:var(--muted,#9ca3af)}
 .probation-rules{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.probation-rules .badge{font-size:.76rem}
-.probation-row{display:flex!important;align-items:stretch!important;gap:18px!important}.probation-row>.who{flex:1;min-width:220px}.probation-row>.actions{flex:2;min-width:0}.probation-row .probation-box{margin-top:0;width:100%;box-sizing:border-box}
+.probation-row{display:block!important;align-items:stretch!important;gap:0!important}.probation-row>.probation-member{display:flex;align-items:center;gap:12px;width:100%;min-width:0}.probation-entry-content{display:block;width:100%;margin-top:12px}.probation-row .probation-box{margin-top:0;width:100%;box-sizing:border-box}.probation-actions{display:flex!important;flex-wrap:wrap!important;gap:8px!important;width:100%!important;margin-top:15px!important;visibility:visible!important;opacity:1!important}.probation-actions .btn{display:inline-flex!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important}
 @media (max-width:900px){.probation-info-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.probation-row{flex-direction:column!important}.probation-row>.who{min-width:0}.probation-counts{grid-template-columns:1fr}}
 @media (max-width:560px){.probation-info-grid{grid-template-columns:1fr}}
 </style>
@@ -3337,14 +3337,19 @@ function renderProbation() {
   list.replaceChildren(...members.map((member) => {
     const p = probationData(member);
     const panel = probationPanel(member);
-    return h("li", { class: "row probation-row" },
-      h("div", { class: "who" }, avatar(member.avatar), h("div", { class: "names" },
+    return h("li", { class: "row probation-row probation-entry" },
+      h("div", { class: "who probation-member" }, avatar(member.avatar), h("div", { class: "names" },
         h("strong", {}, member.name),
         h("span", { class: "sub" }, member.rank_name || "Probezeit")
       )),
-      h("div", { class: "actions" },
-        p ? panel : h("span", { class: "badge warn" }, "Probezeit wird initialisiert")
-      )
+      p
+        ? h("div", { class: "probation-entry-content" }, panel)
+        : h("div", { class: "probation-entry-content" },
+            h("div", { class: "probation-box active" },
+              h("div", { class: "probation-title" }, "🟠 Probezeit wird initialisiert"),
+              h("div", { class: "probation-meta" }, "Der Bot legt den Probezeit-Eintrag gerade an. Bitte einmal aktualisieren.")
+            )
+          )
     );
   }));
 }
