@@ -806,6 +806,11 @@ main > section.motion-refresh { animation: pageEnter var(--motion-med) var(--mot
   .content::before { display: none; }
 }
 
+
+/* ============================================================
+   PROBEZEIT UI
+   ============================================================ */
+.probation-box{margin-top:14px;padding:14px;border:1px solid var(--border,rgba(255,255,255,.12));border-radius:14px;background:var(--panel,rgba(255,255,255,.035))}.probation-box.active{border-color:rgba(245,158,11,.45)}.probation-box.done{border-color:rgba(34,197,94,.35)}.probation-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}.probation-title{font-weight:700}.probation-meta{color:var(--muted,#9ca3af);font-size:.86rem}.probation-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.probation-counts{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}.probation-time{font-weight:700}
 </style>
 
 <style id="palm-pro-redesign">
@@ -3204,6 +3209,19 @@ function rankSelect(ranks, selectedId) {
     )
   );
 }
+
+// ============================================================
+// PROBEZEIT
+// ============================================================
+const PROBATION_TEST_ROLE_NAMES=new Set(["low supporter","low support","low moderator","low mod","low admin"]);
+function probationData(member){return member?.probation||member?.probezeit||null}
+function hasTestRole(member){const p=probationData(member);if(p)return true;const a=[member?.rank_name,member?.rank,...(Array.isArray(member?.roles)?member.roles.map(r=>typeof r==='string'?r:r?.name):[])].filter(Boolean);return a.some(n=>PROBATION_TEST_ROLE_NAMES.has(String(n).trim().toLowerCase()))}
+function probationRemaining(end){const ms=new Date(end).getTime()-Date.now();if(!Number.isFinite(ms))return "unbekannt";if(ms<=0)return "abgelaufen";const m=Math.floor(ms/60000),d=Math.floor(m/1440),h=Math.floor((m%1440)/60),mi=m%60;const a=[];if(d)a.push(`${d}T`);if(h)a.push(`${h}Std.`);if(mi||!a.length)a.push(`${mi}Min.`);return a.join(" ")}
+function probationCounts(p){return{complaints:Number(p?.complaints??p?.complaint_count??p?.beschwerden??0),badFeedback:Number(p?.bad_feedback??p?.bad_feedback_count??p?.schlechtes_feedback??0)}}
+function openProbationExtendModal(member){const v=h("input",{id:"probationExtend",type:"text",maxlength:32,placeholder:"z. B. 2h 30m, 1d, 45m"});modal({title:"Probezeit verlängern",subtitle:member.name,content:h("div",{class:"field"},h("label",{for:"probationExtend"},"Verlängerung"),v,h("p",{class:"sub"},"z. B. 30m, 2h, 1d 4h oder 2h 30m.")),confirm:"Verlängern",onConfirm:async()=>{const duration=v.value.trim();if(!duration)throw new Error("Bitte eine Verlängerung angeben.");await act("probation_extend",{user_id:member.id,duration})}})}
+function openProbationAcceptModal(member){modal({title:"Probezeit beenden",subtitle:member.name,content:h("p",{class:"sub"},"Die Probezeit wird sofort beendet und die Person regulär angenommen."),confirm:"Jetzt annehmen",onConfirm:()=>act("probation_end",{user_id:member.id})})}
+function openProbationAbortModal(member){const r=h("textarea",{id:"probationAbortReason",maxlength:500,placeholder:"Grund für Abbruch / Teamkick …"});modal({title:"Probezeit abbrechen",subtitle:member.name,danger:true,content:h("div",{class:"field"},h("label",{for:"probationAbortReason"},"Grund"),r),confirm:"Abbrechen & Teamkick",onConfirm:()=>act("probation_abort",{user_id:member.id,reason:r.value.trim()})})}
+function probationPanel(member){const p=probationData(member);if(!p&&!hasTestRole(member))return null;if(!p)return h("div",{class:"probation-box active"},h("div",{class:"probation-head"},h("span",{class:"probation-title"},"🟠 Probezeit"),h("span",{class:"badge warn"},"Testrolle")),h("p",{class:"probation-meta"},"Probezeitstatus wird vom Bot erwartet."));const active=p.active===true||p.status==="active"||(!p.status&&p.ends_at);const {complaints,badFeedback}=probationCounts(p);const end=p.ends_at||p.end_at||p.end;const status=String(p.status||"").toLowerCase();const done=["passed","completed","accepted","ended"].includes(status);if(!active&&!done)return null;const box=h("div",{class:`probation-box ${done?"done":"active"}`},h("div",{class:"probation-head"},h("span",{class:"probation-title"},done?"🟢 Probezeit abgeschlossen":"🟠 Probezeit aktiv"),h("span",{class:`badge ${done?"ok":"warn"}`},done?"Angenommen":"14 Tage / Testphase"}));if(end)box.append(h("p",{class:"probation-meta"},"Ende: ",h("strong",{},formatDate(end)),!done?h("span",{class:"probation-time"},` · verbleibend: ${probationRemaining(end)}`):null));box.append(h("div",{class:"probation-counts"},h("span",{class:`badge ${complaints?"warn":"ok"}`},`Beschwerden: ${complaints}`),h("span",{class:`badge ${badFeedback>=2?"warn":"ok"}`},`Schlechte Feedbacks: ${badFeedback}`)));if(active)box.append(h("div",{class:"probation-actions"},button("✓ Probezeit beenden & annehmen",()=>openProbationAcceptModal(member),"primary",false,"check"),button("＋ Verlängern",()=>openProbationExtendModal(member),"",false,"clock"),button("✕ Abbrechen & Teamkick",()=>openProbationAbortModal(member),"danger",false,"userMinus")));return box}
 
 // ============================================================
 // AKTIONEN
