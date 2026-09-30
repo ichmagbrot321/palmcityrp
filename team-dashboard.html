@@ -2760,6 +2760,21 @@ section:not([hidden]) > .list, section:not([hidden]) > .stats { animation:ds-ris
 }
 </style>
 
+<style id="probation-dashboard-style">
+.probation-dashboard-head{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:16px}
+.probation-dashboard-head h2{margin:4px 0 5px;font-size:1.45rem}
+.probation-dashboard-summary{font-weight:800;font-size:1.05rem;padding:10px 14px;border:1px solid rgba(245,158,11,.3);border-radius:12px;background:rgba(245,158,11,.08);white-space:nowrap}
+.probation-rules{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:18px}
+.probation-rule{padding:14px;border:1px solid var(--line,rgba(255,255,255,.1));border-radius:14px;background:var(--surface,rgba(255,255,255,.03));display:flex;flex-direction:column;gap:4px}
+.probation-rule strong{font-size:1.05rem}.probation-rule span{font-size:.82rem;color:var(--muted,#9ca3af);line-height:1.35}
+.probation-dashboard-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.probation-dashboard-card{padding:16px;border:1px solid rgba(245,158,11,.28);border-radius:16px;background:var(--surface,rgba(255,255,255,.035));box-shadow:0 10px 30px rgba(0,0,0,.12)}
+.probation-dashboard-card.done{border-color:rgba(34,197,94,.28)}
+.probation-dashboard-card-head{display:flex;align-items:center;gap:12px}.probation-avatar{width:48px;height:48px;border-radius:50%;object-fit:cover;background:#111827}.probation-identity{min-width:0;display:flex;flex-direction:column;gap:3px}.probation-name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.probation-rank,.probation-userid{font-size:.82rem;color:var(--muted,#9ca3af)}
+.probation-dashboard-meta{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:14px}.probation-dashboard-meta>div{padding:10px;border-radius:11px;background:rgba(255,255,255,.035)}.probation-dashboard-meta .label{display:block;font-size:.72rem;color:var(--muted,#9ca3af);margin-bottom:3px}.probation-dashboard-meta strong{font-size:.82rem}
+.probation-empty{padding:45px 20px;text-align:center;border:1px dashed var(--line,rgba(255,255,255,.15));border-radius:16px}.probation-empty .empty-icon{margin-bottom:10px}.probation-empty svg{width:28px;height:28px}
+@media(max-width:900px){.probation-rules,.probation-dashboard-list{grid-template-columns:1fr}.probation-dashboard-meta{grid-template-columns:repeat(2,minmax(0,1fr))}.probation-dashboard-head{align-items:flex-start;flex-direction:column}}
+</style>
 </head>
 <body>
 
@@ -2812,6 +2827,24 @@ section:not([hidden]) > .list, section:not([hidden]) > .stats { animation:ds-ris
           <input id="teamSearch" type="search" placeholder="Teammitglied suchen" autocomplete="off" aria-label="Teammitglied suchen">
         </label>
         <ul class="list" id="teamList"></ul>
+      </section>
+
+      <section id="p-probation" hidden>
+        <div class="page-card probation-dashboard-head">
+          <div>
+            <div class="eyebrow">TEAM · PROBEZEIT</div>
+            <h2>Probezeiten</h2>
+            <p class="sub">Low Supporter, Low Moderator / Jr Moderator und Low Admin starten mit 14 Tagen Probezeit.</p>
+          </div>
+          <div class="probation-dashboard-summary" id="probationSummary">0 aktiv</div>
+        </div>
+        <div class="probation-rules">
+          <div class="probation-rule"><strong>14 Tage</strong><span>Basis-Probezeit</span></div>
+          <div class="probation-rule"><strong>2×</strong><span>schlechtes Feedback beendet die Probezeit</span></div>
+          <div class="probation-rule"><strong>1×</strong><span>Beschwerde beendet die Probezeit</span></div>
+          <div class="probation-rule"><strong>Uprank</strong><span>bei erfolgreichem Abschluss automatisch</span></div>
+        </div>
+        <div id="probationList" class="probation-dashboard-list"></div>
       </section>
 
       <section id="p-users" hidden>
@@ -3006,6 +3039,7 @@ function fillStaticIcons() {
 
 const TITLES = {
   team: ["Teamliste", "Ränge, Verwarnungen und Entfernen"],
+  probation: ["Probezeiten", "14 Tage Probezeit, Bewertungen, Beschwerden und automatischer Uprank"],
   users: ["Nutzer", "Hole Mitglieder ins Team"],
   bans: ["Teamsperren", "Personen, die sich nicht fürs Team bewerben können"],
   absences: ["Abmeldungen", "Wer ist wie lange abwesend und warum"],
@@ -3768,6 +3802,94 @@ function renderUsers(users, total) {
 
   $("#userNote").textContent =
     total > users.length ? `${users.length} von ${total} Nutzern angezeigt. Nutze die Suche, um weitere zu finden.` : "";
+}
+
+function renderProbation() {
+  const list = $("#probationList");
+  const summary = $("#probationSummary");
+  if (!list) return;
+
+  const members = Array.isArray(S.data?.team) ? S.data.team : [];
+  const rows = members
+    .map((member) => ({ member, probation: member?.probation || member?.probezeit || null }))
+    .filter(({ member, probation }) => probation || hasTestRole(member));
+
+  const activeRows = rows.filter(({ probation }) => {
+    if (!probation) return true;
+    return probation.status === "active" || probation.active === true || (!probation.status && probation.ends_at);
+  });
+
+  if (summary) summary.textContent = `${activeRows.length} aktiv`;
+
+  if (!rows.length) {
+    list.replaceChildren(
+      h("div", { class: "empty probation-empty" },
+        h("div", { class: "empty-icon" }, icon("clock")),
+        h("strong", {}, "Keine aktiven Probezeiten"),
+        h("p", { class: "sub" }, "Aktuell hat kein Teammitglied eine erkannte Probezeit.")
+      )
+    );
+    return;
+  }
+
+  const cards = rows.map(({ member, probation }) => {
+    const p = probation || {};
+    const status = String(p.status || "active").toLowerCase();
+    const active = status === "active" || p.active === true || (!p.status && p.ends_at);
+    const done = ["passed", "completed", "accepted", "ended"].includes(status);
+    const counts = probationCounts(p);
+    const end = p.ends_at || p.end_at || p.end || null;
+    const start = p.started_at || p.start_at || p.start || null;
+    const rank = p.rank_name || member.rank_name || "Unbekannter Rang";
+    const extensions = Number(p.extensions || 0);
+
+    const card = h("article", { class: `probation-dashboard-card ${done ? "done" : "active"}` });
+
+    const avatar = h("img", {
+      class: "probation-avatar",
+      src: member.avatar || "",
+      alt: "",
+      loading: "lazy"
+    });
+
+    const identity = h("div", { class: "probation-identity" },
+      h("div", { class: "probation-name-row" },
+        h("strong", {}, member.name || member.username || member.id),
+        h("span", { class: `badge ${done ? "ok" : "warn"}` }, done ? "Abgeschlossen" : "Aktiv")
+      ),
+      h("span", { class: "probation-rank" }, rank),
+      h("span", { class: "probation-userid" }, `ID: ${member.id}`)
+    );
+
+    const head = h("div", { class: "probation-dashboard-card-head" }, avatar, identity);
+
+    const meta = h("div", { class: "probation-dashboard-meta" },
+      h("div", {}, h("span", { class: "label" }, "Start"), h("strong", {}, start ? formatDate(start) : "Unbekannt")),
+      h("div", {}, h("span", { class: "label" }, "Ende"), h("strong", {}, end ? formatDate(end) : "Unbekannt")),
+      h("div", {}, h("span", { class: "label" }, "Verlängerungen"), h("strong", {}, String(extensions))),
+      h("div", {}, h("span", { class: "label" }, "Restzeit"), h("strong", {}, active && end ? probationRemaining(end) : (done ? "bestanden" : "unbekannt")))
+    );
+
+    const countsBox = h("div", { class: "probation-counts" },
+      h("span", { class: `badge ${counts.complaints ? "warn" : "ok"}` }, `Beschwerden: ${counts.complaints}/1`),
+      h("span", { class: `badge ${counts.badFeedback >= 2 ? "warn" : "ok"}` }, `Schlechtes Feedback: ${counts.badFeedback}/2`),
+      h("span", { class: "badge" }, "Basis: 14 Tage")
+    );
+
+    card.append(head, meta, countsBox);
+
+    if (active) {
+      card.append(h("div", { class: "probation-actions" },
+        button("✓ Beenden & Uprank", () => openProbationAcceptModal(member), "primary", false, "check"),
+        button("＋ Verlängern", () => openProbationExtendModal(member), "", false, "clock"),
+        button("✕ Abbrechen & Teamkick", () => openProbationAbortModal(member), "danger", false, "userMinus")
+      ));
+    }
+
+    return card;
+  });
+
+  list.replaceChildren(...cards);
 }
 
 function renderBans() {
@@ -5388,8 +5510,14 @@ function renderRules() {
 function renderTabs() {
   const data = S.data;
 
+  const probationActive = (data.team || []).filter((member) => {
+    const p = member && (member.probation || member.probezeit);
+    return p && (p.status === "active" || p.active === true || (!p.status && p.ends_at));
+  }).length;
+
   const tabs = [
     ["team", "Teamliste", data.team.length, "users"],
+    ["probation", "Probezeiten", probationActive, "clock"],
     ["users", "Nutzer", null, "userPlus"],
     ["bans", "Sperren", data.bans.length, "ban"],
   ];
@@ -5427,7 +5555,7 @@ function renderTabs() {
 
   const groups = [
     { label: "Übersicht", ids: ["team", "users", "activity"] },
-    { label: "Team", ids: ["applications", "absences", "complaints", "feedback"] },
+    { label: "Team", ids: ["probation", "applications", "absences", "complaints", "feedback"] },
     { label: "Kontrolle", ids: ["bans", "support", "rules", "history"] },
     { label: "System", ids: ["settings"] },
   ];
@@ -5470,7 +5598,7 @@ function switchTab(id) {
   S.tab = id;
   S.keys.tabs = "";
 
-  for (const panel of ["team", "users", "bans", "absences", "complaints", "applications", "activity", "history", "support", "feedback", "rules", "settings"]) {
+  for (const panel of ["team", "probation", "users", "bans", "absences", "complaints", "applications", "activity", "history", "support", "feedback", "rules", "settings"]) {
     const section = $("#p-" + panel);
     if (section) section.hidden = panel !== id;
   }
@@ -5499,6 +5627,7 @@ function renderAll() {
   $("#pageSub").textContent = subtitle;
 
   if (S.tab === "team") renderTeam();
+  if (S.tab === "probation") renderProbation();
   if (S.tab === "bans") renderBans();
   if (S.tab === "absences") renderAbsences();
   if (S.tab === "complaints") renderComplaints();
