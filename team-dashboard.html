@@ -3300,6 +3300,75 @@ function openHireModal(user) {
   });
 }
 
+function openProbationExtendModal(member) {
+  const duration = h("input", {
+    id: "probationDuration",
+    type: "text",
+    placeholder: "z. B. 30m, 2h, 1d 4h",
+    value: "2h",
+  });
+  const reason = h("textarea", {
+    id: "probationReason",
+    maxlength: 300,
+    placeholder: "Optionaler Grund für die Verlängerung",
+  });
+
+  modal({
+    title: "Probezeit verlängern",
+    subtitle: member.name,
+    content: h(
+      "div",
+      {},
+      h("div", { class: "field" }, h("label", { for: "probationDuration" }, "Verlängerung"), duration),
+      h("p", { class: "sub" }, "Erlaubt sind Minuten, Stunden, Tage und Wochen, z. B. 30m, 2h oder 1d 4h."),
+      h("div", { class: "field" }, h("label", { for: "probationReason" }, "Grund"), reason),
+    ),
+    confirm: "Probezeit verlängern",
+    onConfirm: () => act("probation_extend", {
+      user_id: member.id,
+      duration: duration.value.trim(),
+      reason: reason.value.trim(),
+    }),
+  });
+}
+
+function endProbation(member) {
+  modal({
+    title: "Probezeit vorzeitig beenden",
+    subtitle: member.name,
+    content: h("p", { class: "sub" }, "Die Person wird sofort regulär als angenommen markiert. Die aktuelle Teamrolle bleibt bestehen."),
+    confirm: "Probezeit beenden",
+    onConfirm: () => act("probation_end", {
+      user_id: member.id,
+      reason: "Probezeit im Dashboard vorzeitig beendet",
+    }),
+  });
+}
+
+function abortProbation(member) {
+  const reason = h("textarea", {
+    id: "probationAbortReason",
+    maxlength: 500,
+    placeholder: "Warum wird die Probezeit abgebrochen?",
+  });
+  modal({
+    title: "Probezeit abbrechen",
+    subtitle: member.name,
+    danger: true,
+    content: h(
+      "div",
+      {},
+      h("p", { class: "sub" }, "Die Person wird aus dem Team entfernt, erhält die Teamkick-Rolle und die Teamsperre wird nach der normalen Teamkick-Konfiguration gesetzt."),
+      h("div", { class: "field" }, h("label", { for: "probationAbortReason" }, "Grund"), reason),
+    ),
+    confirm: "Probezeit abbrechen & Teamkick",
+    onConfirm: () => act("probation_abort", {
+      user_id: member.id,
+      reason: reason.value.trim() || "Probezeit im Dashboard abgebrochen",
+    }),
+  });
+}
+
 async function removeWarn(member, warn) {
   try {
     await act("warn_remove", { user_id: member.id, warn_id: warn.id });
@@ -3361,6 +3430,9 @@ function memberCard(member) {
           member.absence
             ? h("span", { class: "badge info", title: member.absence.reason }, icon("clock"), "Abgemeldet")
             : null,
+          member.probation && member.probation.status === "active"
+            ? h("span", { class: "badge warn", title: `Probezeit bis ${formatDate(member.probation.ends_at)}` }, icon("clock"), "Probezeit")
+            : null,
           count
             ? h("span", { class: "badge warn" }, icon("alert"), count === 1 ? "1 Verwarnung" : `${count} Verwarnungen`)
             : h("span", { class: "badge ok" }, icon("check"), "Keine Verwarnung"),
@@ -3394,6 +3466,35 @@ function memberCard(member) {
       button("Verwarnen", () => openWarnModal(member), "", false, "alert"),
       button("Entfernen", () => openKickModal(member), "danger", false, "userMinus")
     ),
+    member.probation && member.probation.status === "active"
+      ? h(
+          "div",
+          { class: "team-warns" },
+          h("div", { class: "team-warns-title" }, "🕒 Probezeit"),
+          h(
+            "div",
+            { class: "sub" },
+            `Start: ${formatDate(member.probation.started_at)} · Ende: ${formatDate(member.probation.ends_at)} · ` +
+              `${member.probation.bad_feedbacks}/2 schlechte Feedbacks · ${member.probation.complaints}/1 Beschwerden`
+          ),
+          h(
+            "div",
+            { class: "team-card-actions", style: "margin-top:10px" },
+            button("Vorzeitig annehmen", () => endProbation(member), "primary", false, "check"),
+            button("Verlängern", () => openProbationExtendModal(member), "", false, "clock"),
+            button("Probezeit abbrechen", () => abortProbation(member), "danger", false, "userMinus")
+          )
+        )
+      : member.probation && member.probation.status !== "active"
+        ? h(
+            "div",
+            { class: "team-warns" },
+            h("div", { class: "team-warns-title" }, `Probezeit: ${member.probation.status === "completed" ? "erfolgreich beendet" : "abgebrochen"}`),
+            member.probation.end_reason
+              ? h("span", { class: "sub" }, member.probation.end_reason)
+              : null
+          )
+        : null,
     h(
       "div",
       { class: "team-card-notes" },
