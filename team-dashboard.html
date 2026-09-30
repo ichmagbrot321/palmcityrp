@@ -3252,7 +3252,8 @@ function probationPanel(member) {
       )
     );
   }
-  const active = p.active === true || p.status === "active" || (!p.status && p.ends_at);
+  const activeStatus = String(p.status || "").toLowerCase();
+  const active = p.active !== false && !["passed", "completed", "accepted", "ended", "aborted", "cancelled", "kicked", "teamkick"].includes(activeStatus);
   const { complaints, badFeedback } = probationCounts(p);
   const start = p.started_at || p.start_at || p.start || p.created_at;
   const end = p.ends_at || p.end_at || p.end;
@@ -3290,13 +3291,13 @@ function probationPanel(member) {
       h("span", { class: "badge info" }, "14 Tage Basis-Probezeit"),
       h("span", { class: "badge warn" }, "2 schlechte Feedbacks = Teamkick"),
       h("span", { class: "badge warn" }, "1 Beschwerde = Teamkick")
-    )
+    ),
+    !done ? h("div", { class: "probation-actions" },
+      button("✓ Beenden & Uprank", () => openProbationAcceptModal(member), "primary", false, "check"),
+      button("＋ Verlängern", () => openProbationExtendModal(member), "", false, "clock"),
+      button("✕ Abbrechen & Teamkick", () => openProbationAbortModal(member), "danger", false, "userMinus")
+    ) : null
   );
-  if (active) box.append(h("div", { class: "probation-actions" },
-    button("✓ Beenden & Uprank", () => openProbationAcceptModal(member), "primary", false, "check"),
-    button("＋ Verlängern", () => openProbationExtendModal(member), "", false, "clock"),
-    button("✕ Abbrechen & Teamkick", () => openProbationAbortModal(member), "danger", false, "userMinus")
-  ));
   return box;
 }
 
