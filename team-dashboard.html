@@ -2835,6 +2835,12 @@ section:not([hidden]) > .list, section:not([hidden]) > .stats { animation:ds-ris
         <ul class="list" id="complaintList"></ul>
       </section>
 
+      <section id="p-probation" hidden>
+        <div class="stats" id="probationStats"></div>
+        <p class="note" id="probationNote"></p>
+        <ul class="list" id="probationList"></ul>
+      </section>
+
       <section id="p-applications" hidden>
         <div id="appHero"></div>
         <div class="applications-workspace" id="appWorkspace"></div>
@@ -3010,6 +3016,7 @@ const TITLES = {
   bans: ["Teamsperren", "Personen, die sich nicht fürs Team bewerben können"],
   absences: ["Abmeldungen", "Wer ist wie lange abwesend und warum"],
   complaints: ["Beschwerden", "Teambeschwerden bearbeiten"],
+  probation: ["Probezeiten", "Aktive Probezeiten, Verlängerungen und automatische Upranks"],
   applications: ["Bewerbungen", "Teambewerbungen und Status"],
   activity: ["Aktivität", "Nachrichten und Voice-Zeit im Team"],
   history: ["Verlauf", "Alle Aktionen mit Suche, Filter und Export"],
@@ -3340,6 +3347,54 @@ function probationPanel(member) {
   }
 
   return box;
+}
+
+function renderProbation() {
+  const members = (S.data?.team || []).filter((member) => hasTestRole(member));
+  const active = members.filter((member) => {
+    const p = probationData(member);
+    return p && (p.active === true || p.status === "active" || (!p.status && p.ends_at));
+  });
+  const completed = members.filter((member) => {
+    const p = probationData(member);
+    const status = String(p?.status || "").toLowerCase();
+    return ["passed", "completed", "accepted", "ended"].includes(status);
+  });
+
+  const stats = $("#probationStats");
+  if (stats) {
+    stats.replaceChildren(
+      h("div", { class: "stat" }, h("strong", {}, String(active.length)), h("span", {}, "Aktiv")),
+      h("div", { class: "stat" }, h("strong", {}, String(members.length)), h("span", {}, "In Probezeit")),
+      h("div", { class: "stat" }, h("strong", {}, String(completed.length)), h("span", {}, "Abgeschlossen"))
+    );
+  }
+
+  const note = $("#probationNote");
+  if (note) {
+    note.textContent = "14 Tage Probezeit. 2 schlechte Feedbacks oder 1 Beschwerde beenden die Probezeit automatisch mit Teamkick.";
+  }
+
+  const list = $("#probationList");
+  if (!list) return;
+  if (!members.length) {
+    list.replaceChildren(emptyState("li", "Aktuell befindet sich niemand in einer Probezeit."));
+    return;
+  }
+
+  list.replaceChildren(...members.map((member) => {
+    const p = probationData(member);
+    const panel = probationPanel(member);
+    return h("li", { class: "row probation-row" },
+      h("div", { class: "who" }, avatar(member.avatar), h("div", { class: "names" },
+        h("strong", {}, member.name),
+        h("span", { class: "sub" }, member.rank_name || "Probezeit")
+      )),
+      h("div", { class: "actions" },
+        p ? panel : h("span", { class: "badge warn" }, "Probezeit wird initialisiert")
+      )
+    );
+  }));
 }
 
 // ============================================================
@@ -5400,6 +5455,14 @@ function renderTabs() {
     tabs.push(["complaints", "Beschwerden", open, "flag"]);
   }
 
+  if (data.features && data.features.probation) {
+    const activeProbations = (data.team || []).filter((member) => {
+      const p = probationData(member);
+      return p && (p.active === true || p.status === "active" || (!p.status && p.ends_at));
+    }).length;
+    tabs.push(["probation", "Probezeiten", activeProbations, "clock"]);
+  }
+
   if (data.features && data.features.applications) {
     tabs.push(["applications", "Bewerbungen", (data.applications && data.applications.open_count) || 0, "userPlus"]);
   }
@@ -5425,7 +5488,7 @@ function renderTabs() {
 
   const groups = [
     { label: "Übersicht", ids: ["team", "users", "activity"] },
-    { label: "Team", ids: ["applications", "absences", "complaints", "feedback"] },
+    { label: "Team", ids: ["applications", "absences", "complaints", "probation", "feedback"] },
     { label: "Kontrolle", ids: ["bans", "support", "rules", "history"] },
     { label: "System", ids: ["settings"] },
   ];
@@ -5468,7 +5531,7 @@ function switchTab(id) {
   S.tab = id;
   S.keys.tabs = "";
 
-  for (const panel of ["team", "users", "bans", "absences", "complaints", "applications", "activity", "history", "support", "feedback", "rules", "settings"]) {
+  for (const panel of ["team", "users", "bans", "absences", "complaints", "probation", "applications", "activity", "history", "support", "feedback", "rules", "settings"]) {
     const section = $("#p-" + panel);
     if (section) section.hidden = panel !== id;
   }
@@ -5500,6 +5563,7 @@ function renderAll() {
   if (S.tab === "bans") renderBans();
   if (S.tab === "absences") renderAbsences();
   if (S.tab === "complaints") renderComplaints();
+  if (S.tab === "probation") renderProbation();
   if (S.tab === "applications") renderApplications();
   if (S.tab === "activity" && S.activity) renderActivity();
   if (S.tab === "support" && S.support) renderSupport();
