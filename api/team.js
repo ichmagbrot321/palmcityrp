@@ -654,6 +654,121 @@ async function checkBotHealth(session) {
   }
 }
 
+
+// ============================================================
+// ÖFFENTLICHE TEAM-API
+// ============================================================
+// Die Website ruft /api/team ohne "action" und ohne Discord-Login auf.
+// Dieser Block ergänzt genau diese Route, ohne die bestehende
+// Team-Dashboard-API darunter zu verändern.
+
+const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
+const PUBLIC_TEAM_GUILD_ID = "1548652649866596473";
+const PUBLIC_TEAM_ROLE_ID = "1551649116675768414";
+
+async function getPublicTeamMembers() {
+  if (!DISCORD_BOT_TOKEN) {
+    throw new Error("DISCORD_BOT_TOKEN fehlt in den Vercel Environment Variables.");
+  }
+
+  const members = [];
+  let after = "0";
+
+  while (true) {
+    const response = await fetch(
+      `https://discord.com/api/v10/guilds/${PUBLIC_TEAM_GUILD_ID}/members?limit=1000&after=${after}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bot ${DISCORD_BOT_TOKEN}`,
+          Accept: "application/json",
+        },
+        cache: "no-store",
+      }
+    );
+
+    if (!response.ok) {
+      const body = await response.text().catch(() => "");
+      throw new Error(
+        `Discord API ${response.status}: ${body.slice(0, 300)}`
+      );
+    }
+
+    const page = await response.json();
+
+    if (!Array.isArray(page) || page.length === 0) {
+      break;
+    }
+
+    for (const member of page) {
+      if (
+        !Array.isArray(member.roles) ||
+        !member.roles.includes(PUBLIC_TEAM_ROLE_ID)
+      ) {
+        continue;
+      }
+
+      members.push({
+        id: String(member.user.id),
+        username: member.user.username,
+        display_name:
+          member.nick ||
+          member.user.global_name ||
+          member.user.username,
+        avatar: member.user.avatar
+          ? `https://cdn.discordapp.com/avatars/${member.user.id}/${member.user.avatar}.png?size=128`
+          : "https://cdn.discordapp.com/embed/avatars/0.png",
+        online: false,
+      });
+    }
+
+    if (page.length < 1000) {
+      break;
+    }
+
+    after = page[page.length - 1].user.id;
+  }
+
+  members.sort((a, b) =>
+    String(a.display_name || "").localeCompare(
+      String(b.display_name || ""),
+      "de",
+      { sensitivity: "base" }
+    )
+  );
+
+  return members;
+}
+
+async function publicTeam(req, res) {
+  if (req.method !== "GET") {
+    return json(res, 405, {
+      error: "Method not allowed",
+      code: "method_not_allowed",
+    });
+  }
+
+  try {
+    const members = await getPublicTeamMembers();
+
+    return json(res, 200, {
+      guild_id: PUBLIC_TEAM_GUILD_ID,
+      role_id: PUBLIC_TEAM_ROLE_ID,
+      members,
+      count: members.length,
+      updated_at: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("Öffentliche Team-API Fehler:", error);
+
+    return json(res, 502, {
+      error: "Discord Team konnte nicht geladen werden.",
+      code: "team_api_error",
+      detail: error?.message || String(error),
+    });
+  }
+}
+
 // ============================================================
 // HANDLER
 // ============================================================
@@ -667,6 +782,13 @@ async function handle(req, res) {
   );
 
   const action = url.searchParams.get("action") || "";
+
+  // Öffentliche Website-Teamliste: GET /api/team
+  // Muss vor der Session-Prüfung behandelt werden, da die Website
+  // dafür keinen Discord-Login benötigt.
+  if (!action && req.method === "GET") {
+    return publicTeam(req, res);
+  }
 
   if (action === "login") {
     if (!CLIENT_ID || !CLIENT_SECRET) {
