@@ -2771,6 +2771,20 @@ section:not([hidden]) > .list, section:not([hidden]) > .stats { animation:ds-ris
   *, *::before, *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; scroll-behavior:auto !important; }
   .skeleton { animation:none; }
 }
+/* ---------- Schichtsystem ---------- */
+.subhead { margin: var(--sp-6) 0 var(--sp-3); font-size: var(--fs-small); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.shift-bar { grid-column: 1 / -1; height: 6px; border-radius: var(--radius-full); background: var(--surface-2); overflow: hidden; }
+.shift-bar > span { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: width var(--dur-slow) var(--ease-out); }
+.hero .shift-total { font-size: var(--fs-h1); font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.shift-history { max-height: min(60dvh, 420px); overflow: auto; gap: 0; margin: var(--sp-4) 0; overscroll-behavior: contain; }
+.shift-session { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-2) var(--sp-4); padding: var(--sp-3) 0; border-bottom: 1px solid var(--line); }
+.shift-session:last-child { border-bottom: 0; }
+#p-shifts .filters input[type="date"] { min-height: var(--ctl-h); border-radius: var(--radius-md); width: auto; min-width: 150px; }
+@media (max-width: 640px) {
+  #p-shifts .filters { gap: var(--sp-2); }
+  #p-shifts .filters select, #p-shifts .filters input[type="date"] { flex: 1 1 140px; }
+}
+@media (prefers-reduced-motion: reduce) { .shift-bar > span { transition: none; } }
 </style>
 
 </head>
@@ -2870,6 +2884,29 @@ section:not([hidden]) > .list, section:not([hidden]) > .stats { animation:ds-ris
         <div class="chips" id="actChips"></div>
         <p class="note" id="actNote"></p>
         <ul class="list" id="actList"></ul>
+      </section>
+
+      <section id="p-shifts" hidden>
+        <div class="filters">
+          <select id="shiftRange" aria-label="Zeitraum">
+            <option value="day">Tag</option>
+            <option value="week" selected>Woche</option>
+            <option value="month">Monat</option>
+            <option value="year">Jahr</option>
+            <option value="all">Gesamt</option>
+          </select>
+          <button type="button" class="btn small ghost" id="shiftPrev" aria-label="Voriger Zeitraum">‹ Zurück</button>
+          <button type="button" class="btn small ghost" id="shiftNext" aria-label="Nächster Zeitraum">Weiter ›</button>
+          <button type="button" class="btn small" id="shiftToday">Heute</button>
+          <input type="date" id="shiftDate" aria-label="Datum wählen">
+        </div>
+        <div class="hero" id="shiftHero"></div>
+        <div class="chips" id="shiftChips"></div>
+        <h3 class="subhead" id="shiftLiveHead" hidden>Gerade im Dienst</h3>
+        <ul class="list" id="shiftLive"></ul>
+        <h3 class="subhead">Zeiten im Zeitraum</h3>
+        <ul class="list" id="shiftList"></ul>
+        <p class="note" id="shiftNote"></p>
       </section>
 
       <section id="p-history" hidden>
@@ -2981,6 +3018,7 @@ const ICONS = {
   unlock: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>',
   x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
   clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  timer: '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M9 2h6"/>',
   chart: '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
   message: '<path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.6 8.6 0 0 1-4.2-1.1L3 20l1.5-4.4A8.5 8.5 0 1 1 21 11.5Z"/><path d="M8 11h.01M12 11h.01M16 11h.01"/>',
   history: '<path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/>',
@@ -3032,6 +3070,7 @@ const TITLES = {
   probation: ["Probezeiten", "Aktive Probezeiten, Verlängerungen und automatische Upranks"],
   applications: ["Bewerbungen", "Teambewerbungen und Status"],
   activity: ["Aktivität", "Nachrichten und Voice-Zeit im Team"],
+  shifts: ["Schichten", "Dienstzeiten, Anwesenheits-Checks und verpasste Checks"],
   history: ["Verlauf", "Alle Aktionen mit Suche, Filter und Export"],
   support: ["Support", "Bewertungen, Tickets und Voice-Support pro Teammitglied"],
   feedback: ["Team-Feedback", "Rückmeldungen aus dem Discord-Feedback-Panel"],
@@ -3054,6 +3093,12 @@ const S = {
   activityAt: 0,
   activityDays: 7,
   inactiveCount: 0,
+  shifts: null,
+  shiftsAt: 0,
+  shiftReq: 0,
+  shiftRange: "week",
+  shiftDate: "",
+  shiftActive: 0,
   histTimer: null,
   support: null,
   supportAt: 0,
@@ -4591,6 +4636,281 @@ async function loadActivity(force = false) {
 }
 
 // ============================================================
+// SCHICHTEN
+// ============================================================
+
+const SHIFT_TZ = "Europe/Berlin";
+
+function isoDay(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function shiftAnchor() {
+  return S.shiftDate || isoDay(new Date());
+}
+
+function timeOnly(iso) {
+  if (!iso) return "";
+  return new Date(iso).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit", timeZone: SHIFT_TZ });
+}
+
+function syncShiftControls() {
+  const all = S.shiftRange === "all";
+  $("#shiftRange").value = S.shiftRange;
+  $("#shiftDate").value = shiftAnchor();
+  $("#shiftDate").disabled = all;
+  $("#shiftPrev").disabled = all;
+  $("#shiftToday").disabled = all || !S.shiftDate;
+  if (all) $("#shiftNext").disabled = true;
+}
+
+function shiftMove(direction) {
+  if (S.shiftRange === "all") return;
+
+  const [y, m, d] = shiftAnchor().split("-").map(Number);
+  const date = new Date(y, m - 1, d, 12);
+
+  if (S.shiftRange === "day") date.setDate(date.getDate() + direction);
+  else if (S.shiftRange === "week") date.setDate(date.getDate() + 7 * direction);
+  else if (S.shiftRange === "month") date.setMonth(date.getMonth() + direction, 1);
+  else date.setFullYear(date.getFullYear() + direction, 0, 1);
+
+  S.shiftDate = isoDay(date);
+  syncShiftControls();
+  loadShifts(true);
+}
+
+function shiftRangeLabel(data) {
+  if (!data.from) return "Gesamter Zeitraum";
+
+  const from = new Date(data.from);
+  const to = new Date(new Date(data.to).getTime() - 1);
+  const fmt = (date, options) => date.toLocaleDateString("de-DE", { timeZone: SHIFT_TZ, ...options });
+
+  if (data.range === "day") return fmt(from, { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
+  if (data.range === "week") return `${fmt(from, { day: "2-digit", month: "2-digit" })} – ${fmt(to, { day: "2-digit", month: "2-digit", year: "numeric" })}`;
+  if (data.range === "month") return fmt(from, { month: "long", year: "numeric" });
+  return fmt(from, { year: "numeric" });
+}
+
+const SHIFT_RANGE_NAMES = { day: "Tag", week: "Woche", month: "Monat", year: "Jahr", all: "Gesamt" };
+
+function shiftLiveRow(item) {
+  const shift = item.shift;
+  const started = new Date(shift.started_at).getTime();
+  const running = Math.max(0, Math.floor((Date.now() - started) / 1000));
+
+  const checkText = shift.pending_deadline
+    ? `Check offen · antworten bis ${timeOnly(shift.pending_deadline)}`
+    : shift.next_check_at
+      ? `Nächster Check ${timeOnly(shift.next_check_at)}`
+      : "";
+
+  return h(
+    "li",
+    { class: "row done" },
+    h(
+      "div",
+      { class: "who" },
+      avatar(item.avatar),
+      h("div", { class: "names" }, h("strong", {}, item.name), h("span", { class: "sub" }, item.rank_name || "Kein Rang"))
+    ),
+    h(
+      "div",
+      { class: "tags" },
+      h("span", { class: "badge ok" }, icon("timer"), "Im Dienst"),
+      shift.pending_deadline ? h("span", { class: "badge warn" }, icon("clock"), "Check offen") : null
+    ),
+    h(
+      "p",
+      { class: "metrics" },
+      h("span", {}, "seit ", h("b", {}, timeOnly(shift.started_at))),
+      h("span", {}, "läuft ", h("b", {}, voiceText(running))),
+      h("span", {}, h("b", {}, String(shift.checks_ok)), shift.checks_ok === 1 ? " Check bestätigt" : " Checks bestätigt"),
+      checkText ? h("span", {}, checkText) : null
+    ),
+    h("div", { class: "actions" }, button("Schicht beenden", () => openShiftEndModal(item), "danger", false, "ban"))
+  );
+}
+
+function shiftRow(item, maxSeconds) {
+  const live = item.on_duty && item.shift;
+  const bar = h("span", {});
+  bar.style.width = (maxSeconds > 0 && item.seconds > 0 ? Math.max(2, Math.round((item.seconds / maxSeconds) * 100)) : 0) + "%";
+
+  return h(
+    "li",
+    { class: "row " + (live ? "done" : item.missed ? "pending" : "closed") },
+    h(
+      "div",
+      { class: "who" },
+      avatar(item.avatar),
+      h("div", { class: "names" }, h("strong", {}, item.name), h("span", { class: "sub" }, item.rank_name || "Kein Rang"))
+    ),
+    h(
+      "div",
+      { class: "tags" },
+      live ? h("span", { class: "badge ok" }, "Im Dienst") : null,
+      item.missed ? h("span", { class: "badge bad" }, icon("alert"), item.missed === 1 ? "1 Check verpasst" : `${item.missed} Checks verpasst`) : null
+    ),
+    h("div", { class: "shift-bar", role: "img", "aria-label": `${voiceText(item.seconds)} im gewählten Zeitraum` }, bar),
+    h(
+      "p",
+      { class: "metrics" },
+      h("span", {}, h("b", {}, voiceText(item.seconds)), " im Zeitraum"),
+      h("span", {}, h("b", {}, String(item.shifts)), item.shifts === 1 ? " Schicht" : " Schichten"),
+      item.shifts ? h("span", {}, "Ø ", h("b", {}, voiceText(item.avg_seconds))) : null,
+      h("span", {}, "insgesamt ", h("b", {}, voiceText(item.total_seconds)), ` (${item.total_shifts} Schichten)`)
+    ),
+    h("div", { class: "actions" }, button("Verlauf", () => openShiftHistory(item), "ghost", false, "history"))
+  );
+}
+
+function renderShifts() {
+  const data = S.shifts;
+  if (!data) return;
+
+  const key = JSON.stringify(data);
+  if (key === S.keys.shifts) return;
+  S.keys.shifts = key;
+
+  clearSkeleton();
+
+  if (!data.available) {
+    $("#shiftHero").replaceChildren();
+    $("#shiftChips").replaceChildren();
+    $("#shiftLiveHead").hidden = true;
+    $("#shiftLive").replaceChildren();
+    $("#shiftNote").textContent = "";
+    $("#shiftList").replaceChildren(emptyState("li", "Das Schichtsystem ist im Bot nicht geladen."));
+    return;
+  }
+
+  const totals = data.totals || {};
+  const items = data.items || [];
+  const live = items.filter((item) => item.on_duty && item.shift);
+  const maxSeconds = items.reduce((max, item) => Math.max(max, item.seconds), 0);
+
+  $("#shiftNext").disabled = !data.to || new Date(data.to) > new Date();
+
+  $("#shiftHero").replaceChildren(
+    h("div", {}, h("strong", {}, shiftRangeLabel(data)), h("span", { class: "sub" }, `Auswertung · ${SHIFT_RANGE_NAMES[data.range] || ""}`)),
+    h("div", { class: "shift-total" }, voiceText(totals.seconds || 0))
+  );
+
+  $("#shiftChips").replaceChildren(
+    h("span", { class: "badge info" }, `Schichten: ${totals.shifts || 0}`),
+    h("span", { class: "badge " + (totals.active_now ? "ok" : "") }, `Im Dienst: ${totals.active_now || 0}`),
+    h("span", { class: "badge " + (totals.missed ? "bad" : "") }, `Verpasste Checks: ${totals.missed || 0}`),
+    h("span", { class: "badge" }, `Aktiv: ${totals.members_with_shifts || 0} Mitglieder`),
+    h("span", { class: "badge" }, `Gesamtzeit aller Zeiten: ${voiceText(totals.total_seconds || 0)}`)
+  );
+
+  $("#shiftLiveHead").hidden = live.length === 0;
+  $("#shiftLive").replaceChildren(...live.map(shiftLiveRow));
+
+  $("#shiftList").replaceChildren(
+    ...(items.length ? items.map((item) => shiftRow(item, maxSeconds)) : [emptyState("li", "Keine Teammitglieder gefunden.")])
+  );
+
+  const cfg = data.settings || {};
+  $("#shiftNote").textContent =
+    `Alle ${cfg.interval_minutes} Minuten gibt es einen Anwesenheits-Check (${Math.round((cfg.response_seconds || 0) / 60)} Min Zeit). ` +
+    `Ohne Bestätigung wird die Schicht abgebrochen und nur bis zur letzten Bestätigung gezählt. ` +
+    `Ab ${cfg.warn_threshold} verpassten Checks in ${cfg.warn_window_days} Tagen folgt automatisch eine Teamwarn.`;
+}
+
+async function loadShifts(force = false) {
+  if (!S.data || !S.data.features || !S.data.features.shifts) return;
+
+  const age = Date.now() - S.shiftsAt;
+  const onTab = S.tab === "shifts";
+
+  if (!force && ((onTab && age < 15000) || (!onTab && age < 60000))) return;
+
+  const request = ++S.shiftReq;
+
+  try {
+    if (!S.shifts) skeleton("#shiftList", 5);
+    const data = await api("shifts", { params: { range: S.shiftRange, date: shiftAnchor() } });
+    if (request !== S.shiftReq) return; // neuere Anfrage hat Vorrang
+
+    S.shifts = data;
+    S.shiftsAt = Date.now();
+    S.shiftActive = (data.totals && data.totals.active_now) || 0;
+    renderTabs();
+    if (S.tab === "shifts") renderShifts();
+  } catch (err) {
+    if (request !== S.shiftReq) return;
+    clearSkeleton();
+    if (err.code === "no_access") setLocked(err.message);
+    else if (S.tab === "shifts") toast(err.message, true);
+  }
+}
+
+function openShiftEndModal(item) {
+  modal({
+    title: "Schicht beenden",
+    subtitle: item.name,
+    danger: true,
+    content: h("p", { class: "sub" }, "Die Schicht wird sofort beendet. Die bisherige Zeit wird vollständig gezählt, es gibt keinen Verpasst-Eintrag."),
+    confirm: "Schicht beenden",
+    onConfirm: async () => {
+      S.shiftsAt = 0;
+      await act("shifts_end", { user_id: item.id });
+      await loadShifts(true);
+    },
+  });
+}
+
+async function openShiftHistory(item) {
+  let data;
+
+  try {
+    data = await api("shifts", { params: { range: S.shiftRange, date: shiftAnchor(), user_id: item.id } });
+  } catch (err) {
+    toast(err.message, true);
+    return;
+  }
+
+  const sessions = data.sessions || [];
+
+  const content = sessions.length
+    ? h(
+        "ul",
+        { class: "list shift-history" },
+        ...sessions.map((session) =>
+          h(
+            "li",
+            { class: "shift-session" },
+            h("div", {}, h("strong", {}, formatDate(session.started_at)), h("span", { class: "sub" }, ` bis ${timeOnly(session.ended_at)} Uhr`)),
+            h(
+              "div",
+              { class: "tags" },
+              h("span", { class: "badge " + (session.missed ? "bad" : "ok") }, voiceText(session.seconds)),
+              h("span", { class: "badge " + (SHIFT_REASON_BADGE[session.reason] || "") }, session.reason_label),
+              session.checks_ok ? h("span", { class: "badge info" }, `${session.checks_ok}× bestätigt`) : null
+            )
+          )
+        )
+      )
+    : h("p", { class: "sub" }, "Keine Schichten im gewählten Zeitraum.");
+
+  modal({
+    title: "Schicht-Verlauf",
+    subtitle: `${item.name} · ${shiftRangeLabel(data)}`,
+    content,
+    confirm: "Schließen",
+    onConfirm: async () => {},
+  });
+}
+
+const SHIFT_REASON_BADGE = { timeout: "bad", bot_offline: "info", admin: "warn", left: "warn", role: "warn" };
+
+// ============================================================
 // VERLAUF + CSV-EXPORT
 // ============================================================
 
@@ -5426,6 +5746,7 @@ function renderTabs() {
   }
 
   if (data.features && data.features.activity) tabs.push(["activity", "Aktivität", S.inactiveCount || 0, "chart"]);
+  if (data.features && data.features.shifts) tabs.push(["shifts", "Schichten", S.shiftActive || 0, "timer"]);
 
   if (data.features && data.features.support) tabs.push(["support", "Support", null, "headset"]);
   if (data.features && data.features.feedback) {
@@ -5445,7 +5766,7 @@ function renderTabs() {
   if (!tabs.some(([id]) => id === S.tab)) S.tab = "team";
 
   const groups = [
-    { label: "Übersicht", ids: ["team", "users", "activity"] },
+    { label: "Übersicht", ids: ["team", "users", "activity", "shifts"] },
     { label: "Team", ids: ["applications", "absences", "complaints", "probation", "feedback"] },
     { label: "Kontrolle", ids: ["bans", "support", "rules", "history"] },
     { label: "System", ids: ["settings"] },
@@ -5489,7 +5810,7 @@ function switchTab(id) {
   S.tab = id;
   S.keys.tabs = "";
 
-  for (const panel of ["team", "users", "bans", "absences", "complaints", "probation", "applications", "activity", "history", "support", "feedback", "rules", "settings"]) {
+  for (const panel of ["team", "users", "bans", "absences", "complaints", "probation", "applications", "activity", "shifts", "history", "support", "feedback", "rules", "settings"]) {
     const section = $("#p-" + panel);
     if (section) section.hidden = panel !== id;
   }
@@ -5502,6 +5823,7 @@ function switchTab(id) {
 
   if (id === "users") loadUsers();
   if (id === "activity") loadActivity(true);
+  if (id === "shifts") loadShifts(true);
   if (id === "history") loadHistory();
   if (id === "support") loadSupport(true);
   if (id === "feedback") loadFeedback(true);
@@ -5524,6 +5846,7 @@ function renderAll() {
   if (S.tab === "probation") renderProbation();
   if (S.tab === "applications") renderApplications();
   if (S.tab === "activity" && S.activity) renderActivity();
+  if (S.tab === "shifts" && S.shifts) renderShifts();
   if (S.tab === "support" && S.support) renderSupport();
   if (S.tab === "feedback" && S.feedback) renderFeedback();
   if (S.tab === "rules") renderRules();
@@ -5576,6 +5899,7 @@ async function refresh() {
     renderAll();
     await loadUsers();
     loadActivity();
+    loadShifts();
     loadHistory();
     loadSupport();
   } catch (err) {
@@ -5656,6 +5980,25 @@ async function boot() {
   $("#actDays").addEventListener("change", (event) => {
     S.activityDays = Number(event.target.value) === 30 ? 30 : 7;
     loadActivity(true);
+  });
+
+  syncShiftControls();
+  $("#shiftRange").addEventListener("change", (event) => {
+    S.shiftRange = event.target.value;
+    syncShiftControls();
+    loadShifts(true);
+  });
+  $("#shiftPrev").addEventListener("click", () => shiftMove(-1));
+  $("#shiftNext").addEventListener("click", () => shiftMove(1));
+  $("#shiftToday").addEventListener("click", () => {
+    S.shiftDate = "";
+    syncShiftControls();
+    loadShifts(true);
+  });
+  $("#shiftDate").addEventListener("change", (event) => {
+    S.shiftDate = event.target.value === isoDay(new Date()) ? "" : event.target.value;
+    syncShiftControls();
+    loadShifts(true);
   });
 
   await refresh();
