@@ -4858,8 +4858,21 @@ async function loadShifts(force = false) {
     clearSkeleton();
     // Kein Dauer-Retry im 5-Sekunden-Takt, wenn der Aufruf fehlschlägt.
     S.shiftsAt = Date.now();
-    if (err.code === "no_access") setLocked(err.message);
-    else if (force && S.tab === "shifts") toast(err.message, true);
+    if (err.code === "no_access") { setLocked(err.message); return; }
+
+    // Sichtbare Fehlermeldung im Tab statt leerer Liste.
+    if (!S.shifts && S.tab === "shifts") {
+      const missingProxy = err.status === 404 && err.code === "not_found";
+      const text = missingProxy
+        ? "Der Server kennt die Aktion „shifts“ noch nicht. Die aktuelle team-dashboard.js (Vercel-Funktion unter api/) muss hochgeladen und neu deployt werden."
+        : err.message;
+      $("#shiftNote").textContent = "";
+      $("#shiftHero").replaceChildren();
+      $("#shiftChips").replaceChildren();
+      $("#shiftList").replaceChildren(emptyState("li", text));
+    } else if (force && S.tab === "shifts") {
+      toast(err.message, true);
+    }
   }
 }
 
