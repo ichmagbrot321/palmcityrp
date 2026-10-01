@@ -2779,7 +2779,17 @@ section:not([hidden]) > .list, section:not([hidden]) > .stats { animation:ds-ris
 .shift-history { max-height: min(60dvh, 420px); overflow: auto; gap: 0; margin: var(--sp-4) 0; overscroll-behavior: contain; }
 .shift-session { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-2) var(--sp-4); padding: var(--sp-3) 0; border-bottom: 1px solid var(--line); }
 .shift-session:last-child { border-bottom: 0; }
-#p-shifts .filters input[type="date"] { min-height: var(--ctl-h); border-radius: var(--radius-md); width: auto; min-width: 150px; }
+#p-shifts .filters input[type="date"] {
+  min-height: var(--ctl-h); width: auto; min-width: 150px; padding: 0 var(--sp-3);
+  border-radius: var(--radius-md); border: 1px solid rgba(126,155,211,.11);
+  background: rgba(8, 14, 28, .88); color: var(--text, #e8eefc);
+  color-scheme: dark; font: inherit; font-size: var(--fs-body);
+  transition: border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+#p-shifts .filters input[type="date"]:focus { outline: none; border-color: rgba(90,156,255,.55); box-shadow: var(--focus-ring); }
+#p-shifts .filters input[type="date"]:disabled { opacity: .5; }
+#p-shifts .filters input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: .75; }
+#p-shifts .filters input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 @media (max-width: 640px) {
   #p-shifts .filters { gap: var(--sp-2); }
   #p-shifts .filters select, #p-shifts .filters input[type="date"] { flex: 1 1 140px; }
@@ -4846,8 +4856,10 @@ async function loadShifts(force = false) {
   } catch (err) {
     if (request !== S.shiftReq) return;
     clearSkeleton();
+    // Kein Dauer-Retry im 5-Sekunden-Takt, wenn der Aufruf fehlschlägt.
+    S.shiftsAt = Date.now();
     if (err.code === "no_access") setLocked(err.message);
-    else if (S.tab === "shifts") toast(err.message, true);
+    else if (force && S.tab === "shifts") toast(err.message, true);
   }
 }
 
@@ -5982,6 +5994,8 @@ async function boot() {
     loadActivity(true);
   });
 
+  $("#shiftDate").max = isoDay(new Date());
+  $("#shiftDate").min = "2020-01-01";
   syncShiftControls();
   $("#shiftRange").addEventListener("change", (event) => {
     S.shiftRange = event.target.value;
@@ -5996,7 +6010,17 @@ async function boot() {
     loadShifts(true);
   });
   $("#shiftDate").addEventListener("change", (event) => {
-    S.shiftDate = event.target.value === isoDay(new Date()) ? "" : event.target.value;
+    const value = event.target.value;
+    const parsed = /^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(value + "T12:00:00") : null;
+    const today = isoDay(new Date());
+
+    // Unvollständige/ungültige Eingaben (z. B. Jahr "0004" beim Tippen) ignorieren.
+    if (!parsed || Number.isNaN(parsed.getTime()) || parsed.getFullYear() < 2020) {
+      syncShiftControls();
+      return;
+    }
+
+    S.shiftDate = value >= today ? "" : value;
     syncShiftControls();
     loadShifts(true);
   });
