@@ -68,6 +68,8 @@ const ROUTES = {
   activity: ["GET", "/team/activity"],
   support: ["GET", "/team/support"],
   feedback: ["GET", "/team/feedback"],
+  shifts: ["GET", "/team/shifts"],
+  shifts_end: ["POST", "/team/shifts/end"],
   // Regelwerk (Rolle + Passwort werden im Bot geprüft)
   rules: ["GET", "/team/rules"],
   rules_unlock: ["POST", "/team/rules/unlock"],
