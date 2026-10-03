@@ -3,1088 +3,558 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#07101f">
+<meta name="theme-color" content="#050a14">
 <meta name="description" content="Notruf Craftopia – neuer Notruf Hamburg RP Server. Baue mit uns eine Stadt, in der Entscheidungen Geschichten schreiben.">
 <link rel="canonical" href="https://notrufcraftopia.vercel.app/">
-<title>Notruf Craftopia — Deine Stadt. Deine Entscheidungen.</title>
-
+<title>Notruf Craftopia — Deine Stadt. Deine Geschichte.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Inter:wght@400;500;600;700&display=swap">
 <style>
-/* ==========================================================
-   DESIGN TOKENS
-   ========================================================== */
 :root{
-  /* Farben */
-  --color-bg:#040711;
-  --color-bg-raised:#07101f;
-  --color-surface:rgba(10,18,34,.72);
-  --color-surface-2:rgba(255,255,255,.035);
-  --color-surface-hover:rgba(255,255,255,.06);
-  --color-border:rgba(110,170,255,.16);
-  --color-border-strong:rgba(110,170,255,.32);
-  --color-text:#f5f8ff;
-  --color-text-soft:#c0ccdc;
-  --color-text-muted:#94a3ba;
-  --color-primary:#4aa8ff;
-  --color-accent:#5ee7ff;
-  --color-success:#51e58b;
-  --color-danger:#ff5c6c;
-  --color-warning:#ffb84a;
-  --color-focus:#8bdcff;
-
-  /* Abstände */
-  --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:20px;
-  --s-6:24px; --s-8:32px; --s-10:40px; --s-12:48px; --s-16:64px; --s-24:96px;
-
-  /* Radien */
-  --radius-sm:10px; --radius-md:14px; --radius-lg:20px; --radius-xl:28px; --radius-full:999px;
-
-  /* Schatten */
-  --shadow-subtle:0 1px 2px rgba(0,0,0,.3);
-  --shadow-medium:0 8px 24px rgba(0,0,0,.28);
-  --shadow-elevated:0 20px 60px rgba(0,0,0,.4);
-  --shadow-modal:0 30px 90px rgba(0,0,0,.55);
-
-  /* Motion */
-  --ease:cubic-bezier(.22,.61,.36,1);
-  --dur-fast:150ms; --dur:250ms; --dur-slow:500ms;
-
-  /* Typografie */
-  --font-sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  --fs-caption:.6875rem;
-  --fs-small:.8125rem;
-  --fs-body:1rem;
-  --fs-lead:clamp(1rem,.95rem + .3vw,1.125rem);
-  --fs-h3:1.25rem;
-  --fs-h2:clamp(2rem,1.4rem + 2.6vw,3.25rem);
-  --fs-display:clamp(2.75rem,1.6rem + 5.6vw,6rem);
-
-  /* Layout */
-  --container:1120px;
-  --control-h:48px;
-  --nav-h:68px;
+  color-scheme:dark;
+  --color-bg:#050a14;--color-surface:#0b1424;--color-surface-2:#101b30;--color-surface-hover:#17243d;
+  --color-border:rgba(130,165,230,.14);--color-border-strong:rgba(130,165,230,.28);
+  --color-text:#eaf0fa;--color-text-soft:#b9c6dc;--color-muted:#8d9bb5;
+  --color-primary:#2563eb;--color-primary-hover:#3b78f5;--color-primary-soft:#8db4ff;--color-navy:#0b2a6f;--color-accent:#38d0ff;
+  --color-success:#3ddc97;--color-danger:#ff5565;--color-warning:#f5b94a;--color-focus:#7fb0ff;
+  --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:20px;--s6:24px;--s8:32px;--s10:40px;--s12:48px;--s16:64px;--s24:96px;
+  --r-sm:10px;--r-md:12px;--r-lg:16px;--r-full:999px;
+  --sh-1:0 1px 2px rgba(0,0,0,.4);--sh-2:0 12px 32px rgba(0,0,0,.45);--sh-modal:0 32px 80px rgba(0,0,0,.65);
+  --ease:cubic-bezier(.22,.61,.36,1);--t:160ms;
+  --font:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --font-display:"Barlow Condensed","Arial Narrow","Roboto Condensed",sans-serif;
+  --fs-caption:.8125rem;--fs-s:.875rem;--fs-b:1rem;--fs-lead:clamp(1.0625rem,1rem + .3vw,1.1875rem);
+  --fs-h3:1.125rem;--fs-h2:clamp(2.25rem,1.2rem + 4vw,3.75rem);--fs-d:clamp(2.5rem,.6rem + 7.4vw,6.75rem);
+  --wrap:1120px;--ctl:48px;--nav:64px;
 }
-
-/* ==========================================================
-   BASE
-   ========================================================== */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;scroll-padding-top:calc(var(--nav-h) + var(--s-8));-webkit-text-size-adjust:100%}
-body{
-  font-family:var(--font-sans);
-  font-size:var(--fs-body);
-  color:var(--color-text);
-  background:
-    radial-gradient(circle at 15% 10%,rgba(45,108,255,.13),transparent 30%),
-    radial-gradient(circle at 85% 25%,rgba(0,214,255,.08),transparent 28%),
-    linear-gradient(180deg,#03050b 0%,#06101e 50%,#03050b 100%);
-  background-attachment:fixed;
-  line-height:1.6;
-  overflow-x:hidden;
-  -webkit-font-smoothing:antialiased;
-}
-a{color:inherit;text-decoration:none}
-img{max-width:100%;display:block}
-svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
-svg.i.lg{width:24px;height:24px}
-:focus-visible{outline:2px solid var(--color-focus);outline-offset:3px;border-radius:var(--radius-sm)}
-::selection{background:rgba(74,168,255,.35)}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--nav) + var(--s6));-webkit-text-size-adjust:100%}
+body{font-family:var(--font);font-size:var(--fs-b);line-height:1.6;color:var(--color-text);background:var(--color-bg);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit}img{max-width:100%;display:block}
+svg.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+:focus-visible{outline:3px solid var(--color-focus);outline-offset:2px;border-radius:var(--r-sm)}
+.wrap{width:min(var(--wrap),100% - var(--s8));margin-inline:auto}
+.skip{position:fixed;left:var(--s3);top:var(--s3);z-index:100;padding:var(--s3) var(--s4);background:var(--color-navy);color:#fff;font-weight:700;border-radius:var(--r-sm);transform:translateY(-200%)}
+.skip:focus{transform:none}
+h1,h2,h3{text-wrap:balance}
+h1,h2{font-family:var(--font-display);text-transform:uppercase}
+h1{font-size:var(--fs-d);line-height:.9;letter-spacing:.005em;font-weight:800}
+h1 span{color:transparent;-webkit-text-stroke:2px var(--color-primary-soft)}
+h2{font-size:var(--fs-h2);line-height:.98;letter-spacing:.01em;font-weight:700}
+h3{font-size:var(--fs-h3);line-height:1.3;font-weight:650;letter-spacing:-.01em}
+.lead{font-size:var(--fs-lead);line-height:1.7;max-width:60ch;color:var(--color-text-soft)}
+.muted{color:var(--color-muted)}.small{font-size:var(--fs-s)}
+.kicker{display:block;margin-bottom:var(--s3);color:var(--color-primary-soft);font-size:var(--fs-s);font-weight:650}
 
-.noise{
-  position:fixed;inset:0;pointer-events:none;opacity:.025;z-index:1;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-.skip-link{
-  position:fixed;top:var(--s-3);left:var(--s-3);z-index:100;
-  padding:var(--s-3) var(--s-4);border-radius:var(--radius-sm);
-  background:#fff;color:#07101c;font-weight:700;font-size:var(--fs-small);
-  transform:translateY(-200%);transition:transform var(--dur-fast) var(--ease);
-}
-.skip-link:focus{transform:none}
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);min-height:var(--ctl);padding:0 var(--s6);border:1px solid var(--color-border-strong);border-radius:var(--r-sm);font:inherit;font-size:var(--fs-s);font-weight:650;line-height:1;text-decoration:none;cursor:pointer;background:var(--color-surface);color:var(--color-text);box-shadow:var(--sh-1);transition:transform var(--t) var(--ease),background var(--t),border-color var(--t),box-shadow var(--t)}
+.btn:hover{background:var(--color-surface-2);transform:translateY(-1px);box-shadow:var(--sh-2)}
+.btn:active{transform:none;box-shadow:var(--sh-1)}
+.btn[disabled]{opacity:.5;pointer-events:none}
+.btn-primary{background:var(--color-primary);border-color:var(--color-primary);color:#fff}
+.btn-primary:hover{background:var(--color-primary-hover);border-color:var(--color-primary-hover)}
+.btn-danger{background:rgba(255,85,101,.1);border-color:rgba(255,85,101,.45);color:#ffc2c8}
+.btn-danger:hover{background:rgba(255,85,101,.18)}
+.btn-ghost{background:transparent;border-color:transparent;box-shadow:none;min-height:40px;padding:0 var(--s3);color:var(--color-text-soft)}
+.btn-ghost:hover{background:var(--color-surface-2);box-shadow:none;transform:none}
+.row{display:flex;flex-wrap:wrap;gap:var(--s3)}
 
-/* ==========================================================
-   TYPOGRAFIE
-   ========================================================== */
-h1{font-size:var(--fs-display);line-height:.95;letter-spacing:-.05em;font-weight:900;text-wrap:balance}
-h2{font-size:var(--fs-h2);line-height:1.05;letter-spacing:-.04em;font-weight:850;text-wrap:balance}
-h3{font-size:var(--fs-h3);line-height:1.3;letter-spacing:-.01em;font-weight:800}
-h1 em{
-  font-style:normal;
-  background:linear-gradient(100deg,#fff 10%,#8bdcff 52%,#4c8dff);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-}
-.lead{font-size:var(--fs-lead);line-height:1.7;color:var(--color-text-soft)}
-.kicker{
-  display:flex;align-items:center;gap:var(--s-2);
-  color:#6ebdff;font-size:var(--fs-caption);font-weight:800;
-  letter-spacing:.14em;text-transform:uppercase;margin-bottom:var(--s-3);
-}
-.kicker::before{content:"";width:18px;height:2px;border-radius:2px;background:currentColor}
-.label{color:var(--color-text-muted);font-size:var(--fs-caption);font-weight:600;text-transform:uppercase;letter-spacing:.12em}
+/* Navigation */
+.nav{position:sticky;top:0;z-index:50;background:rgba(5,10,20,.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--color-border)}
+.nav .wrap{height:var(--nav);display:flex;align-items:center;justify-content:space-between;gap:var(--s4)}
+.brand{display:flex;align-items:center;gap:var(--s3);font-weight:750;text-decoration:none}
+.brand img{width:32px;height:32px;border-radius:50%;border:1px solid var(--color-border-strong);object-fit:cover;background:var(--color-surface-2)}
+.links{display:flex;align-items:center;gap:var(--s1)}
+.links a:not(.btn){padding:var(--s2) var(--s3);border-radius:var(--r-sm);font-size:var(--fs-s);font-weight:550;text-decoration:none;color:var(--color-text-soft);transition:background var(--t),color var(--t)}
+.links a:not(.btn):hover{background:var(--color-surface-2);color:var(--color-text)}
+.links a.active{background:rgba(31,94,255,.1);color:var(--color-primary-soft)}
+.links .btn{min-height:40px;padding:0 var(--s4);margin-left:var(--s2)}
+.burger{display:none;width:44px;height:44px;place-items:center;border:1px solid var(--color-border-strong);border-radius:var(--r-sm);background:var(--color-surface);color:var(--color-text);cursor:pointer}
+.burger .x{display:none}.burger[aria-expanded=true] .x{display:block}.burger[aria-expanded=true] .m{display:none}
 
-/* ==========================================================
-   BUTTONS
-   ========================================================== */
-.buttons{display:flex;flex-wrap:wrap;gap:var(--s-3);margin-top:var(--s-8)}
-.btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:var(--s-2);
-  min-height:var(--control-h);padding:0 var(--s-6);
-  border:1px solid rgba(255,255,255,.12);border-radius:var(--radius-md);
-  font:inherit;font-size:var(--fs-small);font-weight:800;line-height:1;cursor:pointer;
-  transition:transform var(--dur) var(--ease),box-shadow var(--dur) var(--ease),background var(--dur) var(--ease),border-color var(--dur) var(--ease);
-}
-.btn:hover{transform:translateY(-2px)}
-.btn:active{transform:translateY(0) scale(.98)}
-.btn svg.i{transition:transform var(--dur) var(--ease)}
-.btn:hover svg.i.arrow{transform:translate(2px,-2px)}
-.btn-primary{background:linear-gradient(135deg,#f8fbff,#bfe9ff);color:#07101c;box-shadow:0 12px 38px rgba(74,168,255,.24)}
-.btn-primary:hover{box-shadow:0 16px 44px rgba(74,168,255,.36)}
-.btn-secondary{background:rgba(10,20,38,.72);color:#eaf4ff}
-.btn-secondary:hover{background:rgba(20,36,64,.85);border-color:var(--color-border-strong)}
-.btn-danger{background:rgba(255,92,108,.08);color:#ffd7db;border-color:rgba(255,92,108,.32)}
-.btn-danger:hover{background:rgba(255,92,108,.16);border-color:rgba(255,92,108,.5)}
-.btn-sm{min-height:36px;padding:0 var(--s-4);border-radius:var(--radius-sm);font-size:var(--fs-caption)}
+/* Hero: Hamburger Nacht im Einsatz */
+.hero{position:relative;overflow:hidden;isolation:isolate;min-height:min(100svh,880px);display:flex;align-items:flex-end;padding-bottom:clamp(110px,17vw,230px);background:radial-gradient(80% 60% at 50% 0%,#0f2347,transparent 70%),var(--color-bg)}
+.hero::after{content:"";position:absolute;inset:auto 0 0;height:1px;background:linear-gradient(90deg,transparent,var(--color-border-strong),transparent);z-index:1}
+.hero .wrap{position:relative;z-index:1;padding:var(--s16) 0 var(--s8)}
+.glow{position:absolute;z-index:-1;top:-25%;width:60vw;height:60vw;max-width:780px;max-height:780px;border-radius:50%;opacity:.45;animation:beacon 2.4s ease-in-out infinite}
+.glow-b{left:-12%;background:radial-gradient(circle,rgba(47,123,255,.6),transparent 62%)}
+.glow-r{right:-12%;background:radial-gradient(circle,rgba(255,61,77,.42),transparent 62%);animation-delay:1.2s}
+@keyframes beacon{0%,100%{opacity:.12}50%{opacity:.85}}
+.hero h1{margin-bottom:var(--s6)}
+.hero .lead{max-width:54ch}
+.hero .row{margin-top:var(--s8)}
+.sky{position:absolute;left:0;right:0;bottom:0;z-index:0;width:100%;height:clamp(120px,22vw,260px);pointer-events:none}
+.blink{animation:beacon 1.6s steps(2) infinite}
+.pill{display:inline-flex;align-items:center;gap:var(--s2);margin-bottom:var(--s6);padding:var(--s1) var(--s3);border:1px solid var(--color-border-strong);border-radius:var(--r-full);background:rgba(11,20,36,.7);color:var(--color-text-soft);font-size:var(--fs-caption);font-weight:550}
+.live{width:8px;height:8px;border-radius:50%;background:var(--color-success);box-shadow:0 0 0 4px rgba(61,220,151,.18);animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(61,220,151,0)}}
+.strip{display:grid;grid-template-columns:repeat(3,1fr);margin-top:var(--s12);border:1px solid var(--color-border-strong);border-radius:var(--r-lg);background:rgba(8,16,32,.78);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.strip>div{display:flex;flex-direction:column;padding:var(--s4) var(--s6);border-left:1px solid var(--color-border)}
+.strip>div:first-child{border-left:0}
+.strip dd{order:1;font-family:var(--font-display);font-size:2.25rem;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+.strip dt{order:2;color:var(--color-muted);font-size:var(--fs-s)}
+.statement{padding:var(--s16) 0 var(--s24)}
+.statement p{max-width:20ch;font-family:var(--font-display);font-size:clamp(2.25rem,.9rem + 5vw,5rem);font-weight:800;line-height:.95;text-transform:uppercase}
+.statement span{color:var(--color-primary-soft)}
+.statement .wrap{padding-left:var(--s6);border-left:4px solid var(--color-primary)}
 
-/* ==========================================================
-   NAVIGATION
-   ========================================================== */
-.nav{
-  position:fixed;z-index:50;top:var(--s-4);left:50%;transform:translateX(-50%);
-  width:min(var(--container),calc(100% - var(--s-8)));
-  min-height:var(--nav-h);
-  display:flex;align-items:center;justify-content:space-between;gap:var(--s-4);
-  padding:var(--s-2) var(--s-2) var(--s-2) var(--s-4);
-  border:1px solid var(--color-border);border-radius:var(--radius-lg);
-  background:rgba(4,9,18,.78);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-  box-shadow:var(--shadow-medium);
-}
-.brand{display:flex;align-items:center;gap:var(--s-3);font-weight:900;letter-spacing:.08em;min-width:0}
-.brand-mark{
-  width:40px;height:40px;flex:none;border-radius:50%;
-  border:1px solid rgba(100,190,255,.45);
-  background:url("logo.png") center/cover no-repeat;
-  box-shadow:0 0 24px rgba(54,160,255,.3);
-}
-.brand span{display:block;font-size:var(--fs-small);line-height:1.2}
-.brand small{display:block;color:#7f91ac;font-size:.5625rem;letter-spacing:.16em;line-height:1.2;margin-top:2px}
-.nav-right{display:flex;align-items:center;gap:var(--s-2)}
-.navlinks{display:flex;gap:var(--s-1)}
-.navlinks a{
-  position:relative;padding:var(--s-2) var(--s-3);border-radius:var(--radius-sm);
-  color:#b9c7da;font-size:var(--fs-small);font-weight:600;
-  transition:color var(--dur-fast) var(--ease),background var(--dur-fast) var(--ease);
-}
-.navlinks a:hover{color:#fff;background:var(--color-surface-hover)}
-.navlinks a.active{color:#fff;background:rgba(74,168,255,.14)}
-.navlinks a.active::after{
-  content:"";position:absolute;left:var(--s-3);right:var(--s-3);bottom:2px;height:2px;border-radius:2px;background:var(--color-primary);
-}
-.nav-cta{
-  display:inline-flex;align-items:center;min-height:40px;padding:0 var(--s-4);
-  border-radius:var(--radius-md);background:#fff;color:#07101c;
-  font-size:var(--fs-caption);font-weight:850;letter-spacing:.04em;white-space:nowrap;
-  transition:transform var(--dur) var(--ease),box-shadow var(--dur) var(--ease);
-}
-.nav-cta:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(255,255,255,.18)}
-.nav-toggle{
-  display:none;width:40px;height:40px;place-items:center;cursor:pointer;
-  border:1px solid var(--color-border);border-radius:var(--radius-md);
-  background:var(--color-surface-2);color:var(--color-text);
-  transition:background var(--dur-fast) var(--ease);
-}
-.nav-toggle:hover{background:var(--color-surface-hover)}
-.nav-toggle .close{display:none}
-.nav-toggle[aria-expanded="true"] .open{display:none}
-.nav-toggle[aria-expanded="true"] .close{display:block}
+/* Sections */
+section.s{padding:var(--s16) 0}
+.head{display:grid;grid-template-columns:1fr 1fr;gap:var(--s8);align-items:end;margin-bottom:var(--s10)}
+.head p{max-width:50ch}
+.cols{border-top:1px solid var(--color-border-strong)}
+.cols .col{display:grid;grid-template-columns:1fr 1.5fr;gap:var(--s8);padding:var(--s8) 0;border:0;border-bottom:1px solid var(--color-border);border-radius:0;background:none;box-shadow:none}
+.cols .col h3{margin:0;font-family:var(--font-display);font-size:clamp(1.625rem,1.1rem + 1.6vw,2.375rem);line-height:1;font-weight:700;text-transform:uppercase}
+.cols .col p{font-size:var(--fs-lead);color:var(--color-text-soft)}
+.panel,.value{padding:var(--s6);border:1px solid var(--color-border);border-radius:var(--r-lg);background:linear-gradient(180deg,rgba(255,255,255,.04),transparent 45%),var(--color-surface);box-shadow:var(--sh-1)}
+.values{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s4);margin-top:var(--s4)}
+.value{display:flex;flex-direction:column;gap:var(--s2)}
+.value svg{width:40px;height:40px;padding:10px;margin-bottom:var(--s2);border-radius:var(--r-md);background:rgba(31,94,255,.1);color:var(--color-primary-soft)}
+.value b{font-weight:650}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s4)}
+.member{display:flex;align-items:center;gap:var(--s3);min-height:72px;padding:var(--s3) var(--s4);border:1px solid var(--color-border);border-radius:var(--r-md);background:var(--color-bg)}
+.avatar{width:44px;height:44px;flex:none;border-radius:50%;object-fit:cover;background:var(--color-surface-hover)}
+.member div{min-width:0}.member b{display:block;font-weight:650;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meta{display:flex;justify-content:space-between;gap:var(--s4);margin-bottom:var(--s4)}
+.partner{display:flex;flex-direction:column;gap:var(--s3);transition:box-shadow var(--t),transform var(--t) var(--ease)}
+.partner:hover{box-shadow:var(--sh-2);transform:translateY(-2px)}
+.partner p{flex:1;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;color:var(--color-muted);font-size:var(--fs-s)}
+.partner .foot{display:flex;align-items:center;justify-content:space-between;gap:var(--s3)}
+.state{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:var(--s2);padding:var(--s12) var(--s6);text-align:center;border:1px dashed var(--color-border-strong);border-radius:var(--r-lg);color:var(--color-muted)}
+.state svg{width:32px;height:32px;color:var(--color-primary-soft)}.state b{color:var(--color-text);font-weight:650}.state.err svg{color:var(--color-warning)}
+.sk{height:72px;border-radius:var(--r-md);background:linear-gradient(90deg,var(--color-surface-2),#14213a,var(--color-surface-2));background-size:200% 100%;animation:sh 1.4s linear infinite}
+.sk.tall{height:176px;border-radius:var(--r-lg)}@keyframes sh{to{background-position:-200% 0}}
 
-/* ==========================================================
-   HERO
-   ========================================================== */
-main{position:relative;z-index:2}
-.hero{
-  min-height:min(100svh,880px);display:grid;place-items:center;position:relative;isolation:isolate;
-  padding:calc(var(--nav-h) + var(--s-16) + var(--s-8)) var(--s-5) var(--s-24);
-}
-.hero::before{
-  content:"";position:absolute;inset:0;z-index:-3;
-  background:linear-gradient(180deg,rgba(2,5,12,.2),#040711 82%),url("logo.png") center top/cover no-repeat;
-}
-.hero::after{
-  content:"";position:absolute;inset:0;z-index:-2;
-  background:
-    radial-gradient(circle at 50% 42%,rgba(36,138,255,.2),transparent 32%),
-    linear-gradient(90deg,rgba(2,6,13,.82),transparent 45%,rgba(2,6,13,.62));
-}
-.hero-inner{
-  width:min(var(--container),100%);
-  display:grid;grid-template-columns:1.15fr .85fr;gap:var(--s-16);align-items:center;
-}
-.hero-copy .lead{max-width:60ch}
-.hero-copy h1{margin:var(--s-6) 0}
-.eyebrow{
-  display:inline-flex;align-items:center;gap:var(--s-2);padding:var(--s-2) var(--s-3);
-  border:1px solid rgba(92,184,255,.24);border-radius:var(--radius-full);
-  background:rgba(7,17,32,.58);color:#a9d9ff;
-  font-size:var(--fs-caption);font-weight:800;letter-spacing:.1em;text-transform:uppercase;
-}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--color-success);box-shadow:0 0 12px var(--color-success);animation:pulse 2.4s ease-in-out infinite}
-@keyframes pulse{50%{opacity:.45}}
+/* Bewertungen */
+.rev{display:grid;grid-template-columns:380px 1fr;gap:var(--s6);align-items:start}
+.sum{position:sticky;top:calc(var(--nav) + var(--s6))}
+.avg{display:flex;align-items:center;gap:var(--s4)}
+.avg strong{font-family:var(--font-display);font-size:4rem;line-height:.9;font-weight:700}
+.rate{display:inline-flex;gap:2px;color:var(--color-warning)}
+.rate svg,.stars svg{width:18px;height:18px;fill:currentColor;stroke:none}.rate .off{color:#26324a}
+#revBox{display:grid;gap:var(--s4)}
+.bars{display:grid;gap:var(--s2);margin:var(--s6) 0}
+.bar{display:grid;grid-template-columns:16px 1fr 28px;gap:var(--s3);align-items:center;font-size:var(--fs-s);color:var(--color-muted)}
+.bar i{position:relative;height:6px;border-radius:var(--r-full);background:var(--color-surface-2);overflow:hidden}
+.bar i::after{content:"";position:absolute;inset:0;width:var(--w,0%);border-radius:inherit;background:var(--color-primary);transition:width .6s var(--ease)}
+.bar span:last-child{text-align:right}
+form{display:grid;gap:var(--s4)}
+.field{display:grid;gap:var(--s2)}
+label,legend{font-size:var(--fs-s);font-weight:650;color:var(--color-text-soft)}
+input,select,textarea{width:100%;min-height:var(--ctl);padding:var(--s3) var(--s4);font:inherit;color:var(--color-text);background:var(--color-surface);border:1px solid var(--color-border-strong);border-radius:var(--r-sm);transition:border-color var(--t),box-shadow var(--t)}
+textarea{min-height:128px;resize:vertical}
+::placeholder{color:var(--color-muted)}
+input:hover,select:hover,textarea:hover{border-color:var(--color-muted)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--color-primary);box-shadow:0 0 0 3px rgba(31,94,255,.2)}
+[aria-invalid=true]{border-color:var(--color-danger)}
+.stars{display:flex;flex-direction:row-reverse;justify-content:flex-end;border:0}
+.stars input{position:absolute;opacity:0;width:1px;height:1px;min-height:0}
+.stars label{padding:var(--s1);cursor:pointer;color:#26324a;transition:color var(--t),transform var(--t) var(--ease)}
+.stars svg{width:30px;height:30px}
+.stars input:checked~label,.stars label:hover,.stars label:hover~label{color:var(--color-warning)}
+.stars label:active{transform:scale(.92)}
+.stars input:focus-visible+label{outline:3px solid var(--color-focus);border-radius:var(--r-sm)}
+.msg{font-size:var(--fs-s);font-weight:650}.msg:empty{display:none}.msg.ok{color:var(--color-success)}.msg.bad{color:var(--color-danger)}
+.who{display:flex;align-items:center;gap:var(--s3)}.who .avatar{width:36px;height:36px}.who span{flex:1;font-weight:650}
+.list{display:grid;gap:var(--s4)}
+.review header{display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s3)}
+.review header div{flex:1;min-width:0}.review header b{display:block;font-weight:650;line-height:1.3}
+.review p{color:var(--color-text-soft);white-space:pre-wrap;overflow-wrap:anywhere}
+.tag{padding:2px var(--s2);border-radius:var(--r-full);background:rgba(31,94,255,.1);color:var(--color-primary-soft);font-size:.75rem;font-weight:650}
 
-.hero-card{
-  border:1px solid var(--color-border);border-radius:var(--radius-xl);
-  background:rgba(5,13,26,.66);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-  padding:var(--s-4);box-shadow:var(--shadow-elevated);
-}
-.hero-card img{width:100%;aspect-ratio:1/1;border-radius:var(--radius-lg);object-fit:cover}
-.mini-status{
-  display:flex;align-items:center;justify-content:space-between;gap:var(--s-4);
-  margin-top:var(--s-3);padding:var(--s-3) var(--s-4);
-  border:1px solid rgba(255,255,255,.07);border-radius:var(--radius-md);background:var(--color-surface-2);
-}
-.mini-status .label{margin-bottom:var(--s-1)}
-.mini-status > div:last-child{text-align:right}
-.online{display:flex;align-items:center;gap:var(--s-2);color:#b9ffd2;font-size:var(--fs-small);font-weight:800}
-.online i{width:8px;height:8px;border-radius:50%;background:var(--color-success);box-shadow:0 0 12px var(--color-success)}
-.count{font-size:1.375rem;font-weight:900;line-height:1.2}
+/* Kontakt + CTA */
+.contact{display:grid;grid-template-columns:1fr 1.2fr;gap:var(--s12);align-items:start}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:var(--s4)}
+.hp{position:absolute;left:-9999px;height:0;overflow:hidden}
+.cta{display:grid;grid-template-columns:1fr 1fr;gap:var(--s4)}
+.cta .panel{display:flex;flex-direction:column;align-items:flex-start;gap:var(--s4);padding:var(--s8)}
+.cta h2{font-size:clamp(2rem,1.4rem + 2vw,2.75rem)}
+.cta .panel p{flex:1;color:var(--color-muted)}
+.cta .dark{border-color:rgba(37,99,235,.5);background:radial-gradient(90% 120% at 0% 0%,rgba(37,99,235,.38),transparent 60%),radial-gradient(70% 100% at 100% 100%,rgba(255,85,101,.2),transparent 60%),var(--color-surface)}
+.cta .dark .btn-primary{background:#fff;border-color:#fff;color:var(--color-navy)}
+.faces{display:flex;min-height:32px}.faces img{width:32px;height:32px;margin-left:-8px;border:2px solid var(--color-surface);border-radius:50%;background:var(--color-surface-2)}.faces img:first-child{margin:0}
+footer{margin-top:var(--s16);border-top:1px solid var(--color-border);background:var(--color-surface);padding:var(--s8) 0;font-size:var(--fs-s);color:var(--color-muted)}
+footer .wrap{display:flex;justify-content:space-between;gap:var(--s4);flex-wrap:wrap}
 
-/* ==========================================================
-   SECTIONS
-   ========================================================== */
-section{width:min(var(--container),calc(100% - var(--s-8)));margin:auto;padding:var(--s-24) 0}
-.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:var(--s-8);margin-bottom:var(--s-10)}
-.section-head p{max-width:46ch;color:var(--color-text-muted)}
+/* Team-Menü */
+.secret{display:inline-block;width:10px;height:10px;margin-left:var(--s3);padding:0;border:0;border-radius:50%;background:var(--color-muted);opacity:.2;cursor:pointer;vertical-align:middle;transition:opacity var(--t)}
+.secret:hover,.secret:focus-visible{opacity:.8}
+dialog{width:min(720px,100% - var(--s8));max-height:calc(100dvh - var(--s8));margin:auto;padding:0;border:1px solid var(--color-border);border-radius:var(--r-lg);background:var(--color-bg);color:var(--color-text);box-shadow:var(--sh-modal);overflow:auto}
+dialog::backdrop{background:rgba(2,5,12,.75)}
+dialog[open]{animation:in .25s var(--ease)}
+.dhead{position:sticky;top:0;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:var(--s3);padding:var(--s4) var(--s6);background:var(--color-surface);border-bottom:1px solid var(--color-border)}
+.dhead h2{font-size:var(--fs-h3)}
+#adminBody{display:grid;gap:var(--s4);padding:var(--s6)}
+.tabs{display:flex;gap:var(--s2)}.tabs .btn{min-height:40px}.tabs .on{background:rgba(31,94,255,.1);border-color:var(--color-primary);color:var(--color-primary-soft)}
+.item{display:grid;gap:var(--s2);padding:var(--s4)}
+.item .meta{margin:0}.item p{white-space:pre-wrap;overflow-wrap:anywhere;color:var(--color-text-soft)}
+.item .row{align-items:center}.item select{width:auto;min-height:40px}
 
-/* Karten-Basis */
-.card{
-  border:1px solid var(--color-border);border-radius:var(--radius-lg);
-  background:linear-gradient(145deg,rgba(15,29,52,.8),rgba(6,12,24,.75));
-  box-shadow:var(--shadow-medium);
-  transition:transform var(--dur) var(--ease),border-color var(--dur) var(--ease),box-shadow var(--dur) var(--ease);
+@media(max-width:960px){
+  .burger{display:grid}
+  .links{position:absolute;top:calc(100% + 1px);left:0;right:0;flex-direction:column;align-items:stretch;padding:var(--s3) var(--s4);background:var(--color-surface);border-bottom:1px solid var(--color-border);box-shadow:var(--sh-2);opacity:0;visibility:hidden;transform:translateY(-8px);transition:opacity var(--t),transform var(--t),visibility var(--t)}
+  .links.open{opacity:1;visibility:visible;transform:none}
+  .links a:not(.btn){padding:var(--s3) var(--s4);font-size:var(--fs-b)}.links .btn{margin:var(--s2) 0 0}
+  .head,.rev,.contact,.cta{grid-template-columns:1fr}
+  .hero .wrap{padding:var(--s16) 0 var(--s8)}
+  .grid3,.values{grid-template-columns:1fr 1fr}
+  .cols .col{grid-template-columns:1fr;gap:var(--s3)}
+  section.s{padding:var(--s12) 0}.sum{position:static}
 }
-.card:hover{border-color:var(--color-border-strong);box-shadow:var(--shadow-elevated)}
-.icon-tile{
-  width:48px;height:48px;flex:none;display:grid;place-items:center;
-  border:1px solid rgba(94,231,255,.17);border-radius:var(--radius-md);
-  background:linear-gradient(145deg,rgba(74,168,255,.16),rgba(123,75,216,.13));
-  color:var(--color-accent);
-}
-
-.mission{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-4)}
-.mission-card{padding:var(--s-8)}
-.mission-card.large{grid-row:span 2}
-.mission-card h3{margin:var(--s-5) 0 var(--s-2)}
-.mission-card p{color:#aebbd0}
-
-.features{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s-4)}
-.feature{padding:var(--s-6)}
-.feature strong{display:block;margin:var(--s-4) 0 var(--s-1);font-size:var(--fs-body)}
-.feature span{font-size:var(--fs-small);color:var(--color-text-muted);line-height:1.6}
-
-/* Team */
-.team-wrap{padding:var(--s-6);border-radius:var(--radius-xl)}
-.team-wrap:hover{transform:none}
-.team-top{display:flex;justify-content:space-between;align-items:center;gap:var(--s-5);margin-bottom:var(--s-5)}
-.team-top .status{font-size:var(--fs-caption);color:var(--color-text-muted)}
-.team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-3)}
-.member{
-  display:flex;align-items:center;gap:var(--s-3);min-height:76px;padding:var(--s-4);
-  border:1px solid rgba(255,255,255,.07);border-radius:var(--radius-md);background:var(--color-surface-2);
-  transition:background var(--dur) var(--ease),border-color var(--dur) var(--ease);
-}
-.member:hover{background:var(--color-surface-hover);border-color:var(--color-border)}
-.member-body{min-width:0}
-.avatar{width:48px;height:48px;flex:none;border-radius:50%;object-fit:cover;background:#0d1a2e;border:1px solid rgba(105,180,255,.22)}
-.member-name{font-weight:800;font-size:.875rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.member-role{font-size:var(--fs-caption);color:var(--color-text-muted)}
-.member-dot{margin-left:auto;flex:none;width:8px;height:8px;border-radius:50%;background:#64748b}
-.member-dot.online{background:var(--color-success);box-shadow:0 0 10px rgba(81,229,139,.65)}
-
-/* Empty & Skeleton */
-.empty{
-  grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:var(--s-2);
-  padding:var(--s-10) var(--s-6);text-align:center;color:var(--color-text-muted);
-  border:1px dashed rgba(122,160,216,.2);border-radius:var(--radius-lg);background:rgba(255,255,255,.025);
-}
-.empty strong{color:#dce9f8;font-size:var(--fs-body)}
-.empty .icon-tile{margin-bottom:var(--s-2);color:var(--color-text-muted)}
-.empty.error .icon-tile{color:var(--color-warning);border-color:rgba(255,184,74,.25);background:rgba(255,184,74,.08)}
-.skeleton{
-  height:76px;border-radius:var(--radius-md);
-  background:linear-gradient(90deg,rgba(255,255,255,.04),rgba(255,255,255,.09),rgba(255,255,255,.04));
-  background-size:200% 100%;animation:shine 1.4s linear infinite;
-}
-.skeleton.tall{height:190px;border-radius:var(--radius-lg)}
-@keyframes shine{to{background-position:-200% 0}}
-
-/* Partner */
-.partner-meta{display:flex;align-items:center;flex-wrap:wrap;gap:var(--s-3);margin-top:var(--s-4);color:var(--color-text-muted);font-size:var(--fs-caption)}
-.partner-live{
-  display:inline-flex;align-items:center;gap:var(--s-2);padding:var(--s-1) var(--s-3);
-  border:1px solid rgba(81,229,139,.18);border-radius:var(--radius-full);
-  background:rgba(81,229,139,.06);color:#9cebbd;font-size:var(--fs-caption);font-weight:800;
-}
-.partner-live i{width:7px;height:7px;border-radius:50%;background:var(--color-success);box-shadow:0 0 12px rgba(81,229,139,.75)}
-.partners-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-4)}
-.partner-card{
-  position:relative;overflow:hidden;display:flex;flex-direction:column;padding:var(--s-6);
-  background:radial-gradient(circle at 100% 0%,rgba(74,168,255,.12),transparent 35%),linear-gradient(145deg,rgba(12,25,47,.82),rgba(5,11,21,.88));
-}
-.partner-card::before{
-  content:"";position:absolute;inset:0 auto 0 0;width:3px;
-  background:linear-gradient(180deg,var(--color-accent),var(--color-primary),transparent);
-}
-.partner-card:hover{transform:translateY(-4px)}
-.partner-top{display:flex;align-items:center;gap:var(--s-3)}
-.partner-info{min-width:0}
-.partner-name{font-size:1.0625rem;font-weight:850;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.partner-owner{color:var(--color-text-muted);font-size:var(--fs-caption)}
-.partner-description{
-  flex:1;min-height:64px;margin-top:var(--s-4);color:#9eacc1;font-size:var(--fs-small);line-height:1.65;
-  display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;
-}
-.partner-bottom{display:flex;align-items:center;gap:var(--s-2);margin-top:var(--s-5)}
-.partner-members{
-  display:inline-flex;align-items:center;gap:var(--s-2);min-height:36px;padding:0 var(--s-3);
-  border:1px solid rgba(255,255,255,.07);border-radius:var(--radius-sm);background:var(--color-surface-2);
-  color:#dbe8f8;font-size:var(--fs-caption);font-weight:800;
-}
-.partner-link{
-  margin-left:auto;display:inline-flex;align-items:center;gap:var(--s-1);min-height:36px;padding:0 var(--s-3);
-  border:1px solid rgba(94,231,255,.16);border-radius:var(--radius-sm);background:rgba(94,231,255,.07);
-  color:#bfefff;font-size:var(--fs-caption);font-weight:850;
-  transition:background var(--dur-fast) var(--ease),border-color var(--dur-fast) var(--ease);
-}
-.partner-link svg.i{width:14px;height:14px}
-.partner-link:hover{background:rgba(94,231,255,.14);border-color:rgba(94,231,255,.3)}
-.partners-fade{animation:fadeUp var(--dur-slow) var(--ease) both}
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-
-/* Discord */
-.discord-box{
-  position:relative;overflow:hidden;padding:var(--s-12);border-radius:var(--radius-xl);
-  border-color:rgba(88,164,255,.25);background:linear-gradient(135deg,rgba(19,48,87,.82),rgba(7,13,27,.9));
-  box-shadow:var(--shadow-elevated);
-}
-.discord-box:hover{transform:none}
-.discord-box::after{
-  content:"";position:absolute;width:330px;height:330px;border-radius:50%;right:-130px;top:-170px;
-  background:rgba(74,168,255,.13);pointer-events:none;
-}
-.discord-content{position:relative;z-index:1;display:grid;grid-template-columns:1fr auto;gap:var(--s-10);align-items:center}
-.discord-content p{color:#aebbd0;margin-top:var(--s-4);max-width:52ch}
-.stats{display:flex;gap:var(--s-8);margin-top:var(--s-6)}
-.stat strong{display:block;font-size:1.625rem;font-weight:900;line-height:1.2}
-.stat span{font-size:var(--fs-caption);text-transform:uppercase;letter-spacing:.12em;color:var(--color-text-muted)}
-.widget{min-width:288px;padding:var(--s-5);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius-lg);background:rgba(2,8,18,.55)}
-.widget-head{display:flex;align-items:center;gap:var(--s-3)}
-.widget-logo{width:48px;height:48px;border-radius:var(--radius-md);object-fit:cover}
-.widget-name{font-weight:900}
-.widget-sub{font-size:var(--fs-caption);color:var(--color-text-muted)}
-.member-list{display:flex;margin:var(--s-4) 0 var(--s-2);min-height:30px}
-.member-list img{width:30px;height:30px;border-radius:50%;border:2px solid var(--color-bg-raised);margin-left:-8px;background:#0d1a2e}
-.member-list img:first-child{margin-left:0}
-.widget-note{font-size:var(--fs-caption);color:var(--color-text-muted)}
-
-/* Einspruch */
-.appeal{
-  display:grid;grid-template-columns:1fr auto;gap:var(--s-8);align-items:center;padding:var(--s-10);
-  border-color:rgba(255,95,110,.18);background:linear-gradient(135deg,rgba(45,13,23,.5),rgba(10,15,27,.75));
-}
-.appeal:hover{transform:none;border-color:rgba(255,95,110,.3)}
-.appeal .kicker{color:#ff8b97}
-.appeal p{color:#aebbd0;margin-top:var(--s-3);max-width:52ch}
-
-/* Footer */
-.footer{position:relative;z-index:2;border-top:1px solid rgba(255,255,255,.07);padding:var(--s-8) var(--s-5);color:var(--color-text-muted);font-size:var(--fs-caption)}
-.footer-inner{width:min(var(--container),100%);margin:auto;display:flex;justify-content:space-between;gap:var(--s-5)}
-
-/* Scroll-Reveal (nur mit JS aktiv) */
-.js .reveal{opacity:0;transform:translateY(16px);transition:opacity var(--dur-slow) var(--ease),transform var(--dur-slow) var(--ease)}
-.js .reveal.in{opacity:1;transform:none}
-
-/* ==========================================================
-   RESPONSIVE
-   ========================================================== */
-@media(max-width:1000px){
-  .features{grid-template-columns:1fr 1fr}
-  .team-grid,.partners-grid{grid-template-columns:1fr 1fr}
-}
-@media(max-width:900px){
-  .nav-toggle{display:grid}
-  .nav-cta{display:none}
-  .navlinks{
-    position:absolute;top:calc(100% + var(--s-2));left:0;right:0;flex-direction:column;
-    padding:var(--s-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);
-    background:rgba(4,9,18,.96);box-shadow:var(--shadow-modal);
-    opacity:0;visibility:hidden;transform:translateY(-8px);
-    transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease),visibility var(--dur);
-  }
-  .navlinks.open{opacity:1;visibility:visible;transform:none}
-  .navlinks a{padding:var(--s-3) var(--s-4);font-size:var(--fs-body)}
-  .navlinks a.active::after{display:none}
-  .navlinks .nav-cta-mobile{display:flex;margin-top:var(--s-1);background:#fff;color:#07101c;font-weight:850;justify-content:center}
-  .hero-inner,.mission,.discord-content,.appeal{grid-template-columns:1fr}
-  .hero{min-height:auto;padding-top:calc(var(--nav-h) + var(--s-12));padding-bottom:var(--s-16)}
-  .hero-inner{gap:var(--s-10)}
-  .hero-card{max-width:480px;width:100%;margin:auto}
-  .mission-card.large{grid-row:auto}
-  section{padding:var(--s-16) 0}
-  .section-head{display:block;margin-bottom:var(--s-8)}
-  .section-head p{margin-top:var(--s-4)}
-  .discord-box,.appeal{padding:var(--s-8)}
-}
-@media(min-width:901px){.navlinks .nav-cta-mobile{display:none}}
 @media(max-width:600px){
-  :root{--s-24:var(--s-16)}
-  .features,.team-grid,.partners-grid{grid-template-columns:1fr}
-  .buttons .btn{flex:1 1 100%}
-  .team-top{flex-direction:column;align-items:flex-start;gap:var(--s-2)}
-  .team-wrap{padding:var(--s-4)}
-  .stats{gap:var(--s-6)}
-  .widget{min-width:0}
-  .discord-box,.appeal{padding:var(--s-6)}
-  .footer-inner{flex-direction:column;gap:var(--s-2)}
-  .brand small{display:none}
+  .grid3,.values,.two{grid-template-columns:1fr}
+  .strip>div{padding:var(--s3) var(--s3)}.strip dd{font-size:1.75rem}.strip dt{font-size:var(--caption,.75rem)}
+  .row .btn{flex:1 1 100%}
+  .col,.panel,.value{padding:var(--s5)}.cta .panel{padding:var(--s6)}
+  .meta{flex-direction:column;gap:var(--s1)}
+  footer .wrap{flex-direction:column}
 }
-
-/* Reduced Motion */
 @media(prefers-reduced-motion:reduce){
-  html{scroll-behavior:auto}
-  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
-  .js .reveal{opacity:1;transform:none}
+  html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition-duration:.01ms!important}
 }
 </style>
 </head>
-
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-siren" viewBox="0 0 24 24"><path d="M7 18v-6a5 5 0 1 1 10 0v6"/><path d="M5 21a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2z"/><path d="M21 12h1M2 12h1M12 2v1M4.93 4.93l1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
+<symbol id="i-scale" viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10M12 3v18M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+<symbol id="i-handshake" viewBox="0 0 24 24"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3M3 4h8"/></symbol>
+<symbol id="i-out" viewBox="0 0 24 24"><path d="M7 7h10v10M7 17 17 7"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3M12 9v4M12 17h.01"/></symbol>
+<symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></symbol>
+</defs></svg>
 
-<!-- Icon-Set (Lucide-Stil, einheitlich 1.75px Strich) -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <defs>
-    <symbol id="i-siren" viewBox="0 0 24 24"><path d="M7 18v-6a5 5 0 1 1 10 0v6"/><path d="M5 21a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2z"/><path d="M21 12h1M18.5 4.5 18 5M2 12h1M12 2v1M4.93 4.93l1.41 1.41"/></symbol>
-    <symbol id="i-scale" viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10M12 3v18M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></symbol>
-    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/></symbol>
-    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></symbol>
-    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></symbol>
-    <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
-    <symbol id="i-handshake" viewBox="0 0 24 24"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3M3 4h8"/></symbol>
-    <symbol id="i-message" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
-    <symbol id="i-arrow-up-right" viewBox="0 0 24 24"><path d="M7 7h10v10M7 17 17 7"/></symbol>
-    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14m-7-7 7 7-7 7"/></symbol>
-    <symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3M12 9v4M12 17h.01"/></symbol>
-    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
-    <symbol id="i-close" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
-  </defs>
-</svg>
-
-<a class="skip-link" href="#home">Zum Inhalt springen</a>
-<div class="noise" aria-hidden="true"></div>
+<a class="skip" href="#main">Zum Inhalt springen</a>
 
 <nav class="nav" aria-label="Hauptnavigation">
-  <a class="brand" href="#home">
-    <div class="brand-mark" aria-hidden="true"></div>
-    <div>
-      <span>NOTRUF CRAFTOPIA</span>
-      <small>NOTRUF HAMBURG RP</small>
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="logo.png" alt="" width="36" height="36"><span>Notruf Craftopia</span></a>
+    <div class="links" id="links">
+      <a href="#mission">Mission</a><a href="#team">Team</a><a href="#partner">Partner</a>
+      <a href="#bewertungen">Bewertungen</a><a href="#kontakt">Kontakt</a>
+      <a class="btn btn-primary" href="https://discord.gg/t7N6D43KFv" target="_blank" rel="noopener">Discord beitreten</a>
     </div>
-  </a>
-
-  <div class="nav-right">
-    <div class="navlinks" id="navlinks">
-      <a href="#mission">Mission</a>
-      <a href="#team">Team</a>
-      <a href="#partner">Partner</a>
-      <a href="#discord">Discord</a>
-      <a href="#einspruch">Widerspruch</a>
-      <a class="nav-cta-mobile nav-cta" href="https://discord.gg/t7N6D43KFv" target="_blank" rel="noopener">DISCORD BEITRETEN</a>
-    </div>
-
-    <a class="nav-cta" href="https://discord.gg/t7N6D43KFv" target="_blank" rel="noopener">DISCORD BEITRETEN</a>
-
-    <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navlinks" aria-label="Menü öffnen">
-      <svg class="i open"><use href="#i-menu"/></svg>
-      <svg class="i close"><use href="#i-close"/></svg>
+    <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="links" aria-label="Menü öffnen">
+      <svg class="i m"><use href="#i-menu"/></svg><svg class="i x"><use href="#i-x"/></svg>
     </button>
   </div>
 </nav>
 
-<main id="home">
-
-  <header class="hero">
-    <div class="hero-inner">
-
-      <div class="hero-copy">
-        <div class="eyebrow">
-          <i class="dot"></i>
-          Neuer Notruf Hamburg RP Server
-        </div>
-
-        <h1>
-          DEINE STADT.<br>
-          <em>DEINE GESCHICHTE.</em>
-        </h1>
-
-        <p class="lead">
-          Notruf Craftopia entsteht gerade von Grund auf.
-          Wir wollen keinen Server, auf dem alles nach einer Session
-          vergessen ist. Wir bauen eine Stadt, in der Entscheidungen
-          Konsequenzen haben und Charaktere ihre eigene Geschichte schreiben.
-        </p>
-
-        <div class="buttons">
-          <a class="btn btn-primary" href="https://discord.gg/t7N6D43KFv" target="_blank" rel="noopener">
-            <svg class="i"><use href="#i-siren"/></svg>
-            Discord beitreten
-          </a>
-          <a class="btn btn-secondary" href="https://notrufcraftopia.vercel.app/einspruch" target="_blank" rel="noopener">
-            <svg class="i"><use href="#i-scale"/></svg>
-            Widerspruch einreichen
-          </a>
-        </div>
-      </div>
-
-      <div class="hero-card">
-        <img src="logo.png" alt="Notruf Craftopia">
-
-        <div class="mini-status">
-          <div>
-            <div class="label">Discord Status</div>
-            <div class="online">
-              <i></i>
-              <span id="heroStatus">Wird geladen…</span>
-            </div>
-          </div>
-          <div>
-            <div class="label">Mitglieder</div>
-            <div class="count" id="heroMembers">—</div>
-          </div>
-        </div>
-      </div>
-
+<main id="main">
+<header class="hero" id="top">
+  <div class="glow glow-b" aria-hidden="true"></div><div class="glow glow-r" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="pill"><i class="live"></i>Neuer Notruf Hamburg RP Server</div>
+    <h1>Deine Stadt.<br><span>Deine Geschichte.</span></h1>
+    <p class="lead">Notruf Craftopia entsteht gerade von Grund auf. Hier ist nach einer Session nicht alles vergessen: Entscheidungen haben Konsequenzen und Charaktere schreiben ihre eigene Geschichte.</p>
+    <div class="row">
+      <a class="btn btn-primary" href="https://discord.gg/t7N6D43KFv" target="_blank" rel="noopener"><svg class="i"><use href="#i-siren"/></svg>Discord beitreten</a>
+      <a class="btn" href="#bewertungen">Bewertungen lesen</a>
     </div>
-  </header>
+    <dl class="strip" aria-label="Live-Status">
+      <div><dt>Online auf Discord</dt><dd id="heroOnline">–</dd></div>
+      <div><dt>Teammitglieder</dt><dd id="heroTeam">–</dd></div>
+      <div><dt>Bewertung</dt><dd id="heroRating">–</dd></div>
+    </dl>
+  </div>
+  <svg class="sky" viewBox="0 0 1440 260" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><path fill="#14284d" d="M0 260V125h45V260zM45 260V184h64V260zM109 260V123h53V260zM162 260V120h60V260zM222 260V192h67V260zM289 260V199h68V260zM357 260V167h60V260zM417 260V171h65V260zM482 260V140h42V260zM524 260V130h64V260zM588 260V150h60V260zM648 260V181h70V260zM718 260V119h44V260zM762 260V134h39V260zM801 260V199h54V260zM855 260V192h72V260zM927 260V125h40V260zM967 260V162h32V260zM999 260V197h79V260zM1078 260V140h47V260zM1125 260V151h68V260zM1193 260V146h75V260zM1268 260V127h55V260zM1323 260V183h58V260zM1381 260V188h53V260zM1434 260V183h32V260z"/><path fill="#0f2040" d="M300 260V104h52v156zM308 104l18-74 18 74zM326 12v18M740 260V120l40-14 40 22 40-34 40 30 40-14v150zM1127 260V50h6v210z M1145 92a15 20 0 1 1-30 0a15 20 0 1 1 30 0z M1129 50V20h2v30z"/><path fill="#081124" d="M0 260V198h75V260zM75 260V185h83V260zM158 260V163h86V260zM244 260V171h37V260zM281 260V199h85V260zM366 260V224h77V260zM443 260V216h46V260zM489 260V170h59V260zM548 260V182h51V260zM599 260V217h70V260zM669 260V199h72V260zM741 260V203h36V260zM777 260V195h62V260zM839 260V181h47V260zM886 260V221h46V260zM932 260V151h44V260zM976 260V174h75V260zM1051 260V214h44V260zM1095 260V230h36V260zM1131 260V203h49V260zM1180 260V209h46V260zM1226 260V190h54V260zM1280 260V161h48V260zM1328 260V150h79V260zM1407 260V207h49V260z"/><path fill="#ffd98a" fill-opacity=".55" d="M8 236h3v5h-3zM20 208h3v5h-3zM20 250h3v5h-3zM32 236h3v5h-3zM44 250h3v5h-3zM56 222h3v5h-3zM83 251h3v5h-3zM95 251h3v5h-3zM119 223h3v5h-3zM131 195h3v5h-3zM131 237h3v5h-3zM143 195h3v5h-3zM143 251h3v5h-3zM166 173h3v5h-3zM166 201h3v5h-3zM166 215h3v5h-3zM178 215h3v5h-3zM190 201h3v5h-3zM190 243h3v5h-3zM202 215h3v5h-3zM214 201h3v5h-3zM226 187h3v5h-3zM252 223h3v5h-3zM264 237h3v5h-3zM289 209h3v5h-3zM289 237h3v5h-3zM349 209h3v5h-3zM386 234h3v5h-3zM386 248h3v5h-3zM422 248h3v5h-3zM434 248h3v5h-3zM451 226h3v5h-3zM463 226h3v5h-3zM497 250h3v5h-3zM509 180h3v5h-3zM509 236h3v5h-3zM521 194h3v5h-3zM533 250h3v5h-3zM568 206h3v5h-3zM580 220h3v5h-3zM619 227h3v5h-3zM677 223h3v5h-3zM689 237h3v5h-3zM701 237h3v5h-3zM713 237h3v5h-3zM725 237h3v5h-3zM761 227h3v5h-3zM797 205h3v5h-3zM797 219h3v5h-3zM847 247h3v5h-3zM859 191h3v5h-3zM859 219h3v5h-3zM871 219h3v5h-3zM940 189h3v5h-3zM984 226h3v5h-3zM1008 212h3v5h-3zM1020 226h3v5h-3zM1032 198h3v5h-3zM1032 212h3v5h-3zM1032 240h3v5h-3zM1032 254h3v5h-3zM1059 238h3v5h-3zM1083 252h3v5h-3zM1151 241h3v5h-3zM1163 227h3v5h-3zM1200 247h3v5h-3zM1246 228h3v5h-3zM1258 228h3v5h-3zM1258 242h3v5h-3zM1300 199h3v5h-3zM1312 241h3v5h-3zM1348 216h3v5h-3zM1360 202h3v5h-3zM1360 230h3v5h-3zM1372 202h3v5h-3zM1372 230h3v5h-3zM1396 160h3v5h-3zM1415 245h3v5h-3z"/><circle cx="1130" cy="20" r="3" fill="#ff5565" class="blink"/></svg>
+</header>
 
-  <section id="mission">
-
-    <div class="section-head reveal">
-      <div>
-        <div class="kicker">Unsere Mission</div>
-        <h2>RP, das bleibt.</h2>
-      </div>
-      <p>
-        Wir wollen Notruf Craftopia gemeinsam mit der Community entwickeln
-        und von Anfang an eine Basis schaffen, auf der langfristige
-        Geschichten entstehen können.
-      </p>
+<section class="s" id="mission">
+  <div class="wrap">
+    <div class="head">
+      <div><span class="kicker">Unsere Mission</span><h2>RP, das bleibt.</h2></div>
+      <p class="muted lead">Wir entwickeln Notruf Craftopia gemeinsam mit der Community und schaffen von Anfang an eine Basis für langfristige Geschichten.</p>
     </div>
-
-    <div class="mission">
-
-      <article class="card mission-card large reveal">
-        <div class="icon-tile"><svg class="i lg"><use href="#i-book"/></svg></div>
-        <h3>Deine Vergangenheit zählt.</h3>
-        <p>
-          Ein Charakter soll nicht jeden Tag bei null anfangen.
-          Schwere Straftaten, Entscheidungen und Erlebnisse können
-          Teil seiner Geschichte werden. Wer im RP eine schwere
-          Vergangenheit aufbaut, kann später beispielsweise Probleme
-          bei einer Bewerbung für den Polizeidienst bekommen.
-        </p>
-      </article>
-
-      <article class="card mission-card reveal">
-        <div class="icon-tile"><svg class="i lg"><use href="#i-scale"/></svg></div>
-        <h3>Ein echtes Rechtssystem.</h3>
-        <p>
-          Anwälte, Gerichte und nachvollziehbare Verfahren sollen RP
-          nicht nur dekorativ machen, sondern echte Geschichten ermöglichen.
-        </p>
-      </article>
-
-      <article class="card mission-card reveal">
-        <div class="icon-tile"><svg class="i lg"><use href="#i-shield"/></svg></div>
-        <h3>Regeln mit Augenmaß.</h3>
-        <p>
-          RP und Regelverstöße sind nicht dasselbe. Dein Charakter darf
-          Fehler machen. Wer tatsächlich gegen Serverregeln verstößt,
-          muss natürlich mit Konsequenzen rechnen.
-        </p>
-      </article>
-
+    <div class="cols">
+      <article class="col"><h3>Deine Vergangenheit zählt.</h3><p class="muted">Ein Charakter beginnt nicht jeden Tag bei null. Schwere Straftaten und Entscheidungen werden Teil seiner Geschichte und können sich später etwa auf eine Bewerbung bei der Polizei auswirken.</p></article>
+      <article class="col"><h3>Ein echtes Rechtssystem.</h3><p class="muted">Anwälte, Gerichte und nachvollziehbare Verfahren sind kein Dekor, sondern Grundlage für echte Geschichten.</p></article>
+      <article class="col"><h3>Regeln mit Augenmaß.</h3><p class="muted">RP und Regelverstöße sind nicht dasselbe. Dein Charakter darf Fehler machen. Wer gegen Serverregeln verstößt, muss mit Konsequenzen rechnen.</p></article>
     </div>
-
-  </section>
-
-  <section>
-
-    <div class="section-head reveal">
-      <div>
-        <div class="kicker">Notruf Craftopia</div>
-        <h2>Was uns wichtig ist.</h2>
-      </div>
+    <div class="values">
+      <div class="value"><svg class="i"><use href="#i-siren"/></svg><b>Serious RP</b><span class="muted small">Langfristige Geschichten statt ständigem Neustart.</span></div>
+      <div class="value"><svg class="i"><use href="#i-scale"/></svg><b>Recht &amp; Ordnung</b><span class="muted small">Anwälte, Gerichte und klare Konsequenzen.</span></div>
+      <div class="value"><svg class="i"><use href="#i-user"/></svg><b>Freie Charaktere</b><span class="muted small">Fehler und Entwicklung gehören dazu.</span></div>
+      <div class="value"><svg class="i"><use href="#i-users"/></svg><b>Gemeinsam bauen</b><span class="muted small">Präge Notruf Craftopia von Anfang an mit.</span></div>
     </div>
+  </div>
+</section>
 
-    <div class="features">
+<section class="statement"><div class="wrap"><p>Dein Charakter darf Fehler machen. <span>Seine Geschichte vergisst sie nicht.</span></p></div></section>
 
-      <div class="card feature reveal">
-        <div class="icon-tile"><svg class="i lg"><use href="#i-siren"/></svg></div>
-        <strong>Serious RP</strong>
-        <span>Langfristige Geschichten statt ständigem Neustart.</span>
-      </div>
-
-      <div class="card feature reveal">
-        <div class="icon-tile"><svg class="i lg"><use href="#i-scale"/></svg></div>
-        <strong>Recht &amp; Ordnung</strong>
-        <span>Anwälte, Gerichte und nachvollziehbare Konsequenzen.</span>
-      </div>
-
-      <div class="card feature reveal">
-        <div class="icon-tile"><svg class="i lg"><use href="#i-user"/></svg></div>
-        <strong>Freie Charaktere</strong>
-        <span>Fehler und Entwicklung gehören zu gutem RP.</span>
-      </div>
-
-      <div class="card feature reveal">
-        <div class="icon-tile"><svg class="i lg"><use href="#i-users"/></svg></div>
-        <strong>Gemeinsam bauen</strong>
-        <span>Du kannst Notruf Craftopia von Anfang an mitprägen.</span>
-      </div>
-
+<section class="s" id="team">
+  <div class="wrap">
+    <div class="head"><div><span class="kicker">Das Team</span><h2>Die Menschen hinter dem Server.</h2></div><p class="muted">Die Teamliste kommt live aus Discord und aktualisiert sich automatisch.</p></div>
+    <div class="panel">
+      <div class="meta"><b id="teamCount">Team wird geladen</b><span class="muted small" id="teamUpdated"></span></div>
+      <div class="grid3" id="teamGrid" aria-live="polite"><div class="sk"></div><div class="sk"></div><div class="sk"></div></div>
     </div>
+  </div>
+</section>
 
-  </section>
+<section class="s" id="partner">
+  <div class="wrap">
+    <div class="head"><div><span class="kicker">Partnerschaften</span><h2>Unsere Partner.</h2></div><p class="muted" id="partnerUpdated">Offizielle Partnerserver erscheinen hier automatisch.</p></div>
+    <div class="grid3" id="partnersGrid" aria-live="polite"><div class="sk tall"></div><div class="sk tall"></div><div class="sk tall"></div></div>
+  </div>
+</section>
 
-  <section id="team">
-
-    <div class="section-head reveal">
-      <div>
-        <div class="kicker">Das Team</div>
-        <h2>Die Menschen hinter Notruf Craftopia.</h2>
+<section class="s" id="bewertungen">
+  <div class="wrap">
+    <div class="head"><div><span class="kicker">Bewertungen</span><h2>Das sagt die Community.</h2></div><p class="muted">Ehrliches Feedback hilft uns, besser zu werden. Bewerten kannst du mit deinem Discord-Konto, einmal pro Person.</p></div>
+    <div class="rev">
+      <div class="sum panel">
+        <div class="avg"><strong id="avg">–</strong><div><div class="rate" id="avgStars" aria-hidden="true"></div><div class="muted small" id="avgCount">Noch keine Bewertungen</div></div></div>
+        <div class="bars" id="bars"></div>
+        <div id="revBox"><div class="sk"></div></div>
       </div>
-      <p>
-        Die Teamliste wird automatisch aus Discord geladen.
-        Dafür wird die Notruf-Craftopia-Teamrolle verwendet.
-      </p>
+      <div class="list" id="revList" aria-live="polite"><div class="sk tall"></div><div class="sk tall"></div></div>
     </div>
+  </div>
+</section>
 
-    <div class="card team-wrap reveal">
-
-      <div class="team-top">
-        <div>
-          <strong id="teamCount">Team wird geladen…</strong>
-          <div class="status">Rolle: 1551649116675768414</div>
-        </div>
-        <div class="status" id="teamUpdated">Live-Daten</div>
+<section class="s" id="kontakt">
+  <div class="wrap contact">
+    <div>
+      <h2>Schreib uns.</h2>
+      <p class="lead muted" style="margin-top:var(--s4)">Fragen zur Bewerbung, Partnerschaft oder einfach Feedback? Wir melden uns, sobald wir deine Nachricht gelesen haben. Schneller geht es meist direkt im Discord.</p>
+      <div class="row" style="margin-top:var(--s6)"><a class="btn" href="https://discord.gg/t7N6D43KFv" target="_blank" rel="noopener">Im Discord schreiben<svg class="i"><use href="#i-out"/></svg></a></div>
+    </div>
+    <form class="panel" id="contactForm" novalidate>
+      <div class="two">
+        <div class="field"><label for="cName">Name</label><input id="cName" name="name" autocomplete="name" required maxlength="80"></div>
+        <div class="field"><label for="cMail">E-Mail</label><input id="cMail" name="email" type="email" autocomplete="email" required maxlength="120"></div>
       </div>
+      <div class="field"><label for="cTopic">Thema</label>
+        <select id="cTopic" name="topic"><option value="allgemein">Allgemeine Frage</option><option value="bewerbung">Bewerbung</option><option value="partnerschaft">Partnerschaft</option><option value="sonstiges">Sonstiges</option></select></div>
+      <div class="field"><label for="cMsg">Nachricht</label><textarea id="cMsg" name="message" required minlength="10" maxlength="2000"></textarea></div>
+      <div class="hp" aria-hidden="true"><label>Nicht ausfüllen<input name="website" tabindex="-1" autocomplete="off"></label></div>
+      <button class="btn btn-primary" type="submit" id="cBtn">Nachricht senden</button>
+      <p class="msg" id="cMsgOut" role="status"></p>
+    </form>
+  </div>
+</section>
 
-      <div class="team-grid" id="teamGrid" aria-live="polite">
-        <div class="skeleton"></div>
-        <div class="skeleton"></div>
-        <div class="skeleton"></div>
-      </div>
-
+<section class="s" id="discord">
+  <div class="wrap cta">
+    <div class="panel dark">
+      <h2>Werde Teil von Notruf Craftopia.</h2>
+      <p>Wir sind noch am Anfang. Genau deshalb kannst du mitbestimmen, wie der Server am Ende aussieht.</p>
+      <div class="faces" id="faces"></div>
+      <a class="btn btn-primary" href="https://discord.gg/t7N6D43KFv" target="_blank" rel="noopener">Discord öffnen<svg class="i"><use href="#i-out"/></svg></a>
     </div>
-
-  </section>
-
-  <section id="partner" class="partners-section">
-
-    <div class="section-head reveal">
-      <div>
-        <div class="kicker">Offizielle Partnerschaften</div>
-        <h2>Unsere Partner.</h2>
-        <div class="partner-meta">
-          <span class="partner-live"><i></i> Live synchronisiert</span>
-          <span id="partnerUpdated">Partner werden geladen…</span>
-        </div>
-      </div>
-      <p>
-        Offizielle Partnerserver von Notruf Craftopia werden automatisch aus
-        unserem Partnerschaftssystem übernommen. Sobald eine Partnerschaft
-        angenommen oder beendet wird, aktualisiert sich die Liste automatisch.
-      </p>
+    <div class="panel" id="einspruch">
+      <h2>Entscheidung anfechten?</h2>
+      <p>Du bist mit einer Moderationsentscheidung nicht einverstanden? Reiche deinen Fall direkt über das Einspruchssystem ein.</p>
+      <a class="btn btn-danger" href="https://notrufcraftopia.vercel.app/einspruch" target="_blank" rel="noopener">Widerspruch einreichen<svg class="i"><use href="#i-out"/></svg></a>
     </div>
-
-    <div class="partners-grid" id="partnersGrid" aria-live="polite">
-      <div class="skeleton tall"></div>
-      <div class="skeleton tall"></div>
-      <div class="skeleton tall"></div>
-    </div>
-
-  </section>
-
-  <section id="discord">
-
-    <div class="card discord-box reveal">
-      <div class="discord-content">
-
-        <div>
-          <div class="kicker">Discord</div>
-          <h2>Werde Teil von Notruf Craftopia.</h2>
-
-          <p>
-            Wir sind noch am Anfang. Genau deshalb kannst du nicht nur
-            zuschauen, sondern mitbestimmen, wie Notruf Craftopia am Ende aussieht.
-          </p>
-
-          <div class="stats">
-            <div class="stat">
-              <strong id="discordMembers">—</strong>
-              <span>Mitglieder</span>
-            </div>
-            <div class="stat">
-              <strong id="discordOnline">—</strong>
-              <span>Online</span>
-            </div>
-          </div>
-
-          <div class="buttons">
-            <a class="btn btn-primary" href="https://discord.gg/t7N6D43KFv" target="_blank" rel="noopener">
-              Discord öffnen
-              <svg class="i arrow"><use href="#i-arrow-up-right"/></svg>
-            </a>
-          </div>
-        </div>
-
-        <div class="widget">
-          <div class="widget-head">
-            <img class="widget-logo" id="widgetLogo" src="logo.png" alt="">
-            <div>
-              <div class="widget-name" id="widgetName">Notruf Craftopia</div>
-              <div class="widget-sub" id="widgetSub">Discord Server</div>
-            </div>
-          </div>
-
-          <div class="member-list" id="widgetMembers"></div>
-
-          <div class="widget-note" id="widgetNote">Discord Widget wird geladen…</div>
-        </div>
-
-      </div>
-    </div>
-
-  </section>
-
-  <section id="einspruch">
-
-    <div class="card appeal reveal">
-      <div>
-        <div class="kicker">Moderation</div>
-        <h2>Eine Entscheidung anfechten?</h2>
-        <p>
-          Du bist mit einer Moderationsentscheidung nicht einverstanden?
-          Öffne unser Einspruchssystem und reiche deinen Fall direkt ein.
-        </p>
-      </div>
-
-      <a class="btn btn-danger" href="https://notrufcraftopia.vercel.app/einspruch" target="_blank" rel="noopener">
-        Widerspruch einreichen
-        <svg class="i arrow"><use href="#i-arrow-up-right"/></svg>
-      </a>
-    </div>
-
-  </section>
-
+  </div>
+</section>
 </main>
 
-<footer class="footer">
-  <div class="footer-inner">
-    <div>© <span id="year"></span> Notruf Craftopia</div>
-    <div>Notruf Hamburg RP · Deine Stadt. Deine Entscheidungen.</div>
-  </div>
-</footer>
+<footer><div class="wrap"><span>© <span id="year"></span> Notruf Craftopia</span><span>Notruf Hamburg RP · Deine Stadt. Deine Geschichte.<button class="secret" id="adminDot" type="button" aria-label="Team-Menü"></button></span></div></footer>
+
+<dialog id="adminDlg" aria-labelledby="adminTitle">
+  <div class="dhead"><h2 id="adminTitle">Team-Menü</h2><button class="btn btn-ghost" type="button" id="adminClose" aria-label="Schließen"><svg class="i"><use href="#i-x"/></svg></button></div>
+  <div id="adminBody"></div>
+</dialog>
 
 <script>
-document.documentElement.classList.add("js");
+const $ = id => document.getElementById(id);
+const INVITE = "https://discord.gg/t7N6D43KFv", DEFAULT_AVATAR = "https://cdn.discordapp.com/embed/avatars/0.png";
+const icon = (n, c = "") => `<svg class="i ${c}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+const stars = n => `<span class="rate" role="img" aria-label="${n} von 5 Sternen">${[1,2,3,4,5].map(i => `<svg class="${i <= Math.round(n) ? "" : "off"}"><use href="#i-star"/></svg>`).join("")}</span>`;
+const state = (ic, title, text, cls = "") => `<div class="state ${cls}">${icon(ic)}<b>${title}</b><span>${text}</span></div>`;
+async function api(url, opt) {
+  const r = await fetch(url, { cache: "no-store", ...opt });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || "Anfrage fehlgeschlagen.");
+  return d;
+}
+$("year").textContent = new Date().getFullYear();
 
-const WIDGET_URL = "https://discord.com/api/guilds/1548652649866596473/widget.json";
-const TEAM_ROLE_ID = "1551649116675768414";
-const TEAM_API = "/api/team";
-const INVITE = "https://discord.gg/t7N6D43KFv";
-const DEFAULT_AVATAR = "https://cdn.discordapp.com/embed/avatars/0.png";
-
-const icon = (name, cls = "") =>
-  `<svg class="i ${cls}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
-
-document.getElementById("year").textContent = new Date().getFullYear();
-
-function avatarFor(id, avatar){
-  return avatar
-    ? `https://cdn.discordapp.com/avatars/${id}/${avatar}.png?size=128`
-    : DEFAULT_AVATAR;
+/* Navigation */
+const burger = $("burger"), links = $("links");
+const setNav = o => { links.classList.toggle("open", o); burger.setAttribute("aria-expanded", o); burger.setAttribute("aria-label", o ? "Menü schließen" : "Menü öffnen"); };
+burger.onclick = () => setNav(!links.classList.contains("open"));
+links.onclick = e => { if (e.target.closest("a")) setNav(false); };
+document.addEventListener("keydown", e => e.key === "Escape" && setNav(false));
+document.addEventListener("click", e => !e.target.closest(".nav") && setNav(false));
+if ("IntersectionObserver" in window) {
+  const items = [...links.querySelectorAll('a[href^="#"]')];
+  const spy = new IntersectionObserver(es => es.forEach(en => en.isIntersecting && items.forEach(a => a.classList.toggle("active", a.hash === "#" + en.target.id))), { rootMargin: "-45% 0px -50% 0px" });
+  items.forEach(a => { const t = document.querySelector(a.hash); t && spy.observe(t); });
 }
 
-function escapeHtml(s){
-  return String(s ?? "").replace(/[&<>"']/g, c => ({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    '"':"&quot;",
-    "'":"&#039;"
-  }[c]));
-}
-
-/* ---------- Navigation ---------- */
-const navToggle = document.getElementById("navToggle");
-const navLinks = document.getElementById("navlinks");
-
-function setNav(open){
-  navLinks.classList.toggle("open", open);
-  navToggle.setAttribute("aria-expanded", String(open));
-  navToggle.setAttribute("aria-label", open ? "Menü schließen" : "Menü öffnen");
-}
-
-navToggle.addEventListener("click", () => setNav(!navLinks.classList.contains("open")));
-navLinks.addEventListener("click", e => { if(e.target.closest("a")) setNav(false); });
-document.addEventListener("keydown", e => { if(e.key === "Escape") setNav(false); });
-document.addEventListener("click", e => { if(!e.target.closest(".nav")) setNav(false); });
-
-/* Aktiver Menüpunkt + Scroll-Reveal */
-if("IntersectionObserver" in window){
-
-  const links = [...navLinks.querySelectorAll('a[href^="#"]')];
-  const spy = new IntersectionObserver(entries => {
-    entries.forEach(en => {
-      if(en.isIntersecting){
-        links.forEach(a => a.classList.toggle("active", a.getAttribute("href") === "#" + en.target.id));
-      }
-    });
-  }, { rootMargin: "-45% 0px -50% 0px" });
-
-  links.forEach(a => {
-    const t = document.querySelector(a.getAttribute("href"));
-    if(t) spy.observe(t);
-  });
-
-  const reveal = new IntersectionObserver((entries, obs) => {
-    entries.forEach(en => {
-      if(en.isIntersecting){ en.target.classList.add("in"); obs.unobserve(en.target); }
-    });
-  }, { threshold: .12 });
-
-  document.querySelectorAll(".reveal").forEach(el => reveal.observe(el));
-
-}else{
-  document.querySelectorAll(".reveal").forEach(el => el.classList.add("in"));
-}
-
-/* ---------- Discord Widget ---------- */
-async function loadWidget(){
-
-  try{
-
-    const r = await fetch(WIDGET_URL, { cache:"no-store" });
-    if(!r.ok) throw new Error("Widget nicht verfügbar");
-
+/* Discord Widget */
+async function loadWidget() {
+  try {
+    const r = await fetch("https://discord.com/api/guilds/1548652649866596473/widget.json", { cache: "no-store" });
+    if (!r.ok) throw 0;
     const d = await r.json();
-    const members = Number(d.presence_count || 0);
-    const memberText = d.members?.length ? (d.members.length + "+") : "—";
+    $("heroOnline").textContent = d.presence_count ?? "–";
+    $("faces").innerHTML = (d.members || []).slice(0, 8).map(m => `<img src="${esc(m.avatar_url || DEFAULT_AVATAR)}" alt="" loading="lazy">`).join("");
+    if (d.instant_invite) document.querySelectorAll('a[href*="discord.gg/t7N6D43KFv"]').forEach(a => a.href = d.instant_invite);
+  } catch { $("heroOnline").textContent = "–"; }
+}
 
-    document.getElementById("heroMembers").textContent = memberText;
-    document.getElementById("heroStatus").textContent = members + " online";
-    document.getElementById("discordMembers").textContent = memberText;
-    document.getElementById("discordOnline").textContent = members;
-    document.getElementById("widgetName").textContent = d.name || "Notruf Craftopia";
+/* Partner */
+function safeUrl(v) { try { const u = new URL(String(v || "")); return /^https?:$/.test(u.protocol) ? u.href : ""; } catch { return ""; } }
+function renderPartners(list, error) {
+  const grid = $("partnersGrid");
+  if (error) { $("partnerUpdated").textContent = "Partner momentan nicht erreichbar."; grid.innerHTML = state("alert", "Partner konnten nicht geladen werden", "Wir versuchen es automatisch erneut.", "err"); return; }
+  $("partnerUpdated").textContent = list.length === 1 ? "1 offizieller Partner" : `${list.length} offizielle Partner`;
+  if (!list.length) { grid.innerHTML = state("handshake", "Noch keine Partnerserver", "Sobald eine Partnerschaft angenommen wurde, erscheint sie hier."); return; }
+  grid.innerHTML = list.map(p => {
+    const url = safeUrl(p.server_link);
+    return `<article class="panel partner"><h3>${esc(p.server_name || "Unbekannter Server")}</h3>
+      <span class="muted small">Ansprechpartner: ${esc(p.owner_name || "Unbekannt")}</span>
+      <p>${esc(p.advertisement || "Offizieller Partnerserver von Notruf Craftopia.")}</p>
+      <div class="foot"><span class="small"><b>${Number(p.member_count || 0).toLocaleString("de-DE")}</b> Mitglieder</span>
+      ${url ? `<a class="btn btn-sm" style="min-height:36px;padding:0 12px" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Öffnen${icon("out")}</a>` : ""}</div></article>`;
+  }).join("");
+}
 
-    if(d.instant_invite){
-      document
-        .querySelectorAll('a[href*="discord.gg/t7N6D43KFv"]')
-        .forEach(a => a.href = d.instant_invite);
-    }
-
-    if(d.icon_url){
-      document.getElementById("widgetLogo").src = d.icon_url;
-    }
-
-    const list = document.getElementById("widgetMembers");
-    list.innerHTML = "";
-
-    (d.members || []).slice(0,8).forEach(m => {
-      const img = document.createElement("img");
-      img.src = m.avatar_url || DEFAULT_AVATAR;
-      img.alt = m.username || "";
-      img.title = m.username || "";
-      img.loading = "lazy";
-      list.appendChild(img);
-    });
-
-    document.getElementById("widgetNote").textContent =
-      d.members?.length
-        ? `${d.members.length} aktive Nutzer im Widget`
-        : "Discord-Widget ist aktiv";
-
-  }catch(e){
-
-    document.getElementById("heroStatus").textContent = "Discord";
-    document.getElementById("widgetNote").textContent =
-      "Discord-Widget konnte gerade nicht geladen werden.";
-
+/* Team */
+async function loadTeam() {
+  const grid = $("teamGrid");
+  try {
+    const d = await api("/api/team");
+    const m = Array.isArray(d.members) ? d.members : [];
+    renderPartners(Array.isArray(d.partners) ? d.partners : [], d.partners_error || null);
+    $("teamCount").textContent = `${m.length} Teammitglied${m.length === 1 ? "" : "er"}`;
+    $("teamUpdated").textContent = "Automatisch aktualisiert";
+    $("heroTeam").textContent = m.length;
+    grid.innerHTML = m.length ? m.map(x => `<div class="member"><img class="avatar" src="${esc(x.avatar || DEFAULT_AVATAR)}" alt="" loading="lazy"><div><b>${esc(x.display_name || x.username)}</b><span class="muted small">Team</span></div></div>`).join("")
+      : state("users", "Noch keine Teammitglieder", "Sobald jemand die Teamrolle erhält, erscheint er hier.");
+  } catch {
+    $("teamCount").textContent = "Teamliste nicht erreichbar";
+    grid.innerHTML = state("alert", "Teamliste konnte nicht geladen werden", "Bitte versuche es in ein paar Minuten erneut.", "err");
+    renderPartners([], true);
   }
-
 }
 
-/* ---------- Partner ---------- */
-function safePartnerUrl(value){
-  try{
-    const url = new URL(String(value || ""));
-    if(url.protocol === "https:" || url.protocol === "http:") return url.href;
-  }catch(e){}
-  return "";
-}
+/* Bewertungen */
+const starInput = () => `<fieldset class="stars" aria-label="Deine Bewertung">${[5,4,3,2,1].map(i => `<input type="radio" name="rating" id="r${i}" value="${i}"><label for="r${i}" title="${i} Sterne"><span class="sr" style="position:absolute;left:-9999px">${i} Sterne</span><svg><use href="#i-star"/></svg></label>`).join("")}</fieldset>`;
 
-function renderPartners(partners, error){
-
-  const grid = document.getElementById("partnersGrid");
-  const updated = document.getElementById("partnerUpdated");
-
-  if(!grid || !updated) return;
-
-  grid.innerHTML = "";
-
-  if(error){
-    updated.textContent = "Partner-API momentan nicht erreichbar";
-    grid.innerHTML = `
-      <div class="empty error">
-        <div class="icon-tile">${icon("alert","lg")}</div>
-        <strong>Partnerschaften konnten nicht geladen werden</strong>
-        Die Verbindung zum Partnerschaftssystem ist gerade nicht verfügbar. Die Seite lädt die Liste automatisch erneut.
-      </div>
-    `;
+async function renderReviewBox(reviewed) {
+  const box = $("revBox");
+  let user = null;
+  try { user = (await api("/api/session")).user; } catch {}
+  if (!user) {
+    box.innerHTML = `<div class="field"><label>Wie gefällt dir Notruf Craftopia?</label>${starInput()}</div><p class="small muted">Wähle 1 bis 5 Sterne. Zum Absenden meldest du dich kurz mit Discord an.</p><a class="btn btn-primary" id="loginRev" href="/api/login?next=review">Anmelden und bewerten</a>`;
+    $("loginRev").onclick = () => { try { sessionStorage.setItem("pendingRating", box.querySelector("input[name=rating]:checked")?.value || ""); } catch {} };
     return;
   }
-
-  updated.textContent = partners.length === 1
-    ? "1 offizieller Partner"
-    : `${partners.length} offizielle Partner`;
-
-  if(!partners.length){
-    grid.innerHTML = `
-      <div class="empty partners-fade">
-        <div class="icon-tile">${icon("handshake","lg")}</div>
-        <strong>Noch keine offiziellen Partnerserver</strong>
-        Sobald eine Partnerschaft angenommen wurde, erscheint sie hier automatisch.
-      </div>
-    `;
-    return;
-  }
-
-  partners.forEach((partner,index) => {
-
-    const card = document.createElement("article");
-    card.className = "card partner-card partners-fade";
-    card.style.animationDelay = `${Math.min(index * 55,350)}ms`;
-
-    const name = escapeHtml(partner.server_name || "Unbekannter Server");
-    const owner = escapeHtml(partner.owner_name || "Unbekannt");
-    const text = escapeHtml(
-      partner.advertisement || "Offizieller Partnerserver von Notruf Craftopia."
-    );
-    const members = Number(partner.member_count || 0).toLocaleString("de-DE");
-    const url = safePartnerUrl(partner.server_link);
-
-    card.innerHTML = `
-      <div class="partner-top">
-        <div class="icon-tile">${icon("handshake","lg")}</div>
-        <div class="partner-info">
-          <div class="partner-name">${name}</div>
-          <div class="partner-owner">Ansprechpartner: ${owner}</div>
-        </div>
-      </div>
-
-      <div class="partner-description">${text}</div>
-
-      <div class="partner-bottom">
-        <div class="partner-members">${icon("users")} ${members} Mitglieder</div>
-        ${url ? `<a class="partner-link" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">Server öffnen ${icon("arrow-up-right")}</a>` : ""}
-      </div>
-    `;
-
-    grid.appendChild(card);
-
-  });
-
+  if (reviewed) { box.innerHTML = `<p class="small"><b>Danke für deine Bewertung!</b> Du hast den Server bereits bewertet.</p>`; return; }
+  box.innerHTML = `<form id="revForm" novalidate>
+    <div class="who"><img class="avatar" src="${esc(user.avatar || DEFAULT_AVATAR)}" alt=""><span>${esc(user.global_name || user.username)}</span><a class="btn btn-ghost small" href="/api/logout?next=review">Abmelden</a></div>
+    <div class="field"><label>Sterne</label>${starInput()}</div>
+    <div class="field"><label for="rText">Dein Erfahrungsbericht</label><textarea id="rText" maxlength="600" minlength="10" required></textarea></div>
+    <button class="btn btn-primary" type="submit" id="rBtn">Bewertung senden</button><p class="msg" id="rOut" role="status"></p></form>`;
+  try { const v = sessionStorage.getItem("pendingRating"); if (v && $("r" + v)) $("r" + v).checked = true; sessionStorage.removeItem("pendingRating"); } catch {}
+  $("revForm").onsubmit = async e => {
+    e.preventDefault();
+    const rating = Number(new FormData(e.target).get("rating")), comment = $("rText").value.trim(), out = $("rOut");
+    out.className = "msg bad";
+    if (!rating) return out.textContent = "Bitte wähle zuerst Sterne aus.";
+    if (comment.length < 10) { $("rText").setAttribute("aria-invalid", "true"); return out.textContent = "Bitte schreibe mindestens 10 Zeichen."; }
+    $("rBtn").disabled = true; out.className = "msg"; out.textContent = "Wird gesendet …";
+    try {
+      const d = await api("/api/reviews", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ rating, comment }) });
+      box.innerHTML = `<p class="msg ok">${d.status === "pending" ? "Danke! Deine Bewertung erscheint nach kurzer Prüfung." : "Danke für deine Bewertung!"}</p>`;
+      loadReviews(true);
+    } catch (err) { $("rBtn").disabled = false; out.className = "msg bad"; out.textContent = err.message; }
+  };
 }
 
-/* ---------- Team ---------- */
-async function loadTeam(){
-
-  const grid = document.getElementById("teamGrid");
-
-  try{
-
-    const r = await fetch(TEAM_API, { cache:"no-store" });
-    if(!r.ok) throw new Error("Team API " + r.status);
-
-    const data = await r.json();
-    const teamMembers = Array.isArray(data.members) ? data.members : [];
-
-    renderPartners(
-      Array.isArray(data.partners) ? data.partners : [],
-      data.partners_error || null
-    );
-
-    document.getElementById("teamCount").textContent =
-      `${teamMembers.length} Teammitglied${teamMembers.length === 1 ? "" : "er"}`;
-
-    document.getElementById("teamUpdated").textContent = "● automatisch aktualisiert";
-
-    grid.innerHTML = "";
-
-    if(!teamMembers.length){
-      grid.innerHTML = `
-        <div class="empty">
-          <div class="icon-tile">${icon("users","lg")}</div>
-          <strong>Noch keine Teammitglieder gefunden</strong>
-          Sobald jemand die Teamrolle erhält, erscheint er hier automatisch.
-        </div>
-      `;
-      return;
-    }
-
-    teamMembers.forEach(m => {
-
-      const card = document.createElement("div");
-      card.className = "member";
-
-      card.innerHTML = `
-        <img class="avatar" src="${escapeHtml(m.avatar || DEFAULT_AVATAR)}" alt="" loading="lazy">
-
-        <div class="member-body">
-          <div class="member-name">${escapeHtml(m.display_name || m.username || "Unbekannt")}</div>
-          <div class="member-role">Notruf Craftopia Team</div>
-        </div>
-
-        <span class="member-dot ${m.online ? "online" : ""}" role="img" aria-label="${m.online ? "Online" : "Offline"}"></span>
-      `;
-
-      grid.appendChild(card);
-
-    });
-
-  }catch(e){
-
-    document.getElementById("teamCount").textContent = "Teamliste momentan nicht erreichbar";
-    document.getElementById("teamUpdated").textContent = "API prüfen";
-
-    grid.innerHTML = `
-      <div class="empty error">
-        <div class="icon-tile">${icon("alert","lg")}</div>
-        <strong>Teamliste konnte nicht geladen werden</strong>
-        Die Discord-Teamliste ist gerade nicht erreichbar. Prüfe den Bot-Token und die Team-API.
-      </div>
-    `;
-
-    renderPartners([], "team_api_error");
-
+async function loadReviews(skipBox) {
+  try {
+    const d = await api("/api/reviews");
+    const list = d.reviews || [];
+    $("avg").textContent = d.count ? d.average.toFixed(1).replace(".", ",") : "–";
+    $("heroRating").textContent = d.count ? d.average.toFixed(1).replace(".", ",") + " / 5" : "–";
+    $("avgStars").innerHTML = d.count ? stars(d.average) : "";
+    $("avgCount").textContent = d.count ? `${d.count} Bewertung${d.count === 1 ? "" : "en"}` : "Noch keine Bewertungen";
+    $("bars").innerHTML = [5,4,3,2,1].map(n => { const c = d.distribution?.[n] || 0, w = d.count ? Math.round(c / d.count * 100) : 0; return `<div class="bar"><span>${n}</span><i style="--w:${w}%"></i><span>${c}</span></div>`; }).join("");
+    $("revList").innerHTML = list.length ? list.map(r => `<article class="panel review"><header><img class="avatar" src="${esc(r.avatar || DEFAULT_AVATAR)}" alt="" loading="lazy"><div><b>${esc(r.name)}</b><span class="muted small">${new Date(r.created_at).toLocaleDateString("de-DE", { month: "long", year: "numeric" })}</span></div>${r.mine ? '<span class="tag">Du</span>' : ""}</header>${stars(r.rating)}<p style="margin-top:8px">${esc(r.comment)}</p></article>`).join("")
+      : state("star", "Noch keine Bewertungen", "Sei die erste Person, die den Server bewertet.");
+    if (!skipBox) renderReviewBox(list.some(r => r.mine));
+  } catch {
+    $("revList").innerHTML = state("alert", "Bewertungen konnten nicht geladen werden", "Bitte lade die Seite in ein paar Minuten neu.", "err");
+    if (!skipBox) renderReviewBox(false);
   }
-
 }
 
-loadWidget();
-loadTeam();
+/* Kontakt */
+$("contactForm").onsubmit = async e => {
+  e.preventDefault();
+  const f = e.target, out = $("cMsgOut"), v = Object.fromEntries(new FormData(f));
+  out.className = "msg bad";
+  f.querySelectorAll("[aria-invalid]").forEach(x => x.removeAttribute("aria-invalid"));
+  const bad = [["name", v.name.trim().length < 2, "cName"], ["email", !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.email), "cMail"], ["message", v.message.trim().length < 10, "cMsg"]].find(x => x[1]);
+  if (bad) { $(bad[2]).setAttribute("aria-invalid", "true"); $(bad[2]).focus(); return out.textContent = bad[0] === "name" ? "Bitte gib deinen Namen an." : bad[0] === "email" ? "Bitte gib eine gültige E-Mail-Adresse an." : "Bitte schreibe mindestens 10 Zeichen."; }
+  $("cBtn").disabled = true; out.className = "msg"; out.textContent = "Wird gesendet …";
+  try {
+    await api("/api/contact", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(v) });
+    f.reset(); out.className = "msg ok"; out.textContent = "Danke! Deine Nachricht ist angekommen.";
+  } catch (err) { out.className = "msg bad"; out.textContent = err.message; }
+  $("cBtn").disabled = false;
+};
 
-setInterval(loadWidget, 60000);
-setInterval(loadTeam, 60000);
+/* Team-Menü */
+const dlg = $("adminDlg"), body = $("adminBody");
+let adminData = null, adminTab = "m";
+const fmt = d => new Date(d).toLocaleString("de-DE", { dateStyle: "medium", timeStyle: "short" });
+const STATUS = { approved: "Sichtbar", pending: "Wartet auf Freigabe", hidden: "Versteckt" };
+
+function renderAdmin() {
+  const d = adminData;
+  const tabs = `<div class="tabs" role="tablist"><button class="btn ${adminTab === "m" ? "on" : ""}" data-tab="m" role="tab" aria-selected="${adminTab === "m"}">Nachrichten (${d.messages.length})</button><button class="btn ${adminTab === "r" ? "on" : ""}" data-tab="r" role="tab" aria-selected="${adminTab === "r"}">Bewertungen (${d.reviews.length})</button></div>`;
+  const list = adminTab === "m"
+    ? (d.messages.map(m => `<article class="panel item"><div class="meta"><b>${esc(m.name)}</b><span class="muted small">${fmt(m.created_at)}</span></div><span class="small"><a href="mailto:${esc(m.email)}">${esc(m.email)}</a> · ${esc(m.topic)}</span><p>${esc(m.message)}</p><div class="row"><button class="btn btn-ghost small" data-del="${m.id}" data-kind="message">Löschen</button></div></article>`).join("") || state("users", "Keine Nachrichten", "Neue Kontaktanfragen erscheinen hier."))
+    : (d.reviews.map(r => `<article class="panel item"><div class="meta"><b>${esc(r.display_name)}</b><span class="muted small">${fmt(r.created_at)}</span></div>${stars(r.rating)}<p>${esc(r.comment)}</p><div class="row"><select data-rev="${r.id}" aria-label="Status">${Object.entries(STATUS).map(([k, v]) => `<option value="${k}" ${r.status === k ? "selected" : ""}>${v}</option>`).join("")}</select><button class="btn btn-ghost small" data-del="${r.id}" data-kind="review">Löschen</button></div></article>`).join("") || state("star", "Keine Bewertungen", "Neue Bewertungen erscheinen hier."));
+  body.innerHTML = tabs + list + `<p class="msg" id="adminMsg" role="status"></p>`;
+}
+
+async function openAdmin() {
+  if (!dlg.open) dlg.showModal();
+  body.innerHTML = '<div class="sk tall"></div>';
+  let user = null;
+  try { user = (await api("/api/session")).user; } catch {}
+  if (!user) { body.innerHTML = `<p class="muted">Dieser Bereich ist nur für das Team. Melde dich mit Discord an.</p><a class="btn btn-primary" href="/api/login?next=admin">Mit Discord anmelden</a>`; return; }
+  try { adminData = await api("/api/admin/data"); renderAdmin(); }
+  catch (e) { body.innerHTML = `<p class="msg bad">${esc(e.message)}</p><a class="btn btn-ghost" href="/api/logout?next=admin">Abmelden</a>`; }
+}
+async function adminPost(url, data) {
+  const out = $("adminMsg");
+  try { await api(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }); return true; }
+  catch (e) { if (out) { out.className = "msg bad"; out.textContent = e.message; } return false; }
+}
+body.onclick = async e => {
+  const tab = e.target.closest("[data-tab]"), del = e.target.closest("[data-del]");
+  if (tab) { adminTab = tab.dataset.tab; renderAdmin(); }
+  if (del && confirm("Wirklich endgültig löschen?")) {
+    if (await adminPost("/api/admin/delete", { id: del.dataset.del, kind: del.dataset.kind })) { adminData = await api("/api/admin/data"); renderAdmin(); loadReviews(true); }
+  }
+};
+body.onchange = async e => {
+  const sel = e.target.closest("[data-rev]");
+  if (sel && await adminPost("/api/admin/review", { id: sel.dataset.rev, status: sel.value })) { const o = $("adminMsg"); o.className = "msg ok"; o.textContent = "Gespeichert."; loadReviews(true); }
+};
+$("adminDot").onclick = openAdmin;
+$("adminClose").onclick = () => dlg.close();
+dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+dlg.addEventListener("close", () => history.replaceState(null, "", location.pathname));
+if (location.hash === "#admin") openAdmin();
+
+loadWidget(); loadTeam(); loadReviews();
+setInterval(loadWidget, 60000); setInterval(loadTeam, 60000);
 </script>
-
 </body>
 </html>
