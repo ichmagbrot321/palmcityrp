@@ -16,6 +16,12 @@ const SESSION = process.env.SESSION_SECRET;
 const APPEAL_CHANNEL = process.env.DISCORD_APPEAL_CHANNEL_ID || '1551649399212347422';
 const TEAM_ROLE = process.env.DISCORD_TEAM_ROLE_ID || '1551649116675768414';
 
+const CONTACT_CHANNEL = process.env.DISCORD_CONTACT_CHANNEL_ID || '';
+const REVIEW_STATUS = process.env.REVIEWS_REQUIRE_APPROVAL === 'true' ? 'pending' : 'approved';
+const NEXT = { appeal: '/einspruch', review: '/#bewertungen', admin: '/#admin' };
+const ADMIN_IDS = (process.env.ADMIN_DISCORD_IDS || '').split(',').map(x => x.trim()).filter(Boolean);
+const nextKey = k => (Object.hasOwn(NEXT, k) ? k : 'appeal');
+
 const DISCORD_INVITE = 'https://discord.gg/t7N6D43KFv';
 const WIDGET_URL = 'https://discord.com/api/guilds/1548652649866596473/widget.json';
 
@@ -408,6 +414,25 @@ async function getPublicTeam() {
     .sort((a, b) => a.display_name.localeCompare(b.display_name, 'de'));
 }
 
+/* Einfaches Rate-Limit pro IP (in-memory, reicht gegen Spam) */
+const hits = new Map();
+function limited(key, max, ms) {
+  const now = Date.now();
+  const list = (hits.get(key) || []).filter(t => now - t < ms);
+  list.push(now);
+  hits.set(key, list);
+  if (hits.size > 500) hits.delete(hits.keys().next().value);
+  return list.length > max;
+}
+/* Admin = ID in ADMIN_DISCORD_IDS oder Mitglied mit Team-Rolle */
+async function isAdmin(me) {
+  if (ADMIN_IDS.includes(String(me.id))) return true;
+  const r = await dapi(`/guilds/${encodeURIComponent(GUILD)}/members/${encodeURIComponent(me.id)}`);
+  return r.ok && Array.isArray(r.data?.roles) && r.data.roles.includes(TEAM_ROLE);
+}
+const clientIp = req => String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
+const clip = (v, n) => String(v || '').trim().slice(0, n);
+
 /* =========================================================
    ÖFFENTLICHE STARTSEITE
    ========================================================= */
@@ -482,11 +507,77 @@ module.exports = async (req, res) => {
       }
     }
 
+    /* ---------- Session-Status (öffentlich, leichtgewichtig) ---------- */
+    if (p === '/api/session' && req.method === 'GET') {
+      const s = session(req);
+      return send(res, 200, { user: s ? { id: s.id, username: s.username, global_name: s.global_name, avatar: s.avatar } : null });
+    }
+
+    /* ---------- Bewertungen lesen (öffentlich) ---------- */
+    if (p === '/api/reviews' && req.method === 'GET') {
+      const viewer = session(req);
+      const r = await db('reviews?status=eq.approved&order=created_at.desc&limit=200&select=id,discord_id,display_name,avatar,rating,comment,created_at');
+      if (!r.ok) return send(res, 502, { error: 'Bewertungen konnten nicht geladen werden.' });
+      const all = Array.isArray(r.data) ? r.data : [];
+      const distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+      all.forEach(x => { if (distribution[x.rating] !== undefined) distribution[x.rating]++; });
+      const sum = all.reduce((a, x) => a + Number(x.rating || 0), 0);
+      return send(res, 200, {
+        count: all.length,
+        average: all.length ? Math.round(sum / all.length * 10) / 10 : 0,
+        distribution,
+        reviews: all.slice(0, 12).map(x => ({
+          id: x.id, name: x.display_name, avatar: x.avatar, rating: x.rating,
+          comment: x.comment, created_at: x.created_at,
+          mine: !!viewer && String(x.discord_id) === String(viewer.id)
+        }))
+      });
+    }
+
+    /* ---------- Kontaktformular (öffentlich) ---------- */
+    if (p === '/api/contact' && req.method === 'POST') {
+      let x;
+      try { x = await readJson(req); } catch { return send(res, 400, { error: 'Ungültige Anfrage.' }); }
+      if (x.website) return send(res, 200, { ok: true }); // Honeypot: Bots still abfertigen
+      if (limited('contact:' + clientIp(req), 3, 10 * 60 * 1000)) {
+        return send(res, 429, { error: 'Zu viele Nachrichten. Bitte versuche es in ein paar Minuten erneut.' });
+      }
+
+      const name = clip(x.name, 80), email = clip(x.email, 120), message = clip(x.message, 2000);
+      const topic = ['allgemein', 'bewerbung', 'partnerschaft', 'sonstiges'].includes(x.topic) ? x.topic : 'allgemein';
+      if (name.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || message.length < 10) {
+        return send(res, 400, { error: 'Bitte fülle alle Felder korrekt aus (Nachricht mindestens 10 Zeichen).' });
+      }
+
+      const saved = await db('contact_messages', {
+        method: 'POST', headers: { Prefer: 'return=minimal' },
+        body: JSON.stringify({ name, email, topic, message, created_at: new Date().toISOString() })
+      });
+
+      let notified = false;
+      if (CONTACT_CHANNEL) {
+        const dr = await dapi(`/channels/${encodeURIComponent(CONTACT_CHANNEL)}/messages`, {
+          method: 'POST',
+          body: JSON.stringify({
+            content: `📩 **Neue Kontaktanfrage**\n**Von:** ${name} (${email})\n**Thema:** ${topic}\n\n${message}`.slice(0, 2000),
+            allowed_mentions: { parse: [] }
+          })
+        });
+        notified = dr.ok;
+      }
+
+      if (!saved.ok && !notified) {
+        console.error('[CONTACT] weder gespeichert noch gesendet:', saved.status, saved.data);
+        return send(res, 500, { error: 'Deine Nachricht konnte gerade nicht gesendet werden. Schreib uns bitte im Discord.' });
+      }
+      return send(res, 200, { ok: true });
+    }
+
     /* ---------- Login ---------- */
     if (p === '/api/login') {
       const state = enc(crypto.randomBytes(24));
       const url = `https://discord.com/oauth2/authorize?client_id=${encodeURIComponent(CLIENT)}&response_type=code&redirect_uri=${encodeURIComponent(SITE + '/api/callback')}&scope=identify&state=${state}`;
-      return redirect(res, url, [setCookie('pc_state', state, 600)]);
+      return redirect(res, url, [setCookie('pc_state', state, 600), setCookie('pc_next', nextKey(u.searchParams.get('next')), 600)]);
     }
 
     if (p === '/api/callback') {
@@ -524,17 +615,86 @@ module.exports = async (req, res) => {
       const user = { id: me.id, username: me.username, global_name: me.global_name, avatar: avatar(me) };
 
       // Nach dem Login zurück zur Einspruch-Seite, nicht zur Domain-Wurzel
-      return redirect(res, '/einspruch', [sessionCookie(user), setCookie('pc_state', '', 0)]);
+      return redirect(res, NEXT[nextKey(getCookie(req, 'pc_next'))], [sessionCookie(user), setCookie('pc_state', '', 0), setCookie('pc_next', '', 0)]);
     }
 
     /* ---------- Logout ---------- */
     if (p === '/api/logout') {
-      return redirect(res, '/einspruch', [setCookie('pc_session', '', 0)]);
+      return redirect(res, NEXT[nextKey(u.searchParams.get('next'))], [setCookie('pc_session', '', 0)]);
     }
 
     /* ---------- Ab hier nur eingeloggt ---------- */
     const me = session(req);
     if (!me) return send(res, 401, { error: 'Nicht angemeldet.' });
+
+    /* ---------- Team-Menü (nur Admins) ---------- */
+    if (p.startsWith('/api/admin/')) {
+      if (!(await isAdmin(me))) return send(res, 403, { error: 'Kein Zugriff. Dieses Menü ist nur für das Team.' });
+
+      if (p === '/api/admin/data' && req.method === 'GET') {
+        const [m, rv] = await Promise.all([
+          db('contact_messages?order=created_at.desc&limit=100&select=*'),
+          db('reviews?order=created_at.desc&limit=100&select=id,display_name,rating,comment,status,created_at')
+        ]);
+        if (!m.ok || !rv.ok) return send(res, 502, { error: 'Daten konnten nicht geladen werden. Sind die Supabase-Tabellen angelegt?' });
+        return send(res, 200, { messages: m.data || [], reviews: rv.data || [] });
+      }
+
+      if (req.method === 'POST') {
+        let x;
+        try { x = await readJson(req); } catch { return send(res, 400, { error: 'Ungültige Anfrage.' }); }
+        const id = String(x.id || '');
+        if (!/^\d+$/.test(id)) return send(res, 400, { error: 'Ungültige ID.' });
+
+        if (p === '/api/admin/review') {
+          if (!['approved', 'pending', 'hidden'].includes(x.status)) return send(res, 400, { error: 'Ungültiger Status.' });
+          const r = await db(`reviews?id=eq.${id}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ status: x.status }) });
+          return r.ok ? send(res, 200, { ok: true }) : send(res, 500, { error: 'Status konnte nicht geändert werden.' });
+        }
+        if (p === '/api/admin/delete') {
+          const table = x.kind === 'review' ? 'reviews' : 'contact_messages';
+          const r = await db(`${table}?id=eq.${id}`, { method: 'DELETE', headers: { Prefer: 'return=minimal' } });
+          return r.ok ? send(res, 200, { ok: true }) : send(res, 500, { error: 'Konnte nicht gelöscht werden.' });
+        }
+      }
+      return send(res, 404, { error: 'Nicht gefunden.' });
+    }
+
+    /* ---------- Bewertung abgeben ---------- */
+    if (p === '/api/reviews' && req.method === 'POST') {
+      let x;
+      try { x = await readJson(req); } catch { return send(res, 400, { error: 'Ungültige Anfrage.' }); }
+      const rating = Number(x.rating), comment = clip(x.comment, 600);
+      if (!Number.isInteger(rating) || rating < 1 || rating > 5 || comment.length < 10) {
+        return send(res, 400, { error: 'Bitte wähle 1 bis 5 Sterne und schreibe mindestens 10 Zeichen.' });
+      }
+      if (limited('review:' + me.id, 5, 60 * 60 * 1000)) return send(res, 429, { error: 'Zu viele Versuche. Bitte warte kurz.' });
+
+      const ex = await db(`reviews?discord_id=eq.${encodeURIComponent(me.id)}&select=id`);
+      if (!ex.ok) return send(res, 500, { error: 'Bewertung konnte nicht geprüft werden.' });
+      if (ex.data?.length) return send(res, 409, { error: 'Du hast den Server bereits bewertet.' });
+
+      const display = clip(me.global_name || me.username, 60);
+      const ins = await db('reviews', {
+        method: 'POST', headers: { Prefer: 'return=minimal' },
+        body: JSON.stringify({ discord_id: me.id, display_name: display, avatar: me.avatar, rating, comment, status: REVIEW_STATUS, created_at: new Date().toISOString() })
+      });
+      if (!ins.ok) {
+        console.error('[REVIEW] Insert:', ins.status, ins.data);
+        return send(res, 500, { error: 'Bewertung konnte nicht gespeichert werden.' });
+      }
+
+      if (CONTACT_CHANNEL) {
+        await dapi(`/channels/${encodeURIComponent(CONTACT_CHANNEL)}/messages`, {
+          method: 'POST',
+          body: JSON.stringify({
+            content: `⭐ **Neue Bewertung (${rating}/5)** von ${display}${REVIEW_STATUS === 'pending' ? ' – wartet auf Freigabe' : ''}\n${comment}`.slice(0, 2000),
+            allowed_mentions: { parse: [] }
+          })
+        });
+      }
+      return send(res, 200, { ok: true, status: REVIEW_STATUS });
+    }
 
     /* ---------- Roblox Avatar Proxy ---------- */
     if (p === '/api/roblox-avatar') {
