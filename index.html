@@ -940,7 +940,9 @@ setInterval(loadWidget, 60000); setInterval(loadTeam, 60000);
   }
 
   /* ---------- Start / Audio-Kontext ---------- */
-  const EVENTS=['pointerdown','mousedown','touchstart','touchend','click','keydown'];
+  const EVENTS=['pointerdown','mousedown','touchstart','touchend','click','keydown','mousemove','pointermove','wheel','scroll','touchmove'];
+  const WEAK=new Set(['mousemove','pointermove','wheel','scroll','touchmove']);
+  let lastTry=0;
   function startLoops(){
     if(loopsStarted) return;
     loopsStarted=true;
@@ -987,6 +989,11 @@ setInterval(loadWidget, 60000); setInterval(loadTeam, 60000);
      und beim allerersten Tippen/Klicken/Tastendruck irgendwo auf der Seite starten. */
   function onGesture(e){
     if(e.target&&e.target.closest&&e.target.closest('#halloweenMusic')) return;
+    if(WEAK.has(e.type)){
+      const now=performance.now();
+      if(now-lastTry<400) return; // Bewegen/Scrollen nur gelegentlich versuchen
+      lastTry=now;
+    }
     wake();
   }
   EVENTS.forEach(ev=>window.addEventListener(ev,onGesture,{capture:true,passive:true}));
