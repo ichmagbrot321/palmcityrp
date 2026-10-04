@@ -437,6 +437,12 @@ kbd{font:600 .6875rem/1 var(--mono);padding:4px 6px;border-radius:6px;border:1px
   .contact form{margin-top:-28px}
 }
 @media(max-width:960px){.ck-btn,.ck-hint{display:none}}
+
+/* Team-Menü-Punkt: fast unsichtbar, aber gut antippbar */
+.secret{position:relative;width:6px;height:6px;margin-left:var(--s4);background:var(--color-muted);opacity:.05;transition:opacity .4s}
+.secret::before{content:"";position:absolute;inset:-14px}
+.secret:hover{opacity:.3}
+.secret:focus-visible{opacity:.8}
 </style>
 </head>
 <body class="halloween">
