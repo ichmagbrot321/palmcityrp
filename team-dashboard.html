@@ -2805,7 +2805,11 @@ section:not([hidden]) > .list, section:not([hidden]) > .stats { animation:ds-ris
     <span class="logo" role="img" aria-label="Notruf Craftopia"></span>
     <h1 class="silver">Team-Dashboard</h1>
     <p id="loginText">Melde dich mit Discord an, um das Team zu verwalten.</p>
-    <a class="btn primary" href="/api/team-dashboard?action=login">Mit Discord anmelden</a>
+    <div class="login-actions" style="display:flex;flex-direction:column;gap:10px;width:100%;margin-top:18px">
+      <a class="btn primary" href="/api/team-dashboard?action=login">Mit Discord anmelden</a>
+      <a class="btn" href="/api/team-dashboard?action=logout" style="text-align:center">Abmelden / anderes Discord-Konto nutzen</a>
+    </div>
+    <p class="sub" style="margin-top:10px;font-size:12px">Wenn du mit dem falschen Konto angemeldet bist, melde dich zuerst ab. Danach kannst du dich erneut mit Discord anmelden.</p>
   </div>
 </div>
 
