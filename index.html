@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#050a14">
 <meta name="description" content="Notruf Craftopia – neuer Notruf Hamburg RP Server. Baue mit uns eine Stadt, in der Entscheidungen Geschichten schreiben.">
 <link rel="canonical" href="https://notrufcraftopia.vercel.app/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎃%3C/text%3E%3C/svg%3E">
 <title>Notruf Craftopia — Deine Stadt. Deine Geschichte.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Inter:wght@400;500;600;700&display=swap">
@@ -990,6 +991,7 @@ setInterval(loadWidget, 60000); setInterval(loadTeam, 60000);
   function onGesture(e){
     if(e.target&&e.target.closest&&e.target.closest('#halloweenMusic')) return;
     if(WEAK.has(e.type)){
+      if(navigator.userActivation&&!navigator.userActivation.hasBeenActive) return; // Browser würde es eh blockieren
       const now=performance.now();
       if(now-lastTry<400) return; // Bewegen/Scrollen nur gelegentlich versuchen
       lastTry=now;
