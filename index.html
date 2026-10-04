@@ -370,6 +370,74 @@ footer{background:linear-gradient(180deg,rgba(255,255,255,.02),transparent),var(
 .js .reveal{opacity:0;transform:translateY(28px);filter:blur(6px);transition:opacity .8s var(--out),transform .8s var(--out),filter .8s var(--out);transition-delay:calc(var(--i,0)*80ms)}
 .js .reveal.in{opacity:1;transform:none;filter:none}
 </style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@500;600&display=swap">
+<style id="design-v2-css">
+/* ===== DESIGN V2: Zinc + Amber/Coral, asymmetrisch, echtes App-Gefühl ===== */
+:root{--grad:linear-gradient(120deg,#ffb020 0%,#ff6a3d 100%);--mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+body.halloween{--color-bg:#09090b;--color-surface:#111114;--color-surface-2:#18181c;--color-surface-hover:#212127;--color-border:rgba(255,255,255,.08);--color-border-strong:rgba(255,255,255,.16);--color-text:#fafafa;--color-text-soft:#c6c6ce;--color-muted:#92929c;--color-primary:#ff6a3d;--color-primary-hover:#ff7f55;--color-primary-soft:#ffc15e;--color-navy:#1a0b02;--color-focus:#ffc15e;--color-success:#b6f35c}
+body.halloween{background:#09090b!important}
+body.halloween::before{background:radial-gradient(circle at 50% 15%,rgba(255,176,32,.08),transparent 28%),radial-gradient(circle at 10% 80%,rgba(255,106,61,.1),transparent 25%),radial-gradient(circle at 90% 70%,rgba(255,106,61,.08),transparent 24%)}
+.halloween-banner{background:linear-gradient(90deg,#0c0a09,#1f1308,#0c0a09)!important}
+::selection{background:rgba(255,176,32,.35)}
+.nav{background:rgba(9,9,11,.72)}
+body.halloween .hero{background:radial-gradient(60% 50% at 12% 0%,rgba(255,176,32,.16),transparent 70%),radial-gradient(45% 40% at 90% 15%,rgba(255,106,61,.12),transparent 70%),var(--color-bg)}
+body.halloween .cta .dark{border-color:rgba(255,176,32,.35);background:radial-gradient(90% 120% at 0% 0%,rgba(255,176,32,.22),transparent 60%),radial-gradient(70% 100% at 100% 100%,rgba(255,106,61,.2),transparent 60%),var(--color-surface)}
+
+/* Buttons & Akzente (dunkle Schrift auf Amber/Coral) */
+.btn-primary{color:#1a0b02;box-shadow:0 8px 24px -8px rgba(255,140,40,.55),var(--ring)}
+.btn-primary:hover{box-shadow:0 14px 34px -10px rgba(255,140,40,.7)}
+.q.main{color:#1a0b02;box-shadow:0 14px 34px -14px rgba(255,140,40,.6)}
+.q.main span{color:rgba(26,11,2,.72)}
+.q.main svg{background:rgba(26,11,2,.14);color:#1a0b02}
+h1 span{filter:drop-shadow(0 0 28px rgba(255,150,40,.3))}
+h2{background:linear-gradient(180deg,#fafafa 35%,#a1a1aa);-webkit-background-clip:text;background-clip:text;color:transparent}
+.statement .wrap{border-image:linear-gradient(180deg,#ffb020,#ff6a3d) 1}
+.panel::before,.value::before,.q::before,.member::before{background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(255,176,32,.11),transparent 55%)}
+.value svg,.q svg{background:linear-gradient(135deg,rgba(255,176,32,.2),rgba(255,106,61,.1));box-shadow:inset 0 0 0 1px rgba(255,176,32,.22)}
+.avatar{box-shadow:0 0 0 2px rgba(255,176,32,.25)}
+.brand img{box-shadow:0 0 0 3px rgba(255,176,32,.14),0 0 18px rgba(255,150,40,.35)}
+input:focus,select:focus,textarea:focus{box-shadow:0 0 0 4px rgba(255,176,32,.2)}
+select option{background:#111114}
+dialog::backdrop{background:rgba(4,4,6,.78)}
+#halloweenMusic,#soundHint{background:rgba(17,17,20,.88)}
+footer{background:linear-gradient(180deg,rgba(255,255,255,.02),transparent),var(--color-surface)}
+
+/* Echtes UI-Gefühl: Mono-Labels, Live-Badge, Tastaturkürzel */
+.kicker{font-family:var(--mono);font-weight:600}
+.cols{counter-reset:c}.cols .col{counter-increment:c}
+.cols .col h3::before{content:"0" counter(c);display:block;margin-bottom:12px;font:600 .75rem/1 var(--mono);letter-spacing:.14em;color:var(--color-primary-soft)}
+.strip>div:first-child dt::before{content:"LIVE";display:inline-block;margin-right:8px;padding:2px 6px;border-radius:5px;background:rgba(182,243,92,.12);color:#b6f35c;font:600 .625rem/1.2 var(--mono);letter-spacing:.1em;vertical-align:1px}
+.live{background:#b6f35c;box-shadow:0 0 0 4px rgba(182,243,92,.18)}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(182,243,92,0)}}
+kbd{font:600 .6875rem/1 var(--mono);padding:4px 6px;border-radius:6px;border:1px solid var(--color-border-strong);border-bottom-width:2px;background:rgba(255,255,255,.04);color:var(--color-text-soft)}
+.ck-btn{display:inline-flex;align-items:center;gap:10px;min-height:36px;margin-left:var(--s2);padding:0 8px 0 12px;border:1px solid var(--color-border-strong);border-radius:10px;background:rgba(255,255,255,.04);color:var(--color-muted);font:inherit;font-size:.8125rem;cursor:pointer;transition:color .2s,border-color .2s,background .2s,transform .2s var(--out)}
+.ck-btn svg{width:16px;height:16px}
+.ck-btn:hover{color:var(--color-text);border-color:var(--color-primary-soft);background:rgba(255,176,32,.07)}
+.ck-btn:active{transform:scale(.97)}
+#cmdk{width:min(560px,100% - 32px);margin:12vh auto auto;background:rgba(17,17,20,.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 0 0 1px rgba(255,176,32,.08),0 40px 100px rgba(0,0,0,.7)}
+.ck-top{display:flex;align-items:center;gap:12px;padding:0 16px;border-bottom:1px solid var(--color-border);color:var(--color-muted)}
+#cmdk input{min-height:56px;padding:0;border:0;background:transparent;box-shadow:none;font-size:1rem}
+#cmdk input:focus{box-shadow:none}
+#ckList{list-style:none;padding:8px;max-height:50vh;overflow:auto}
+#ckList li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border-radius:10px;cursor:pointer;color:var(--color-text-soft);font-size:.9375rem}
+#ckList li small{font:500 .6875rem/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--color-muted)}
+#ckList li[aria-selected=true]{background:rgba(255,176,32,.1);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,176,32,.25)}
+#ckList .ck-empty{cursor:default;color:var(--color-muted)}
+.ck-hint{display:inline-flex;align-items:center;gap:8px}
+
+/* Asymmetrische Layouts (Desktop) */
+@media(min-width:961px){
+  .qgrid{grid-template-columns:1.5fr 1fr 1fr 1fr}
+  .head{grid-template-columns:1.35fr .65fr}
+  .values{align-items:start}.values .value:nth-child(2n){margin-top:36px}
+  .statement p{margin-left:clamp(0px,7vw,110px)}
+  .partner:first-child{grid-column:span 2}
+  .cols .col{grid-template-columns:.8fr 1.5fr}
+  .contact{grid-template-columns:.85fr 1.15fr}
+  .contact form{margin-top:-28px}
+}
+@media(max-width:960px){.ck-btn,.ck-hint{display:none}}
+</style>
 </head>
 <body class="halloween">
 <div class="noise" aria-hidden="true"></div>
@@ -767,8 +835,15 @@ setInterval(loadWidget, 60000); setInterval(loadTeam, 60000);
   const running=()=>!!ctx&&ctx.state==='running';
 
   /* ---------- Hilfsfunktionen ---------- */
+  const hint=document.createElement('div');
+  hint.id='soundHint';hint.setAttribute('role','status');
+  hint.textContent='🎃 Einmal tippen oder klicken – dann startet der Gruselsound';
+  const hintCss=document.createElement('style');
+  hintCss.textContent='#soundHint{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);z-index:10019;max-width:calc(100% - 32px);padding:10px 16px;border-radius:999px;border:1px solid rgba(255,140,60,.45);background:rgba(18,8,28,.88);color:#ffd9b0;font:600 13px/1.3 Inter,system-ui,sans-serif;text-align:center;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 10px 30px -8px rgba(0,0,0,.7),0 0 24px rgba(247,103,7,.25);pointer-events:none;animation:hintPulse 2s ease-in-out infinite}#soundHint[hidden]{display:none}@keyframes hintPulse{50%{box-shadow:0 10px 30px -8px rgba(0,0,0,.7),0 0 36px rgba(247,103,7,.55)}}';
+  document.head.appendChild(hintCss);document.body.appendChild(hint);
   function setUi(){
     const on=running()&&!userMuted;
+    hint.hidden=on||userMuted;
     btn.classList.toggle('on',on);
     const label=on?'🎃 Gruselmusik AN':userMuted?'🎃 Gruselmusik AUS':'🎃 Tippen für Ton';
     btn.innerHTML='<span class="music-dot"></span>'+label;
@@ -1051,6 +1126,58 @@ setInterval(loadWidget, 60000); setInterval(loadTeam, 60000);
     setTimeout(()=>el.classList.remove('reveal','in'),1200+(parseInt(el.style.getPropertyValue('--i'))||0)*80);
   }),{threshold:.12,rootMargin:'0px 0px -6% 0px'});
   els.forEach(el=>io.observe(el));
+})();
+</script>
+<script id="design-v2-script">
+(function(){
+  const mod=/Mac|iPhone|iPad/.test(navigator.platform||'')?'⌘':'Strg';
+  const ITEMS=[
+    ['Mission','Abschnitt','go','#mission'],['Team','Abschnitt','go','#team'],['Partner','Abschnitt','go','#partner'],
+    ['Bewertungen','Abschnitt','go','#bewertungen'],['Kontakt','Abschnitt','go','#kontakt'],['Einspruch','Abschnitt','go','#einspruch'],
+    ['Discord beitreten','Extern','open','https://discord.gg/t7N6D43KFv'],
+    ['Sirene abspielen','Aktion','click','sirenBtn'],['Gruselmusik an/aus','Aktion','click','halloweenMusic']];
+  const SEARCH='<svg class="i" aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
+  const dlg=document.createElement('dialog');dlg.id='cmdk';dlg.setAttribute('aria-label','Schnellzugriff');
+  dlg.innerHTML='<div class="ck-top">'+SEARCH+'<input id="ckIn" type="text" role="combobox" aria-expanded="true" aria-controls="ckList" aria-label="Suchen" placeholder="Springe zu …" autocomplete="off" spellcheck="false"><kbd>esc</kbd></div><ul id="ckList" role="listbox" aria-label="Ergebnisse"></ul>';
+  document.body.appendChild(dlg);
+  const input=dlg.querySelector('#ckIn'),list=dlg.querySelector('#ckList');
+  let shown=[],sel=0;
+  const mark=()=>{[...list.children].forEach((li,i)=>li.setAttribute('aria-selected',String(i===sel)));input.setAttribute('aria-activedescendant',shown.length?'ck'+sel:'')};
+  const draw=()=>{
+    const q=input.value.trim().toLowerCase();
+    shown=ITEMS.filter(x=>x[0].toLowerCase().includes(q)||x[1].toLowerCase().includes(q));
+    sel=Math.min(sel,Math.max(0,shown.length-1));
+    list.innerHTML=shown.length?shown.map((x,i)=>'<li role="option" id="ck'+i+'" data-i="'+i+'"><span>'+x[0]+'</span><small>'+x[1]+'</small></li>').join(''):'<li class="ck-empty">Nichts gefunden</li>';
+    if(shown.length)mark();
+  };
+  const run=i=>{
+    const x=shown[i];if(!x)return;dlg.close();
+    if(x[2]==='go'){const t=document.querySelector(x[3]);t&&t.scrollIntoView({behavior:'smooth',block:'start'})}
+    else if(x[2]==='open')window.open(x[3],'_blank','noopener');
+    else{const b=document.getElementById(x[3]);b&&b.click()}
+  };
+  const open=()=>{input.value='';sel=0;draw();if(!dlg.open)dlg.showModal();input.focus()};
+  input.addEventListener('input',()=>{sel=0;draw()});
+  input.addEventListener('keydown',e=>{
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+      e.preventDefault();
+      if(shown.length){sel=(sel+(e.key==='ArrowDown'?1:-1)+shown.length)%shown.length;mark();const a=document.getElementById('ck'+sel);a&&a.scrollIntoView({block:'nearest'})}
+    }else if(e.key==='Enter'){e.preventDefault();run(sel)}
+  });
+  list.addEventListener('click',e=>{const li=e.target.closest('li[data-i]');li&&run(+li.dataset.i)});
+  list.addEventListener('mousemove',e=>{const li=e.target.closest('li[data-i]');if(li&&+li.dataset.i!==sel){sel=+li.dataset.i;mark()}});
+  dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close()});
+  document.addEventListener('keydown',e=>{
+    const k=e.key.toLowerCase(),adm=document.getElementById('adminDlg');
+    if((e.metaKey||e.ctrlKey)&&k==='k'){e.preventDefault();dlg.open?dlg.close():open()}
+    else if(k==='/'&&!/^(input|textarea|select)$/i.test(e.target.tagName)&&!dlg.open&&!(adm&&adm.open)){e.preventDefault();open()}
+  });
+  const chip=document.createElement('button');chip.type='button';chip.className='ck-btn';chip.setAttribute('aria-label','Schnellzugriff öffnen');
+  chip.innerHTML=SEARCH+'<span>Suchen</span><kbd>'+mod+' K</kbd>';
+  chip.addEventListener('click',open);
+  const links=document.getElementById('links');links.insertBefore(chip,links.querySelector('.btn'));
+  const fw=document.querySelector('footer .wrap');
+  if(fw){const h=document.createElement('span');h.className='ck-hint';h.innerHTML='Schnellzugriff <kbd>'+mod+' K</kbd>';fw.appendChild(h)}
 })();
 </script>
 </body>
