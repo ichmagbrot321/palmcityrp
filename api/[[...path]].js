@@ -13,7 +13,7 @@ const SUPA = process.env.SUPABASE_URL;
 const SKEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
 const SITE = 'https://notruf-craftopia.vercel.app';
 const SESSION = process.env.SESSION_SECRET;
-const APPEAL_CHANNEL = process.env.DISCORD_APPEAL_CHANNEL_ID || '1548705694033780867';
+const APPEAL_CHANNEL = process.env.DISCORD_APPEAL_CHANNEL_ID || '1551649399212347422';
 const TEAM_ROLE = process.env.DISCORD_TEAM_ROLE_ID || '1551649116675768414';
 
 const CONTACT_CHANNEL = process.env.DISCORD_CONTACT_CHANNEL_ID || '';
@@ -993,8 +993,19 @@ module.exports = async (req, res) => {
       });
 
       if (!dr.ok) {
-        console.error('Discord appeal message failed:', dr.status, dr.data);
-        return send(res, 502, { error: 'Der Antrag wurde gespeichert, konnte aber nicht nach Discord gesendet werden.' });
+        /*
+         * Der Antrag ist bereits in Supabase gespeichert (discord_notified bleibt false).
+         * Der Bot holt solche Anträge selbst ab und postet sie in den Team-Channel.
+         * Deshalb KEIN Fehler an den Nutzer: sonst würde er es erneut versuchen und
+         * bekäme wegen des Duplikat-Checks nur "läuft bereits ein Antrag".
+         */
+        console.error(
+          'Discord appeal message failed:',
+          'channel=' + APPEAL_CHANNEL,
+          'status=' + dr.status,
+          'detail=' + (dr.error || JSON.stringify(dr.data))
+        );
+        return send(res, 200, { ok: true, appeal_id: appealId, discord_notified: false });
       }
 
       const patch = JSON.stringify({ discord_notified: true, discord_message_id: dr.data?.id || null });
