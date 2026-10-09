@@ -66,6 +66,8 @@ const ROUTES = {
   application_action: ["POST", "/team/applications/action"],
   history: ["GET", "/team/history"],
   activity: ["GET", "/team/activity"],
+  activity_config: ["GET", "/team/config/activity"],
+  activity_config_save: ["POST", "/team/config/activity"],
   support: ["GET", "/team/support"],
   feedback: ["GET", "/team/feedback"],
   shifts: ["GET", "/team/shifts"],
@@ -399,7 +401,12 @@ async function proxy(req, res, url, action, session) {
       target: target.toString(),
       status: upstream.status,
       contentType,
-      responsePreview: action.startsWith("rules") ? "(nicht geloggt)" : text.slice(0, 1500),
+      responsePreview:
+        action.startsWith("rules") || action.startsWith("activity_config")
+          ? "(nicht geloggt)"
+          : upstream.ok
+            ? "(ok, Inhalt nicht geloggt)"
+            : text.slice(0, 500),
     });
 
     if (upstream.status === 401) {
@@ -666,7 +673,32 @@ const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const PUBLIC_TEAM_GUILD_ID = "1548652649866596473";
 const PUBLIC_TEAM_ROLE_ID = "1551649116675768414";
 
+// 60 s Cache: schont das Discord-Rate-Limit und beschleunigt die Website.
+// Bei Discord-Fehlern wird die letzte gute Antwort weiterverwendet.
+const PUBLIC_TEAM_TTL_MS = 60_000;
+let publicTeamCache = { at: 0, members: null };
+
 async function getPublicTeamMembers() {
+  const now = Date.now();
+
+  if (publicTeamCache.members && now - publicTeamCache.at < PUBLIC_TEAM_TTL_MS) {
+    return publicTeamCache.members;
+  }
+
+  try {
+    const members = await fetchPublicTeamMembers();
+    publicTeamCache = { at: now, members };
+    return members;
+  } catch (error) {
+    if (publicTeamCache.members) {
+      console.error("Öffentliche Team-API: Discord-Fehler, nutze Cache.", error?.message);
+      return publicTeamCache.members;
+    }
+    throw error;
+  }
+}
+
+async function fetchPublicTeamMembers() {
   if (!DISCORD_BOT_TOKEN) {
     throw new Error("DISCORD_BOT_TOKEN fehlt in den Vercel Environment Variables.");
   }
@@ -750,6 +782,8 @@ async function publicTeam(req, res) {
 
   try {
     const members = await getPublicTeamMembers();
+
+    res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=120");
 
     return json(res, 200, {
       guild_id: PUBLIC_TEAM_GUILD_ID,
