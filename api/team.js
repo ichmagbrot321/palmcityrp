@@ -38,7 +38,7 @@ const OAUTH_REDIRECT_URI =
 const DASHBOARD_PATH = "/team-dashboard";
 const SESSION_COOKIE = "td_session";
 const OAUTH_COOKIE = "td_oauth";
-const SESSION_TTL = 60 * 60 * 24 * 7;
+const SESSION_TTL = 60 * 60 * 24 * 30; // 30 Tage, bei erneuter Anmeldung erneuert
 const BOT_TIMEOUT_MS = 8000;
 
 // Aktion -> [Methode, Pfad in der Bot-API]
@@ -155,6 +155,28 @@ function readToken(token) {
 
 function getSession(req) {
   return readToken(parseCookies(req.headers.cookie)[SESSION_COOKIE]);
+}
+
+// Kritische Berechtigungsprüfung: Der Cookie allein reicht niemals aus.
+// Discord-Mitgliedschaft und zwingende Zugriffsrolle werden bei jeder Anfrage
+// live über die Bot-API geprüft. Bei API-Ausfall wird der Zugriff verweigert.
+const ACCESS_GUILD_ID = process.env.DISCORD_GUILD_ID || "1548652649866596473";
+const ACCESS_ROLE_ID = "1556719122648408197";
+const ACCESS_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
+async function verifyDashboardAccess(session) {
+  if (!session?.id || !ACCESS_BOT_TOKEN) return false;
+  try {
+    const response = await fetch(
+      `https://discord.com/api/v10/guilds/${ACCESS_GUILD_ID}/members/${encodeURIComponent(session.id)}`,
+      { headers: { Authorization: `Bot ${ACCESS_BOT_TOKEN}`, Accept: "application/json" }, signal: AbortSignal.timeout(5000), cache: "no-store" }
+    );
+    if (!response.ok) return false;
+    const member = await response.json();
+    return Array.isArray(member.roles) && member.roles.includes(ACCESS_ROLE_ID);
+  } catch (error) {
+    console.error("Dashboard-Zugriffsprüfung fehlgeschlagen:", error?.message || error);
+    return false;
+  }
 }
 
 // ============================================================
@@ -861,6 +883,14 @@ async function handle(req, res) {
       ok: false,
       error: "Nicht angemeldet.",
       code: "no_session",
+    });
+  }
+
+  if (!(await verifyDashboardAccess(session))) {
+    return json(res, 403, {
+      ok: false,
+      error: "Zugriff verweigert. Du musst auf dem Discord-Server sein und die erforderliche Zugriffsrolle besitzen.",
+      code: "no_access",
     });
   }
 
