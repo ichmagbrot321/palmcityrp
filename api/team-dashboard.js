@@ -66,6 +66,8 @@ const ROUTES = {
   application_action: ["POST", "/team/applications/action"],
   history: ["GET", "/team/history"],
   activity: ["GET", "/team/activity"],
+  activity_config: ["GET", "/team/config/activity"],
+  activity_config_save: ["POST", "/team/config/activity"],
   support: ["GET", "/team/support"],
   feedback: ["GET", "/team/feedback"],
   shifts: ["GET", "/team/shifts"],
@@ -399,7 +401,12 @@ async function proxy(req, res, url, action, session) {
       target: target.toString(),
       status: upstream.status,
       contentType,
-      responsePreview: action.startsWith("rules") ? "(nicht geloggt)" : text.slice(0, 1500),
+      responsePreview:
+        action.startsWith("rules") || action.startsWith("activity_config")
+          ? "(nicht geloggt)"
+          : upstream.ok
+            ? "(ok, Inhalt nicht geloggt)"
+            : text.slice(0, 500),
     });
 
     if (upstream.status === 401) {
