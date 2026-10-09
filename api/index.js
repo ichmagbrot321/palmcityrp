@@ -25,7 +25,7 @@ const nextKey = k => (Object.hasOwn(NEXT, k) ? k : 'appeal');
 const DISCORD_INVITE = 'https://discord.gg/t7N6D43KFv';
 const WIDGET_URL = 'https://discord.com/api/guilds/1548652649866596473/widget.json';
 
-const SESSION_MAX_AGE = 60 * 60 * 24 * 365 * 10;
+const SESSION_MAX_AGE = 60 * 60 * 24 * 30; // 30 Tage statt 10 Jahre
 const ROBLOX_NAME = /^[A-Za-z0-9_]{3,20}$/;
 const UA = 'PalmCityRP-Moderationsportal/1.1';
 
