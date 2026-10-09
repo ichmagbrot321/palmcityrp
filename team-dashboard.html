@@ -831,6 +831,29 @@ main > section.motion-refresh { animation: pageEnter var(--motion-med) var(--mot
 .probation-row{display:block!important;align-items:stretch!important;gap:0!important}.probation-row>.probation-member{display:flex;align-items:center;gap:12px;width:100%;min-width:0}.probation-entry-content{display:block;width:100%;margin-top:12px}.probation-row .probation-box{margin-top:0;width:100%;box-sizing:border-box}.probation-actions{display:flex!important;flex-wrap:wrap!important;gap:8px!important;width:100%!important;margin-top:15px!important;visibility:visible!important;opacity:1!important}.probation-actions .btn{display:inline-flex!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important}
 @media (max-width:900px){.probation-info-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.probation-row{flex-direction:column!important}.probation-row>.who{min-width:0}.probation-counts{grid-template-columns:1fr}}
 @media (max-width:560px){.probation-info-grid{grid-template-columns:1fr}}
+
+/* Aktivitätsdiagramme: responsive, ohne externe Chart-Bibliothek */
+.activity-charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:16px 0 20px}
+.activity-chart-card{min-width:0;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);padding:16px;overflow:hidden}
+.activity-chart-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px;font-weight:700}
+.activity-chart-sub{display:block;color:var(--muted);font-size:12px;font-weight:400;margin-top:2px}
+.activity-bars{display:grid;grid-template-columns:repeat(var(--bar-count,7),minmax(0,1fr));align-items:end;gap:5px;height:132px;padding:8px 0 0;border-bottom:1px solid var(--line)}
+.activity-bar-col{height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;min-width:0;gap:5px}
+.activity-bar{width:min(100%,22px);min-height:2px;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--blue),var(--violet));transition:height .2s ease}
+.activity-bar.voice{background:linear-gradient(180deg,var(--green),var(--blue))}
+.activity-bar-label{font-size:10px;color:var(--muted);white-space:nowrap}
+.activity-chart-legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:12px;margin-top:10px}
+.activity-chart-legend span{display:inline-flex;align-items:center;gap:6px}
+.activity-chart-legend i{width:8px;height:8px;border-radius:3px;background:var(--blue);display:inline-block}
+.activity-chart-legend i.voice{background:var(--green)}
+.activity-heatmap{display:grid;gap:4px;overflow-x:auto;padding-bottom:4px}
+.heatmap-row{display:grid;grid-template-columns:minmax(90px,130px) repeat(var(--heat-days,7),minmax(8px,1fr));gap:4px;align-items:center;min-width:360px}
+.heatmap-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--text)}
+.heatmap-cell{height:16px;border-radius:4px;background:var(--panel-2);border:1px solid var(--line)}
+.heatmap-cell[data-level="1"]{background:rgba(43,140,255,.22)}.heatmap-cell[data-level="2"]{background:rgba(43,140,255,.42)}.heatmap-cell[data-level="3"]{background:rgba(43,140,255,.66)}.heatmap-cell[data-level="4"]{background:rgba(56,217,160,.82)}
+.heatmap-day{font-size:9px;text-align:center;color:var(--muted)}
+@media(max-width:760px){.activity-charts{grid-template-columns:minmax(0,1fr);gap:10px}.activity-chart-card{padding:12px}.activity-bars{height:110px}.heatmap-row{grid-template-columns:minmax(78px,100px) repeat(var(--heat-days,7),minmax(8px,1fr));gap:3px}}
+
 </style>
 <script>try{if(localStorage.getItem("td_theme")==="light")document.documentElement.setAttribute("data-theme","light");}catch(e){}</script>
 <script>(function(){var l=document.querySelector('link[rel="icon"]');if(l&&l.href){document.documentElement.style.setProperty("--logo","url(\""+l.href+"\")");}})();</script>
@@ -5329,6 +5352,7 @@ html[data-theme="light"] .diag-stats {
       <section id="p-activity" hidden>
         <div class="stats" id="actStats"></div>
         <div id="actWarn"></div>
+        <div id="actCharts" class="activity-charts" aria-label="Aktivitätsdiagramme"></div>
         <div class="filters">
           <label class="search">
             <span class="ico" data-icon="search"></span>
@@ -7228,6 +7252,72 @@ function diagnosticsPanel(d) {
   );
 }
 
+function renderActivityCharts(data) {
+  const root = document.querySelector("#actCharts");
+  if (!root) return;
+  root.replaceChildren();
+  const items = Array.isArray(data?.items) ? data.items : [];
+  if (!items.length) return;
+  const days = Math.max(1, Number(data.days) || 7);
+  const dailyRows = items.map((item) => Array.isArray(item.daily) ? item.daily : []);
+  const maxDays = Math.min(days, Math.max(0, ...dailyRows.map((r) => r.length)));
+  if (!maxDays) return;
+  const messages = Array(maxDays).fill(0);
+  const voice = Array(maxDays).fill(0);
+  for (const row of dailyRows) {
+    const offset = maxDays - row.length;
+    row.slice(-maxDays).forEach((d, i) => {
+      messages[offset + i] += Number(d?.[0]) || 0;
+      voice[offset + i] += Number(d?.[1]) || 0;
+    });
+  }
+  const dayLabels = Array.from({length:maxDays}, (_, i) => {
+    const date = new Date(); date.setHours(12,0,0,0); date.setDate(date.getDate() - (maxDays - 1 - i));
+    return date.toLocaleDateString("de-DE", {day:"2-digit",month:"2-digit"});
+  });
+  const makeBars = (values, type, label, unit) => {
+    const max = Math.max(1, ...values);
+    return h("div", {class:"activity-bars", style:`--bar-count:${values.length}`, role:"img", "aria-label":`${label}, ${values.map((v,i)=>`${dayLabels[i]}: ${Math.round(v)} ${unit}`).join(", ")}`},
+      ...values.map((value, i) => h("div", {class:"activity-bar-col", title:`${dayLabels[i]}: ${Math.round(value)} ${unit}`},
+        h("div", {class:"activity-bar"+(type === "voice" ? " voice" : ""), style:`height:${Math.max(value > 0 ? 3 : 1, value / max * 100)}%`}),
+        h("span", {class:"activity-bar-label"}, dayLabels[i])
+      ))
+    );
+  };
+  const card = (title, subtitle, chart, legend) => h("article", {class:"activity-chart-card"},
+    h("h3", {class:"activity-chart-title"}, h("span", {}, title, h("small", {class:"activity-chart-sub"}, subtitle))),
+    chart, legend ? h("div", {class:"activity-chart-legend"}, legend) : null
+  );
+  const legend = (label, cls="") => h("span", {}, h("i", {class:cls}), label);
+  const heatRows = [...items].sort((a,b) => String(a.name||"").localeCompare(String(b.name||""), "de")).slice(0, 40);
+  const maxScore = Math.max(1, ...heatRows.flatMap(item => (item.daily||[]).slice(-maxDays).map(d => (Number(d?.[0])||0) + (Number(d?.[1])||0)/60)));
+  const heatmap = h("div", {class:"activity-heatmap", style:`--heat-days:${maxDays}`, role:"table", "aria-label":"Tägliche Teamaktivität je Person"},
+    h("div", {class:"heatmap-row", role:"row"}, h("span", {class:"heatmap-name"}, "Teammitglied"), ...dayLabels.map(label => h("span", {class:"heatmap-day", role:"columnheader"}, label))),
+    ...heatRows.map(item => {
+      const row = (Array.isArray(item.daily) ? item.daily : []).slice(-maxDays);
+      const offset = maxDays - row.length;
+      return h("div", {class:"heatmap-row", role:"row"},
+        h("span", {class:"heatmap-name", title:item.name||""}, item.name||"Unbekannt"),
+        ...Array.from({length:maxDays}, (_,i) => {
+          const d = row[i-offset];
+          const score = d ? (Number(d[0])||0) + (Number(d[1])||0)/60 : 0;
+          const level = score <= 0 ? 0 : score < maxScore*.25 ? 1 : score < maxScore*.5 ? 2 : score < maxScore*.75 ? 3 : 4;
+          return h("span", {class:"heatmap-cell", "data-level":String(level), role:"cell", title:`${item.name}: ${dayLabels[i]} · ${d ? Number(d[0])||0 : 0} Nachrichten · ${d ? voiceText(Number(d[1])||0) : voiceText(0)}`});
+        })
+      );
+    })
+  );
+  root.append(
+    card("Nachrichten pro Tag", `Team gesamt · letzte ${maxDays} Tage`, makeBars(messages,"messages","Nachrichten pro Tag","Nachrichten"), legend("Nachrichten")),
+    card("Voice-Zeit pro Tag", `Team gesamt · letzte ${maxDays} Tage`, makeBars(voice.map(v => v/60),"voice","Voice-Minuten pro Tag","Minuten"), legend("Voice-Minuten","voice")),
+    h("article", {class:"activity-chart-card", style:"grid-column:1/-1"},
+      h("h3", {class:"activity-chart-title"}, h("span", {}, "Aktivitäts-Heatmap", h("small", {class:"activity-chart-sub"}, `Tageswerte pro Teammitglied · ${maxDays} Tage · maximal 40 Personen angezeigt`))),
+      heatmap,
+      h("div", {class:"activity-chart-legend"}, legend("Keine Aktivität"), legend("Niedrig"), legend("Mittel"), legend("Hoch"), legend("Sehr hoch","voice"))
+    )
+  );
+}
+
 function renderActivity() {
   const data = S.activity;
   if (!data) return;
@@ -7239,6 +7329,7 @@ function renderActivity() {
   if (data.error) {
     $("#actStats").replaceChildren();
     $("#actWarn").replaceChildren();
+    $("#actCharts").replaceChildren();
     $("#actChips").replaceChildren();
     $("#actNote").textContent = "";
     $("#actList").replaceChildren(
@@ -7263,6 +7354,7 @@ function renderActivity() {
   if (!data.available) {
     $("#actStats").replaceChildren();
     $("#actWarn").replaceChildren();
+    $("#actCharts").replaceChildren();
     $("#actChips").replaceChildren();
     $("#actNote").textContent = "";
     $("#actList").replaceChildren(emptyState("li", "Die Aktivitätserfassung ist im Bot nicht geladen."));
@@ -7283,6 +7375,7 @@ function renderActivity() {
     diagnosticsPanel(data.diagnostics),
     ...(data.diagnostics ? [] : (data.warnings || []).map((text) => h("p", { class: "callout warn", role: "alert" }, icon("alert"), h("span", {}, text))))
   );
+  renderActivityCharts(data);
 
   $("#actChips").replaceChildren(
     ...["inactive", "absent", "unknown", "active"]
