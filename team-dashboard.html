@@ -860,7 +860,7 @@ main > section.motion-refresh { animation: pageEnter var(--motion-med) var(--mot
 
 <style id="palm-pro-redesign">
 /* ================================================================
-   PALM CITY RP — PREMIUM STAFF DASHBOARD REDESIGN
+   NOTRUF CRAFTOPIA — PREMIUM TEAM DASHBOARD
    Existing functionality stays intact. This layer intentionally only
    changes hierarchy, spacing, surfaces, navigation, states and motion.
    ================================================================ */
@@ -1564,7 +1564,7 @@ body::before {
 
 <style id="palm-pro-ui-v3">
 /* ================================================================
-   PALM CITY RP · PRO UI V3
+   NOTRUF CRAFTOPIA · PRO UI V3
    Kräftigeres Admin-Dashboard: farbige Ebenen, klare Hierarchie,
    moderne Glows, Statusfarben und deutlichere Interaktionen.
    ================================================================ */
@@ -2033,7 +2033,7 @@ body::after { opacity:.16; background-size:34px 34px; }
 
 <style id="palm-city-redesign-v4">
 /* ============================================================
-   PALM CITY RP · UI REDESIGN V4
+   NOTRUF CRAFTOPIA · UI REDESIGN V4
    Direction: restrained dark operations console
    ============================================================ */
 :root {
@@ -2882,6 +2882,35 @@ dialog.palette::backdrop { background: rgba(3, 7, 15, .6); }
 .pal-empty { padding: 14px; text-align: center; }
 @media (max-width: 560px) { .pal-open kbd, .pal-open-text { display: none; } }
 @media (prefers-reduced-motion: reduce) { dialog.palette[open] { animation: none; } }
+
+/* ---------- Interaktive Aktivitätsdetails ---------- */
+.activity-chart-card .activity-bar-col { cursor: pointer; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; }
+.activity-chart-card .activity-bar-col:hover .activity-bar { filter: brightness(1.16); }
+.heatmap-cell { cursor: pointer; padding: 0; }
+.heatmap-cell:hover { border-color: var(--blue); transform: translateY(-1px); }
+.cfg-settings-hero { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:18px; margin-bottom:10px; border:1px solid var(--line); border-radius:var(--radius-lg, 18px); background:radial-gradient(80% 150% at 100% 0%, rgba(91,156,255,.13), transparent 70%), linear-gradient(135deg, var(--panel), transparent); }
+.cfg-settings-hero h2 { margin:5px 0 6px; font-size:clamp(21px, 3vw, 28px); letter-spacing:-.035em; }
+.cfg-settings-hero .sub { margin:0; max-width:68ch; color:var(--muted); }
+.cfg-settings-hero .eyebrow { color:var(--blue); font-size:10px; font-weight:800; letter-spacing:.12em; }
+.cfg-settings-hero .live-dot { flex:none; margin:8px 3px 0 0; }
+@media (max-width:560px) { .cfg-settings-hero { padding:14px; } }
+.activity-chart-card .activity-bar-col:focus-visible, .heatmap-cell:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.activity-detail-dialog { width: min(520px, calc(100vw - 24px)); max-height: min(78vh, 680px); overflow: auto; padding: 22px; border: 1px solid var(--line-strong); border-radius: var(--radius-lg, 18px); background: var(--surface-2, #0b1324); color: var(--text); box-shadow: var(--shadow-lg); }
+.activity-detail-dialog[open] { animation: pal-in .16s var(--ease); }
+.activity-detail-dialog::backdrop { background: rgba(3, 7, 15, .62); backdrop-filter: blur(5px); }
+.activity-detail-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 18px; }
+.activity-detail-head h2 { margin: 5px 0 0; font-size: clamp(19px, 4vw, 25px); }
+.activity-detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 10px; }
+.activity-detail-item { display: grid; gap: 6px; padding: 14px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--panel); }
+.activity-detail-item > span, .activity-detail-item small { color: var(--muted); font-size: 12px; }
+.activity-detail-item strong { font-size: 20px; letter-spacing: -.025em; }
+.cfg-overview { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 10px; margin: 6px 0 8px; }
+.cfg-overview-card { display: grid; gap: 7px; min-width: 0; padding: 14px; border: 1px solid var(--line); border-radius: var(--radius-md); background: linear-gradient(145deg, var(--panel), transparent); }
+.cfg-overview-card .cfg-overview-label { color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .055em; }
+.cfg-overview-card strong { font-size: clamp(17px, 2vw, 22px); letter-spacing: -.035em; overflow-wrap: anywhere; }
+.cfg-overview-card small { color: var(--muted); font-size: 11px; }
+@media (max-width: 560px) { .activity-detail-dialog { padding: 16px; } .cfg-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (prefers-reduced-motion: reduce) { .activity-detail-dialog[open] { animation: none; } }
 
 /* ---------- Einstellungen: Formular ---------- */
 .act-settings { display: grid; gap: var(--sp-4, 16px); }
@@ -5254,6 +5283,124 @@ html[data-theme="light"] .diag-stats {
 
 </style>
 
+<style id="notruf-premium-motion-v5">
+:root {
+  --motion-ease: cubic-bezier(.2,.75,.25,1);
+  --motion-fast: 180ms;
+  --motion-medium: 320ms;
+  --motion-slow: 620ms;
+}
+html { scroll-behavior: smooth; }
+body { isolation: isolate; }
+/* Subtle, layered motion: keep the UI quick rather than flashy. */
+.content { position: relative; }
+.content::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  opacity: .36; background: radial-gradient(460px circle at var(--mx, 75vw) var(--my, 18vh), rgba(67,142,255,.10), transparent 72%);
+  transition: opacity .25s ease;
+}
+.card, .stat, .activity-chart-card, .cfg-overview-card, .feedback-hero, .shift-card, .member-card {
+  transition: transform var(--motion-medium) var(--motion-ease), border-color var(--motion-medium) ease,
+    box-shadow var(--motion-medium) ease, background-color var(--motion-medium) ease;
+}
+.card, .activity-chart-card, .cfg-overview-card { position: relative; isolation: isolate; }
+.card::after, .activity-chart-card::after, .cfg-overview-card::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: -1;
+  background: linear-gradient(125deg, rgba(89,160,255,.075), transparent 38%, rgba(143,93,255,.045)); opacity: 0;
+  transition: opacity var(--motion-medium) ease;
+}
+.card:hover, .activity-chart-card:hover, .cfg-overview-card:hover {
+  transform: translateY(-3px); border-color: var(--line-strong);
+  box-shadow: 0 18px 44px rgba(0,0,0,.16), 0 0 0 1px rgba(80,145,255,.035);
+}
+.card:hover::after, .activity-chart-card:hover::after, .cfg-overview-card:hover::after { opacity: 1; }
+.stat { overflow: hidden; }
+.stat:hover { transform: translateY(-4px) scale(1.008); }
+.stat .ico-box { transition: transform var(--motion-medium) var(--motion-ease), box-shadow var(--motion-medium) ease; }
+.stat:hover .ico-box { transform: rotate(-4deg) scale(1.07); box-shadow: 0 8px 24px rgba(43,140,255,.12); }
+.btn, button, [role="button"] { -webkit-tap-highlight-color: transparent; }
+.btn {
+  position: relative; overflow: hidden; transform: translateZ(0);
+  transition: transform var(--motion-fast) var(--motion-ease), box-shadow var(--motion-medium) ease,
+    border-color var(--motion-fast) ease, background var(--motion-medium) ease, filter var(--motion-fast) ease;
+}
+.btn::before {
+  content: ""; position: absolute; inset: -1px; pointer-events: none; opacity: 0;
+  background: linear-gradient(110deg, transparent 20%, rgba(255,255,255,.18) 48%, transparent 74%);
+  transform: translateX(-120%); transition: transform 600ms var(--motion-ease), opacity var(--motion-fast) ease;
+}
+.btn:hover:not(:disabled)::before { opacity: 1; transform: translateX(120%); }
+.btn:hover:not(:disabled) { filter: saturate(1.08); }
+.btn:active:not(:disabled) { transform: translateY(1px) scale(.975); }
+.btn:focus-visible, button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--blue); outline-offset: 3px;
+}
+.btn.primary { box-shadow: 0 8px 24px -10px var(--blue-glow); }
+.btn.primary:hover:not(:disabled) { box-shadow: 0 12px 30px -8px var(--blue-glow); }
+/* Chart bars rise into view; hovering a day emphasizes the selection. */
+.activity-bars { perspective: 600px; }
+.activity-bar-col { position: relative; border-radius: 8px 8px 4px 4px; transition: background .2s ease, transform .2s var(--motion-ease); }
+.activity-bar-col::before {
+  content: ""; position: absolute; inset: 0 -3px; border-radius: 8px; background: rgba(90,156,255,.08);
+  opacity: 0; transform: scaleY(.7); transition: opacity .18s ease, transform .22s var(--motion-ease); pointer-events: none;
+}
+.activity-bar-col:hover { transform: translateY(-3px); }
+.activity-bar-col:hover::before, .activity-bar-col:focus-visible::before { opacity: 1; transform: scaleY(1); }
+.activity-bar {
+  transform-origin: bottom; animation: nc-bar-rise 720ms var(--motion-ease) both;
+  animation-delay: calc(var(--bar-i, 0) * 24ms); position: relative; z-index: 1;
+  box-shadow: 0 0 0 rgba(43,140,255,0); transition: height .5s var(--motion-ease), filter .2s ease, box-shadow .2s ease;
+}
+.activity-bar-col:nth-child(1) .activity-bar { --bar-i: 0; }
+.activity-bar-col:nth-child(2) .activity-bar { --bar-i: 1; }
+.activity-bar-col:nth-child(3) .activity-bar { --bar-i: 2; }
+.activity-bar-col:nth-child(4) .activity-bar { --bar-i: 3; }
+.activity-bar-col:nth-child(5) .activity-bar { --bar-i: 4; }
+.activity-bar-col:nth-child(6) .activity-bar { --bar-i: 5; }
+.activity-bar-col:nth-child(7) .activity-bar { --bar-i: 6; }
+.activity-bar-col:hover .activity-bar { filter: brightness(1.22) saturate(1.15); box-shadow: 0 0 18px rgba(43,140,255,.22); }
+.activity-bar-label { transition: color .18s ease, transform .18s ease; }
+.activity-bar-col:hover .activity-bar-label { color: var(--text); transform: translateY(-1px); }
+.activity-chart-card { animation: nc-card-enter 520ms var(--motion-ease) both; }
+.activity-chart-card:nth-child(2) { animation-delay: 70ms; }
+.activity-chart-card:nth-child(3) { animation-delay: 140ms; }
+.heatmap-cell { position: relative; overflow: hidden; transition: transform .16s var(--motion-ease), box-shadow .16s ease, border-color .16s ease, filter .16s ease; }
+.heatmap-cell::after { content: ""; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,.18), transparent 65%); opacity: 0; transition: opacity .16s ease; }
+.heatmap-cell:hover, .heatmap-cell:focus-visible { transform: scale(1.13); z-index: 2; box-shadow: 0 3px 12px rgba(0,0,0,.2); filter: saturate(1.2); }
+.heatmap-cell:hover::after { opacity: 1; }
+.activity-chart-title { letter-spacing: -.015em; }
+.activity-chart-sub { line-height: 1.45; }
+.cfg-section { animation: nc-card-enter 420ms var(--motion-ease) both; }
+.cfg-section:nth-of-type(2) { animation-delay: 35ms; }
+.cfg-section:nth-of-type(3) { animation-delay: 70ms; }
+.cfg-section:nth-of-type(4) { animation-delay: 105ms; }
+.cfg-input { transition: border-color .18s ease, box-shadow .18s ease, background .18s ease; }
+.cfg-input:focus { transform: translateY(-1px); }
+.cfg-check input { transition: transform .16s var(--motion-ease); }
+.cfg-check:hover input { transform: scale(1.08); }
+.cfg-role { padding: 8px; border-radius: 12px; transition: background .18s ease, border-color .18s ease; border: 1px solid transparent; }
+.cfg-role:hover { background: rgba(90,156,255,.045); border-color: var(--line); }
+.activity-detail-dialog[open], .modal[open] { animation: nc-dialog-pop 260ms var(--motion-ease) both; }
+.activity-detail-dialog::backdrop, dialog.modal::backdrop { backdrop-filter: blur(7px); }
+.toast { animation: nc-toast-in 280ms var(--motion-ease) both; }
+.skeleton { background-size: 220% 100%; animation: nc-shimmer 1.6s linear infinite; }
+.motion-refresh { animation: nc-section-enter 420ms var(--motion-ease) both; }
+@keyframes nc-bar-rise { from { transform: scaleY(.06); opacity: .3; } to { transform: scaleY(1); opacity: 1; } }
+@keyframes nc-card-enter { from { opacity: 0; transform: translateY(10px) scale(.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes nc-dialog-pop { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes nc-toast-in { from { opacity: 0; transform: translateX(12px) scale(.98); } to { opacity: 1; transform: translateX(0) scale(1); } }
+@keyframes nc-shimmer { from { background-position: 100% 0; } to { background-position: -120% 0; } }
+@keyframes nc-section-enter { from { opacity: .65; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 760px) {
+  .card:hover, .activity-chart-card:hover, .cfg-overview-card:hover { transform: none; }
+  .stat:hover { transform: translateY(-2px); }
+  .activity-bar-col:hover { transform: none; }
+  .activity-chart-card { animation-duration: 360ms; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+</style>
 </head>
 <body>
 
@@ -5431,7 +5578,7 @@ html[data-theme="light"] .diag-stats {
       <section id="p-feedback" hidden>
         <div class="feedback-hero">
           <div>
-            <span class="eyebrow">PALM CITY RP · INTERN</span>
+            <span class="eyebrow">NOTRUF CRAFTOPIA · INTERN</span>
             <h2><span class="ico" data-icon="message"></span>Team-Feedback</h2>
             <p>Hier landet das Feedback aus dem Discord-Panel. Neue Einträge erscheinen automatisch ganz oben.</p>
           </div>
@@ -7252,6 +7399,25 @@ function diagnosticsPanel(d) {
   );
 }
 
+function showActivityDetail(title, lines) {
+  let dialog = document.getElementById("activityDetailDialog");
+  if (!dialog) {
+    dialog = h("dialog", { id: "activityDetailDialog", class: "activity-detail-dialog", "aria-labelledby": "activityDetailTitle" });
+    document.body.append(dialog);
+    dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
+  }
+  dialog.replaceChildren(
+    h("div", { class: "activity-detail-head" },
+      h("div", {}, h("span", { class: "eyebrow" }, "AKTIVITÄTSDETAIL"), h("h2", { id: "activityDetailTitle" }, title)),
+      h("button", { type: "button", class: "btn small ghost", "aria-label": "Dialog schließen", onclick: () => dialog.close() }, icon("x"))
+    ),
+    h("div", { class: "activity-detail-grid" }, ...lines.map((line) =>
+      h("div", { class: "activity-detail-item" }, h("span", {}, line.label), h("strong", {}, line.value), line.hint ? h("small", {}, line.hint) : null)
+    ))
+  );
+  if (!dialog.open) dialog.showModal();
+}
+
 function renderActivityCharts(data) {
   const root = document.querySelector("#actCharts");
   if (!root) return;
@@ -7277,9 +7443,9 @@ function renderActivityCharts(data) {
   });
   const makeBars = (values, type, label, unit) => {
     const max = Math.max(1, ...values);
-    return h("div", {class:"activity-bars", style:`--bar-count:${values.length}`, role:"img", "aria-label":`${label}, ${values.map((v,i)=>`${dayLabels[i]}: ${Math.round(v)} ${unit}`).join(", ")}`},
-      ...values.map((value, i) => h("div", {class:"activity-bar-col", title:`${dayLabels[i]}: ${Math.round(value)} ${unit}`},
-        h("div", {class:"activity-bar"+(type === "voice" ? " voice" : ""), style:`height:${Math.max(value > 0 ? 3 : 1, value / max * 100)}%`}),
+    return h("div", {class:"activity-bars", style:`--bar-count:${values.length}`, role:"group", "aria-label":`${label}, ${values.map((v,i)=>`${dayLabels[i]}: ${Math.round(v)} ${unit}`).join(", ")}`},
+      ...values.map((value, i) => h("button", {type:"button", class:"activity-bar-col", title:`${dayLabels[i]}: ${Math.round(value)} ${unit} · Details öffnen`, "aria-label":`${label}, ${dayLabels[i]}: ${Math.round(value)} ${unit}. Details öffnen`, onclick:() => showActivityDetail(`${label} · ${dayLabels[i]}`, [{label, value:`${Math.round(value)} ${unit}`, hint:"Team gesamt für diesen Tag"}])},
+        h("div", {class:"activity-bar"+(type === "voice" ? " voice" : ""), style:`height:${Math.max(value > 0 ? 3 : 1, value / max * 100)}%;--bar-i:${i}`}),
         h("span", {class:"activity-bar-label"}, dayLabels[i])
       ))
     );
@@ -7302,7 +7468,7 @@ function renderActivityCharts(data) {
           const d = row[i-offset];
           const score = d ? (Number(d[0])||0) + (Number(d[1])||0)/60 : 0;
           const level = score <= 0 ? 0 : score < maxScore*.25 ? 1 : score < maxScore*.5 ? 2 : score < maxScore*.75 ? 3 : 4;
-          return h("span", {class:"heatmap-cell", "data-level":String(level), role:"cell", title:`${item.name}: ${dayLabels[i]} · ${d ? Number(d[0])||0 : 0} Nachrichten · ${d ? voiceText(Number(d[1])||0) : voiceText(0)}`});
+          return h("button", {type:"button", class:"heatmap-cell", "data-level":String(level), role:"button", tabindex:"0", title:`${item.name}: ${dayLabels[i]} · ${d ? Number(d[0])||0 : 0} Nachrichten · ${d ? voiceText(Number(d[1])||0) : voiceText(0)} · Details öffnen`, "aria-label":`${item.name}, ${dayLabels[i]}: ${d ? Number(d[0])||0 : 0} Nachrichten und ${d ? voiceText(Number(d[1])||0) : voiceText(0)} Voice-Zeit`, onclick:() => showActivityDetail(`${item.name || "Teammitglied"} · ${dayLabels[i]}`, [{label:"Nachrichten", value:String(d ? Number(d[0])||0 : 0)}, {label:"Voice-Zeit", value:d ? voiceText(Number(d[1])||0) : voiceText(0)}])});
         })
       );
     })
@@ -8404,10 +8570,40 @@ function buildActivityForm() {
   });
 
   const section = (title, hint, ...kids) => h("section", { class: "cfg-section" }, h("h3", { class: "subhead" }, title), hint ? h("p", { class: "sub" }, hint) : null, ...kids);
+  const summaryValues = {
+    messages: h("strong", {}, "—"),
+    voice: h("strong", {}, "—"),
+    dailyMessages: h("strong", {}, "—"),
+    dailyVoice: h("strong", {}, "—"),
+    inactive: h("strong", {}, "—"),
+  };
+  const summary = h("div", { class: "cfg-overview", "aria-label": "Live-Vorschau der Aktivitätsziele" },
+    ...[
+      ["Wochenziel Nachrichten", summaryValues.messages, "pro Teammitglied"],
+      ["Wochenziel Voice", summaryValues.voice, "pro Teammitglied"],
+      ["Aktiv ab Nachrichten", summaryValues.dailyMessages, "pro Tag"],
+      ["Aktiv ab Voicezeit", summaryValues.dailyVoice, "pro Tag"],
+      ["Inaktiv nach", summaryValues.inactive, "Tagen ohne Zielerfüllung"],
+    ].map(([label, value, hint]) => h("div", { class: "cfg-overview-card" }, h("span", { class: "cfg-overview-label" }, label), value, h("small", {}, hint)))
+  );
+  const updateSummary = () => {
+    const value = (key) => Number(num[key].value || 0);
+    summaryValues.messages.textContent = value("goal_messages_week") === 0 ? "Aus" : `${value("goal_messages_week")} Nachrichten`;
+    summaryValues.voice.textContent = value("goal_voice_minutes_week") === 0 ? "Aus" : `${value("goal_voice_minutes_week")} Min.`;
+    summaryValues.dailyMessages.textContent = `${value("min_messages_active")} Nachrichten`;
+    const seconds = value("min_voice_seconds_active");
+    summaryValues.dailyVoice.textContent = seconds >= 3600 ? `${(seconds / 3600).toLocaleString("de-DE", { maximumFractionDigits: 1 })} Std.` : seconds >= 60 ? `${Math.round(seconds / 60)} Min.` : `${seconds} Sek.`;
+    summaryValues.inactive.textContent = `${value("inactive_after_days")} Tage`;
+  };
+  for (const key of CFG_NUMBERS) num[key].addEventListener("input", updateSummary);
+  updateSummary();
 
   cfg.el.replaceChildren(
-    h("h2", {}, "Aktivität & Berichte"),
-    h("p", { class: "sub" }, "Mindestwerte, Zählweise und automatische Aufgaben. Änderungen gelten sofort und werden im Team-Log protokolliert."),
+    h("div", { class: "cfg-settings-hero" },
+      h("div", {}, h("span", { class: "eyebrow" }, "NOTRUF CRAFTOPIA · SYSTEMKONFIGURATION"), h("h2", {}, "Aktivität & Berichte"), h("p", { class: "sub" }, "Aktivitätsziele, Mindestwerte, Zählweise und automatische Aufgaben an einer Stelle. Die Vorschau aktualisiert sich direkt beim Ändern.")),
+      h("span", { class: "live-dot", title: "Live-Vorschau aktiv", "aria-label": "Live-Vorschau aktiv" })
+    ),
+    summary,
 
     section("Wochenziele (Mindestwerte)", "Daraus entstehen die Fortschrittsbalken und die Quote „Ziel erreicht“. 0 schaltet ein Ziel aus.",
       h("div", { class: "cfg-grid" },
