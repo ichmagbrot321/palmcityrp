@@ -5401,6 +5401,377 @@ body { isolation: isolate; }
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
 </style>
+<style id="td-viz-v6">
+/* ============================================================
+   VIZ v6 · Diagramme, Heatmap, Tooltip, Mikro-Animationen
+   Nutzt vorhandene Tokens (Dark + Light), eigene Klassen (viz-*)
+   ============================================================ */
+#actCharts, .viz-tip {
+  --viz-ease: cubic-bezier(.2,.75,.25,1);
+  --viz-a: var(--accent-cyan, #42d9ff);
+  --viz-b: var(--accent-blue, #4d9dff);
+  --viz-grid: color-mix(in srgb, var(--text) 9%, transparent);
+  --viz-hc: var(--accent-blue, #4d9dff);
+}
+
+/* ---------- Karten ---------- */
+.activity-charts { gap: 16px; }
+.viz-card { padding: 20px 22px 18px; border-radius: var(--radius-lg, 16px); }
+.viz-card:hover { transform: none; }
+.viz-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.viz-head .activity-chart-title { margin: 0; font-size: 15px; font-weight: 650; letter-spacing: -.015em; }
+.viz-head .activity-chart-sub { margin-top: 3px; font-size: 12px; }
+.viz-kpi { text-align: right; flex: none; display: grid; gap: 2px; }
+.viz-kpi-value {
+  font-size: 24px; font-weight: 750; letter-spacing: -.035em; line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  background: linear-gradient(135deg, var(--text), color-mix(in srgb, var(--viz-b) 70%, var(--text)));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.viz-kpi small { font-size: 11.5px; color: var(--muted); }
+
+/* ---------- Balkendiagramm ---------- */
+.viz-plot { --a: var(--viz-a); --b: var(--viz-b); display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 10px; height: 196px; }
+.viz-plot.voice { --a: var(--accent-green, #45e0ae); --b: color-mix(in srgb, var(--accent-green, #45e0ae) 45%, var(--accent-cyan, #42d9ff)); }
+.viz-axis { position: relative; margin-bottom: var(--lab-h); font-size: 11px; line-height: 1; color: var(--muted); font-variant-numeric: tabular-nums; }
+.viz-axis span { position: absolute; right: 0; transform: translateY(-50%); white-space: nowrap; }
+.viz-axis span:nth-child(1) { top: 0; }
+.viz-axis span:nth-child(2) { top: 50%; }
+.viz-axis span:nth-child(3) { top: 100%; }
+.viz-bars { position: relative; display: grid; grid-template-columns: repeat(var(--bar-count, 7), minmax(0, 1fr)); gap: clamp(3px, 1.2%, 10px); height: 100%; }
+.viz-grid { position: absolute; inset: 0 0 var(--lab-h) 0; display: flex; flex-direction: column; justify-content: space-between; pointer-events: none; }
+.viz-grid i { display: block; height: 1px; background: var(--viz-grid); }
+.viz-grid i:nth-child(2) { background: repeating-linear-gradient(90deg, var(--viz-grid) 0 4px, transparent 4px 9px); }
+.viz-grid i:nth-child(3) { background: color-mix(in srgb, var(--text) 16%, transparent); }
+.viz-avg { position: absolute; inset: 0 0 var(--lab-h) 0; pointer-events: none; z-index: 3; }
+.viz-avg::before { content: ""; position: absolute; left: 0; right: 0; bottom: var(--avg); border-top: 1px dashed color-mix(in srgb, var(--b) 80%, var(--text)); opacity: .75; transform-origin: left; }
+.viz-col {
+  position: relative; display: grid; grid-template-rows: minmax(0, 1fr) var(--lab-h); min-width: 0; padding: 0; border: 0; background: none;
+  color: inherit; font: inherit; cursor: pointer; border-radius: 10px; -webkit-tap-highlight-color: transparent;
+}
+.viz-col::before {
+  content: ""; position: absolute; inset: 0 -2px; border-radius: 10px; opacity: 0; pointer-events: none;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--b) 13%, transparent), transparent);
+  transition: opacity .2s ease;
+}
+.viz-col:hover::before, .viz-col:focus-visible::before { opacity: 1; }
+.viz-col:focus-visible { outline: 2px solid var(--b); outline-offset: 2px; }
+.viz-track { position: relative; display: flex; align-items: flex-end; justify-content: center; height: 100%; min-height: 0; padding: 0 2px; }
+.viz-bar {
+  position: relative; width: min(100%, 38px); height: var(--h); min-height: 4px; border-radius: 9px 9px 4px 4px;
+  background: linear-gradient(180deg, var(--a), var(--b));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 6px 18px -8px color-mix(in srgb, var(--b) 70%, transparent);
+  transform-origin: bottom; transition: opacity .25s ease, filter .25s ease, transform .25s var(--viz-ease), box-shadow .25s ease;
+}
+.viz-col.is-empty .viz-bar { height: 4px; background: var(--viz-grid); box-shadow: none; }
+.viz-col.is-peak .viz-bar { box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 0 22px -2px color-mix(in srgb, var(--b) 65%, transparent); }
+.viz-bars:hover .viz-col:not(:hover) .viz-bar { opacity: .5; }
+.viz-col:hover .viz-bar, .viz-col:focus-visible .viz-bar { filter: brightness(1.15) saturate(1.1); transform: translateY(-2px); }
+.viz-bar-value {
+  position: absolute; left: 50%; bottom: calc(var(--h) + 6px); transform: translateX(-50%); z-index: 2;
+  font-style: normal; font-size: 11px; font-weight: 650; line-height: 1; white-space: nowrap; font-variant-numeric: tabular-nums;
+  color: var(--text); pointer-events: none; text-shadow: 0 0 4px var(--surface-solid, #0a1222), 0 0 8px var(--surface-solid, #0a1222);
+}
+.viz-bar-label { display: grid; align-content: center; justify-items: center; gap: 1px; font-size: 10.5px; line-height: 1.15; color: var(--muted); transition: color .2s ease; }
+.viz-bar-label b { font-size: 9.5px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
+.viz-bar-label.is-hidden { visibility: hidden; }
+.viz-col:hover .viz-bar-label, .viz-col.is-today .viz-bar-label { color: var(--text); }
+.viz-col.is-today .viz-bar-label b { color: var(--b); }
+
+/* ---------- Legende ---------- */
+.viz-legend { margin-top: 14px; gap: 16px; align-items: center; }
+.viz-legend i { width: 10px; height: 10px; border-radius: 3px; background: linear-gradient(180deg, var(--viz-a), var(--viz-b)); }
+.viz-legend i.voice { background: linear-gradient(180deg, var(--accent-green, #45e0ae), color-mix(in srgb, var(--accent-green, #45e0ae) 45%, var(--accent-cyan, #42d9ff))); }
+.viz-legend-split { justify-content: space-between; }
+.viz-legend-group { display: inline-flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.viz-legend i.avg { width: 16px; height: 0; border-radius: 0; background: none; border-top: 2px dashed color-mix(in srgb, var(--viz-b) 80%, var(--text)); }
+.viz-legend small { font-size: 11.5px; color: var(--muted); }
+.viz-scale { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--muted); }
+.viz-scale span { padding: 0 3px; }
+
+/* ---------- Heatmap ---------- */
+.viz-heat-scroll { overflow-x: auto; padding: 2px 4px 8px; margin: 0 -4px; scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
+.viz-heat { display: grid; gap: 3px; min-width: calc(130px + var(--heat-days, 7) * 24px + 56px); }
+.viz-heat-row {
+  display: grid; grid-template-columns: minmax(110px, 160px) repeat(var(--heat-days, 7), minmax(18px, 1fr)) 52px;
+  gap: 4px; align-items: center; padding: 2px 6px; border-radius: 10px; transition: background .18s ease;
+}
+.viz-heat-row:not(.viz-heat-head):hover { background: color-mix(in srgb, var(--viz-hc) 7%, transparent); }
+.viz-heat-head { padding-bottom: 6px; margin-bottom: 2px; border-bottom: 1px solid var(--viz-grid); border-radius: 0; }
+.viz-heat-name {
+  position: sticky; left: 0; z-index: 2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: 10px;
+  font-size: 12.5px; font-weight: 550; color: color-mix(in srgb, var(--text) 88%, transparent);
+  background: linear-gradient(90deg, var(--surface-solid, #0a1222) calc(100% - 14px), transparent);
+}
+.viz-heat-head .viz-heat-name { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.viz-heat-day { display: grid; justify-items: center; gap: 1px; font-size: 10px; line-height: 1.15; color: var(--muted); }
+.viz-heat-day b { font-size: 9.5px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
+.viz-heat-day.is-today { color: var(--viz-hc); }
+.viz-heat-day.is-hidden { visibility: hidden; }
+.viz-heat-sum, .viz-heat-sum-head { text-align: right; font-size: 12px; font-weight: 650; font-variant-numeric: tabular-nums; color: var(--muted); }
+.viz-heat-sum { padding-right: 2px; border-radius: 6px; cursor: default; }
+.viz-heat-sum:focus-visible { outline: 2px solid var(--viz-hc); outline-offset: 2px; }
+.viz-heat-sum-head { font-size: 13px; }
+.viz-heat-row:hover .viz-heat-sum { color: var(--text); }
+
+.viz-cell, .viz-cell-swatch {
+  --c: color-mix(in srgb, var(--text) 6%, transparent);
+  display: block; width: 100%; height: 26px; padding: 0; border: 0; border-radius: 7px; background: var(--c);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 7%, transparent);
+}
+.viz-cell-swatch { width: 14px; height: 14px; border-radius: 4px; }
+.viz-cell { cursor: pointer; position: relative; transition: transform .16s var(--viz-ease), box-shadow .16s ease, filter .16s ease; -webkit-tap-highlight-color: transparent; }
+.viz-cell.is-weekend[data-level="0"] { --c: color-mix(in srgb, var(--text) 3.5%, transparent); }
+[data-level="1"].viz-cell, [data-level="1"].viz-cell-swatch { --c: color-mix(in srgb, var(--viz-hc) 20%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--viz-hc) 22%, transparent); }
+[data-level="2"].viz-cell, [data-level="2"].viz-cell-swatch { --c: color-mix(in srgb, var(--viz-hc) 42%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--viz-hc) 30%, transparent); }
+[data-level="3"].viz-cell, [data-level="3"].viz-cell-swatch { --c: color-mix(in srgb, var(--viz-hc) 70%, transparent); box-shadow: inset 0 1px 0 rgba(255,255,255,.18); }
+[data-level="4"].viz-cell, [data-level="4"].viz-cell-swatch {
+  background: linear-gradient(135deg, var(--viz-hc), var(--accent-cyan, #42d9ff));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 0 14px -3px color-mix(in srgb, var(--accent-cyan, #42d9ff) 70%, transparent);
+}
+.viz-cell:hover, .viz-cell:focus-visible { transform: scale(1.22); z-index: 3; filter: brightness(1.12); box-shadow: 0 6px 16px rgba(0,0,0,.28), inset 0 0 0 1px color-mix(in srgb, var(--text) 40%, transparent); }
+.viz-cell:focus-visible { outline: 2px solid var(--viz-hc); outline-offset: 2px; }
+
+/* ---------- Tooltip ---------- */
+.viz-tip {
+  position: fixed; top: 0; left: 0; z-index: 10000; min-width: 168px; max-width: min(280px, calc(100vw - 16px)); padding: 10px 12px;
+  display: grid; gap: 6px; pointer-events: none; opacity: 0; visibility: hidden;
+  color: var(--text); background: var(--surface-solid, #0a1222);
+  border: 1px solid var(--line-strong); border-radius: 12px; box-shadow: var(--shadow-md, 0 18px 50px rgba(0,0,0,.28));
+  transition: opacity .14s ease, visibility .14s;
+}
+.viz-tip.show { opacity: 1; visibility: visible; }
+.viz-tip-title { font-size: 12.5px; font-weight: 650; letter-spacing: -.01em; }
+.viz-tip-line { display: flex; justify-content: space-between; gap: 18px; font-size: 12px; color: var(--muted); }
+.viz-tip-line b { color: var(--text); font-weight: 650; font-variant-numeric: tabular-nums; }
+
+/* ---------- Einstiegs-Animationen (nur beim ersten Aufbau) ---------- */
+@keyframes viz-rise { from { transform: scaleY(0); opacity: .2; } to { transform: scaleY(1); opacity: 1; } }
+@keyframes viz-fade { from { opacity: 0; transform: translate(-50%, 4px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes viz-draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes viz-pop { from { opacity: 0; transform: scale(.55); } to { opacity: 1; transform: scale(1); } }
+@keyframes viz-fade-in { from { opacity: 0; } to { opacity: 1; } }
+.viz-intro .viz-bar { animation: viz-rise .75s var(--viz-ease) both; animation-delay: calc(var(--i, 0) * 45ms + 120ms); }
+.viz-intro .viz-bar-value { animation: viz-fade .45s var(--viz-ease) both; animation-delay: calc(var(--i, 0) * 45ms + 650ms); }
+.viz-intro .viz-avg::before { animation: viz-draw .9s var(--viz-ease) .55s both; }
+.viz-intro .viz-cell { animation: viz-pop .5s var(--viz-ease) both; animation-delay: var(--d, 0ms); }
+
+/* ---------- Sparkline & Zielbalken (Aktivitätsliste) ---------- */
+.spark { gap: 3px; }
+.spark span::after { border-radius: 3px 3px 1px 1px; background: color-mix(in srgb, var(--text) 14%, transparent); transition: background .2s ease, transform .2s var(--viz-ease), filter .2s ease; }
+.spark span.on::after { background: linear-gradient(180deg, var(--accent-cyan, #42d9ff), var(--accent-blue, #4d9dff)); }
+.spark span:hover::after { background: linear-gradient(180deg, var(--accent-green, #45e0ae), var(--accent-cyan, #42d9ff)); transform: scaleY(1.12); filter: brightness(1.1); }
+.meter { height: 8px; background: color-mix(in srgb, var(--text) 9%, transparent); }
+.meter i { background: linear-gradient(90deg, var(--accent-blue, #4d9dff), var(--accent-cyan, #42d9ff)); box-shadow: 0 0 12px -2px color-mix(in srgb, var(--accent-cyan, #42d9ff) 60%, transparent); }
+.goal.met .meter i { background: linear-gradient(90deg, var(--accent-green, #45e0ae), color-mix(in srgb, var(--accent-green, #45e0ae) 55%, var(--accent-cyan, #42d9ff))); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 760px) {
+  .viz-card { padding: 16px 14px 14px; }
+  .viz-head { margin-bottom: 14px; gap: 10px; }
+  .viz-kpi-value { font-size: 20px; }
+  .viz-plot { height: 164px; grid-template-columns: 30px minmax(0, 1fr); gap: 6px; }
+  .viz-bar { width: min(100%, 28px); border-radius: 7px 7px 3px 3px; }
+  .viz-bar-label b { display: none; }
+  .viz-heat { min-width: calc(84px + var(--heat-days, 7) * 23px + 52px); }
+  .viz-heat-row { grid-template-columns: minmax(84px, 110px) repeat(var(--heat-days, 7), minmax(18px, 1fr)) 44px; gap: 3px; padding: 2px 4px; }
+  .viz-heat-name { font-size: 12px; }
+  .viz-cell { height: 24px; border-radius: 6px; }
+  .viz-legend-split { flex-direction: column; align-items: flex-start; gap: 8px; }
+}
+@media (hover: none) {
+  .viz-cell:hover { transform: none; }
+  .viz-bars:hover .viz-col:not(:hover) .viz-bar { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .viz-intro .viz-bar, .viz-intro .viz-bar-value, .viz-intro .viz-avg::before, .viz-intro .viz-cell { animation: none !important; }
+  .viz-cell:hover, .viz-col:hover .viz-bar { transform: none; }
+}
+</style>
+
+<style id="td-polish-v7">
+/* ============================================================
+   POLISH v7 · einheitliches Design-System über allen Ebenen
+   Buttons · Formulare · Karten · Badges · Navigation · Dialoge
+   Alle Werte über Tokens, funktioniert in Dark + Light
+   ============================================================ */
+:root {
+  --p-brand: #8b3dff;
+  --p-brand-soft: color-mix(in srgb, var(--p-brand) 16%, transparent);
+  --p-ring: 0 0 0 3px color-mix(in srgb, var(--p-brand) 28%, transparent);
+  --p-field: color-mix(in srgb, var(--text) 4.5%, transparent);
+  --p-field-hover: color-mix(in srgb, var(--text) 7%, transparent);
+  --p-ease: cubic-bezier(.2,.75,.25,1);
+  --p-fast: 150ms;
+  --p-base: 240ms;
+  --p-r-sm: 8px;
+  --p-r-md: 12px;
+  --p-r-lg: 16px;
+  --p-h: 40px;
+  --p-h-sm: 32px;
+}
+html[data-theme="light"] { --p-brand: #6d28d9; --p-field: color-mix(in srgb, var(--text) 3.5%, #fff); --p-field-hover: color-mix(in srgb, var(--text) 6%, #fff); }
+
+::selection { background: color-mix(in srgb, var(--p-brand) 38%, transparent); }
+* { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--text) 22%, transparent) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--text) 20%, transparent); border-radius: 999px; border: 3px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--text) 34%, transparent); background-clip: padding-box; border: 3px solid transparent; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* ---------- Buttons: ein System ---------- */
+html body .btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: var(--p-h); height: auto; padding: 0 16px; border-radius: var(--p-r-md);
+  font-size: 13.5px; font-weight: 600; letter-spacing: -.005em; line-height: 1.1; white-space: nowrap; text-decoration: none;
+  cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
+  transition: transform var(--p-fast) var(--p-ease), box-shadow var(--p-base) ease, border-color var(--p-fast) ease, background-color var(--p-base) ease, background var(--p-base) ease, filter var(--p-fast) ease, opacity var(--p-fast) ease;
+}
+html body .btn.small { min-height: var(--p-h-sm); padding: 0 12px; gap: 6px; border-radius: 10px; font-size: 12px; }
+html body .btn .ico, html body .btn svg { width: 16px; height: 16px; flex: none; transition: transform var(--p-base) var(--p-ease); }
+html body .btn.small .ico, html body .btn.small svg { width: 14px; height: 14px; }
+html body .btn:hover:not(:disabled) { transform: translateY(-1px); }
+html body .btn:hover:not(:disabled) .ico, html body .btn:hover:not(:disabled) svg { transform: scale(1.1); }
+html body .btn:active:not(:disabled) { transform: translateY(0) scale(.97); transition-duration: 60ms; }
+html body .btn:focus-visible { outline: 2px solid var(--p-brand); outline-offset: 2px; }
+html body .btn:disabled, html body .btn[aria-disabled="true"] { opacity: .42; cursor: not-allowed; transform: none; box-shadow: none; filter: saturate(.5); }
+html body .btn.ghost:not(:hover) { box-shadow: none; }
+html body .btn.danger:hover:not(:disabled) { box-shadow: 0 10px 26px -12px color-mix(in srgb, var(--red, #ff5468) 70%, transparent); }
+
+/* Segment-Gruppe (Uprank/Downrank) */
+html body .seg { display: inline-flex; gap: 3px; padding: 3px; border-radius: 14px; background: var(--p-field); border: 1px solid var(--line); }
+html body .seg .btn { min-height: 32px; border-color: transparent; background: transparent; box-shadow: none; }
+html body .seg .btn:hover:not(:disabled) { background: var(--p-brand-soft); }
+
+/* Aktionsgruppen in Team-Karten: klares Raster */
+html body .team-card-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+html body .team-card-actions .seg { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; }
+html body .team-card-actions > .btn { width: 100%; }
+html body .team-card-actions > .btn.danger, html body .team-card-actions > .btn.primary:last-child:nth-child(odd) { grid-column: 1 / -1; }
+html body .team-note-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
+html body .team-note-actions .team-note-meta { flex: 1 1 100%; margin: 0 0 2px; }
+html body .team-note-actions .btn { flex: 1 1 0; min-width: 0; }
+
+/* ---------- Formulare ---------- */
+html body input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]),
+html body select, html body textarea, html body .cfg-input {
+  min-height: var(--p-h); border-radius: var(--p-r-md); background-color: var(--p-field);
+  border: 1px solid var(--line); color: var(--text); font-size: 13.5px;
+  transition: border-color var(--p-fast) ease, box-shadow var(--p-base) ease, background-color var(--p-fast) ease;
+}
+html body input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):hover,
+html body select:hover, html body textarea:hover { background-color: var(--p-field-hover); border-color: var(--line-strong); }
+html body input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):focus,
+html body select:focus, html body textarea:focus, html body .cfg-input:focus {
+  outline: none; border-color: color-mix(in srgb, var(--p-brand) 70%, transparent); box-shadow: var(--p-ring); background-color: var(--p-field);
+}
+html body input::placeholder, html body textarea::placeholder { color: color-mix(in srgb, var(--muted) 78%, transparent); }
+html body textarea { min-height: 104px; padding: 12px 14px; line-height: 1.5; resize: vertical; }
+html body select { cursor: pointer; padding-right: 34px; }
+html body .search input { min-height: 46px; }
+html body .search:focus-within .ico { color: var(--p-brand); }
+html body .search .ico { transition: color var(--p-fast) ease; }
+html body input[type="checkbox"], html body input[type="radio"] { accent-color: var(--p-brand); }
+
+/* Filterleiste: alle Controls gleich hoch, sauber umbrechend */
+html body .filters { display: flex; flex-wrap: wrap; align-items: stretch; gap: 10px; }
+html body .filters .search { flex: 1 1 260px; min-width: 0; }
+html body .filters select { flex: 0 1 190px; min-width: 150px; min-height: 46px; }
+html body .filters .btn { min-height: 46px; padding: 0 16px; font-size: 13px; }
+@media (max-width: 760px) {
+  html body .filters select, html body .filters .btn { flex: 1 1 calc(50% - 5px); min-width: 0; }
+}
+
+/* ---------- Badges ---------- */
+html body .badge { display: inline-flex; align-items: center; gap: 5px; min-height: 24px; height: auto; padding: 0 10px; font-size: 11.5px; font-weight: 600; letter-spacing: -.003em; line-height: 1; white-space: nowrap; }
+html body .badge svg, html body .badge .ico { width: 13px; height: 13px; flex: none; }
+html body .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* ---------- Karten, Zeilen, Stats ---------- */
+html body .team-grid { gap: 14px; }
+html body .team-card { min-height: 132px; transition: transform var(--p-base) var(--p-ease), border-color var(--p-base) ease, box-shadow var(--p-base) ease, background-color var(--p-base) ease; }
+html body .team-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--p-brand) 38%, var(--line)); box-shadow: 0 16px 38px -18px color-mix(in srgb, var(--p-brand) 45%, transparent), var(--shadow-medium, 0 8px 24px rgba(0,0,0,.2)); }
+html body .team-card-head { transition: background-color var(--p-fast) ease; }
+html body .team-card-chevron { transition: transform var(--p-base) var(--p-ease), background-color var(--p-fast) ease, border-color var(--p-fast) ease; }
+html body .team-card-head:hover .team-card-chevron { background-color: var(--p-brand-soft); }
+html body .team-card-head[aria-expanded="true"] .team-card-chevron { transform: rotate(180deg); }
+html body .team-card-details { animation: p-reveal var(--p-base) var(--p-ease) both; }
+html body .row { transition: transform var(--p-base) var(--p-ease), border-color var(--p-base) ease, box-shadow var(--p-base) ease, background-color var(--p-base) ease; }
+html body .row:hover { border-color: color-mix(in srgb, var(--p-brand) 28%, var(--line)); }
+html body .stat strong { white-space: nowrap; font-variant-numeric: tabular-nums; }
+html body #actStats .stat strong, html body #probationStats .stat strong { font-size: clamp(19px, 2vw, 23px); }
+html body .stat > div { min-width: 0; }
+html body .stat span:not(.ico-box) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+html body .note, html body .sub { line-height: 1.55; }
+html body .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Leere Zustände */
+html body .empty { display: grid; justify-items: center; align-content: center; gap: 8px; padding: 36px 20px; text-align: center; color: var(--muted); border: 1px dashed var(--line-strong); border-radius: var(--p-r-lg); background: color-mix(in srgb, var(--text) 2.5%, transparent); }
+html body .empty svg { width: 28px; height: 28px; opacity: .7; }
+html body .empty.error-state { border-style: solid; border-color: color-mix(in srgb, var(--red, #ff5468) 40%, var(--line)); }
+
+/* ---------- Navigation ---------- */
+html body #tabs .tab { transition: background-color var(--p-base) ease, color var(--p-fast) ease, transform var(--p-fast) var(--p-ease), box-shadow var(--p-base) ease; }
+html body #tabs .tab:hover { transform: translateX(2px); }
+html body #tabs .tab:active { transform: translateX(0) scale(.98); }
+html body #tabs .tab .ico, html body #tabs .tab svg { transition: transform var(--p-base) var(--p-ease), color var(--p-fast) ease; }
+html body #tabs .tab:hover .ico, html body #tabs .tab:hover svg { transform: scale(1.12); }
+html body #tabs .tab:focus-visible { outline: 2px solid var(--p-brand); outline-offset: 2px; }
+html body .top-actions { display: flex; align-items: center; gap: 10px; }
+html body .top-actions .btn { min-height: 36px; padding: 0 14px; font-size: 12.5px; }
+html body .top-actions .live { min-height: 36px; display: inline-flex; align-items: center; }
+html body .pal-open kbd { transition: background-color var(--p-fast) ease; }
+
+/* ---------- Dialoge ---------- */
+html body .backdrop { backdrop-filter: blur(8px); animation: p-fade var(--p-base) ease both; }
+html body .backdrop.is-closing { animation: p-fade-out 160ms ease both; }
+html body .backdrop.is-closing .modal { animation: p-pop-out 160ms ease both; }
+html body .modal { padding: 24px; border-radius: 20px; animation: p-pop var(--p-base) var(--p-ease) both; box-shadow: var(--shadow-modal, 0 30px 90px rgba(0,0,0,.45)); }
+html body .modal h3 { margin: 0 0 4px; font-size: 19px; font-weight: 700; letter-spacing: -.02em; }
+html body .modal .sub { margin: 0 0 18px; }
+html body .modal label { display: block; margin: 14px 0 6px; font-size: 12px; font-weight: 600; color: var(--muted); }
+html body .modal textarea { height: auto; min-height: 112px !important; }
+html body .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; padding-top: 18px; }
+html body .modal-actions .btn { min-width: 110px; }
+html body .err { padding: 10px 12px; border-radius: 10px; font-size: 12.5px; background: color-mix(in srgb, var(--red, #ff5468) 12%, transparent); border: 1px solid color-mix(in srgb, var(--red, #ff5468) 35%, transparent); }
+@media (max-width: 560px) {
+  html body .modal { padding: 20px 18px; }
+  html body .modal-actions { flex-direction: column-reverse; }
+  html body .modal-actions .btn { width: 100%; }
+}
+
+/* ---------- Toast ---------- */
+html body .toast { border-radius: 14px; backdrop-filter: blur(10px); }
+
+/* ---------- Animationen ---------- */
+@keyframes p-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes p-fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes p-pop { from { opacity: 0; transform: translateY(10px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes p-pop-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(6px) scale(.98); } }
+@keyframes p-reveal { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+/* ---------- Touch & Mobil ---------- */
+@media (pointer: coarse) {
+  html body .btn { min-height: 44px; }
+  html body .btn.small { min-height: 38px; }
+  html body input:not([type="checkbox"]):not([type="radio"]), html body select { min-height: 46px; font-size: 16px; }
+}
+@media (max-width: 760px) { .viz-heat-day b + span { display: none; } }
+@media (max-width: 560px) {
+  html body .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  html body .stats .stat:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  html body .stats .stat { min-height: 0; }
+  html body .team-grid { gap: 10px; }
+  html body .top-actions { gap: 8px; }
+  html body .top-actions .pal-open-text, html body .top-actions kbd { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html body .btn, html body .team-card, html body .row, html body #tabs .tab { transition-duration: .01ms !important; }
+  html body .btn:hover:not(:disabled), html body .team-card:hover, html body #tabs .tab:hover { transform: none; }
+  html body .modal, html body .backdrop, html body .team-card-details { animation: none !important; }
+}
+</style>
+
 </head>
 <body>
 
@@ -5883,8 +6254,10 @@ function modal({ title, subtitle, content, confirm, danger = false, onConfirm })
   const onKey = (event) => { if (event.key === "Escape") close(); };
 
   function close() {
-    back.remove();
     document.removeEventListener("keydown", onKey);
+    if (back.classList.contains("is-closing")) return;
+    back.classList.add("is-closing");
+    setTimeout(() => back.remove(), 160);
   }
 
   back.addEventListener("click", (event) => { if (event.target === back) close(); });
@@ -7418,6 +7791,82 @@ function showActivityDetail(title, lines) {
   if (!dialog.open) dialog.showModal();
 }
 
+/* ---------- Aktivitätsdiagramme v6: Tooltip, Count-up, Balkendiagramme, Heatmap ---------- */
+const VIZ_REDUCED = () => window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/** Zählt eine Zahl sanft hoch (respektiert prefers-reduced-motion). */
+function vizCountUp(el, target, format = (n) => String(Math.round(n)), duration = 900) {
+  if (!el) return;
+  if (VIZ_REDUCED() || !Number.isFinite(target) || target <= 0) { el.textContent = format(target); return; }
+  const start = performance.now();
+  const tick = (now) => {
+    const t = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = format(target * eased);
+    if (t < 1 && el.isConnected) requestAnimationFrame(tick);
+    else el.textContent = format(target);
+  };
+  requestAnimationFrame(tick);
+}
+
+/** Ein gemeinsamer, schwebender Tooltip für Balken und Heatmap-Zellen. */
+const VIZ_TIP = { el: null, target: null };
+
+function vizTipEl() {
+  if (!VIZ_TIP.el) {
+    VIZ_TIP.el = h("div", { id: "vizTip", class: "viz-tip", role: "tooltip" });
+    document.body.append(VIZ_TIP.el);
+  }
+  return VIZ_TIP.el;
+}
+
+function vizTipHide() {
+  VIZ_TIP.target = null;
+  if (VIZ_TIP.el) VIZ_TIP.el.classList.remove("show");
+}
+
+function vizTipShow(target) {
+  const tip = vizTipEl();
+  VIZ_TIP.target = target;
+  const lines = String(target.dataset.tipBody || "").split("\n").filter(Boolean);
+  tip.replaceChildren(
+    h("strong", { class: "viz-tip-title" }, target.dataset.tipTitle || ""),
+    ...lines.map((line) => {
+      const [label, value] = line.split("|");
+      return h("span", { class: "viz-tip-line" }, h("span", {}, label), value != null ? h("b", {}, value) : null);
+    })
+  );
+  tip.classList.add("show");
+  const rect = (target.querySelector(".viz-bar") || target).getBoundingClientRect();
+  const tw = tip.offsetWidth;
+  const th = tip.offsetHeight;
+  const gap = 10;
+  let left = rect.left + rect.width / 2 - tw / 2;
+  left = Math.max(8, Math.min(left, window.innerWidth - tw - 8));
+  let top = rect.top - th - gap;
+  if (top < 8) top = rect.bottom + gap;
+  tip.style.transform = `translate3d(${Math.round(left)}px, ${Math.round(top)}px, 0)`;
+}
+
+function vizBindTips(root) {
+  if (root.dataset.vizTips) return;
+  root.dataset.vizTips = "1";
+  root.addEventListener("pointerover", (event) => {
+    const target = event.target.closest("[data-tip-title]");
+    if (target && target !== VIZ_TIP.target) vizTipShow(target);
+  });
+  root.addEventListener("pointerout", (event) => {
+    if (!event.relatedTarget || !event.relatedTarget.closest || !event.relatedTarget.closest("[data-tip-title]")) vizTipHide();
+  });
+  root.addEventListener("focusin", (event) => {
+    const target = event.target.closest("[data-tip-title]");
+    if (target) vizTipShow(target);
+  });
+  root.addEventListener("focusout", vizTipHide);
+  root.addEventListener("click", vizTipHide);
+  window.addEventListener("scroll", vizTipHide, { passive: true, capture: true });
+}
+
 function renderActivityCharts(data) {
   const root = document.querySelector("#actCharts");
   if (!root) return;
@@ -7437,49 +7886,143 @@ function renderActivityCharts(data) {
       voice[offset + i] += Number(d?.[1]) || 0;
     });
   }
-  const dayLabels = Array.from({length:maxDays}, (_, i) => {
+  const dayDates = Array.from({length:maxDays}, (_, i) => {
     const date = new Date(); date.setHours(12,0,0,0); date.setDate(date.getDate() - (maxDays - 1 - i));
-    return date.toLocaleDateString("de-DE", {day:"2-digit",month:"2-digit"});
+    return date;
   });
-  const makeBars = (values, type, label, unit) => {
-    const max = Math.max(1, ...values);
-    return h("div", {class:"activity-bars", style:`--bar-count:${values.length}`, role:"group", "aria-label":`${label}, ${values.map((v,i)=>`${dayLabels[i]}: ${Math.round(v)} ${unit}`).join(", ")}`},
-      ...values.map((value, i) => h("button", {type:"button", class:"activity-bar-col", title:`${dayLabels[i]}: ${Math.round(value)} ${unit} · Details öffnen`, "aria-label":`${label}, ${dayLabels[i]}: ${Math.round(value)} ${unit}. Details öffnen`, onclick:() => showActivityDetail(`${label} · ${dayLabels[i]}`, [{label, value:`${Math.round(value)} ${unit}`, hint:"Team gesamt für diesen Tag"}])},
-        h("div", {class:"activity-bar"+(type === "voice" ? " voice" : ""), style:`height:${Math.max(value > 0 ? 3 : 1, value / max * 100)}%;--bar-i:${i}`}),
-        h("span", {class:"activity-bar-label"}, dayLabels[i])
-      ))
+  const dayLabels = dayDates.map((date) => date.toLocaleDateString("de-DE", {day:"2-digit",month:"2-digit"}));
+  const dayWeek = dayDates.map((date) => date.toLocaleDateString("de-DE", {weekday:"short"}).replace(".", ""));
+  const intro = !root.dataset.vizReady;
+  root.dataset.vizReady = "1";
+  root.classList.toggle("viz-intro", intro);
+  vizBindTips(root);
+
+  const numFmt = new Intl.NumberFormat("de-DE");
+  const labelStep = maxDays > 21 ? 3 : maxDays > 12 ? 2 : 1;
+  const showLabel = (i) => (maxDays - 1 - i) % labelStep === 0;
+
+  const niceMax = (value) => {
+    if (value <= 2) return 2;
+    const p = Math.pow(10, Math.floor(Math.log10(value)));
+    const n = value / p;
+    return (n <= 2 ? 2 : n <= 4 ? 4 : n <= 6 ? 6 : n <= 8 ? 8 : 10) * p;
+  };
+
+  /** Balkendiagramm mit Achse, Gitterlinien, Durchschnittslinie und Spitzenwert. */
+  const makeBars = (values, type, label, unit, formatValue) => {
+    const peak = Math.max(0, ...values);
+    const top = niceMax(peak * 1.1);
+    const total = values.reduce((sum, v) => sum + v, 0);
+    const avg = total / values.length;
+    const peakIndex = peak > 0 ? values.indexOf(peak) : -1;
+    const ticks = [top, top / 2, 0];
+    return h("div", {class:"viz-plot " + type, style:`--lab-h:${maxDays <= 10 ? 32 : 20}px`},
+      h("div", {class:"viz-axis", "aria-hidden":"true"}, ...ticks.map((t) => h("span", {}, numFmt.format(Math.round(t))))),
+      h("div", {class:"viz-bars", style:`--bar-count:${values.length}`, role:"group", "aria-label":`${label}, ${values.map((v,i)=>`${dayLabels[i]}: ${Math.round(v)} ${unit}`).join(", ")}`},
+        h("div", {class:"viz-grid", "aria-hidden":"true"}, h("i", {}), h("i", {}), h("i", {})),
+        avg > 0 ? h("div", {class:"viz-avg", style:`--avg:${(avg / top * 100).toFixed(2)}%`, "aria-hidden":"true"}) : null,
+        ...values.map((value, i) => {
+          const pct = value > 0 ? Math.max(3, value / top * 100) : 0;
+          const isToday = i === values.length - 1;
+          return h("button", {type:"button", class:"viz-col" + (i === peakIndex ? " is-peak" : "") + (isToday ? " is-today" : "") + (value <= 0 ? " is-empty" : ""),
+            "data-tip-title":`${dayWeek[i]}, ${dayLabels[i]}`, "data-tip-body":`${label}|${formatValue(value)}\n${value > 0 && avg > 0 ? `Zum Ø|${value >= avg ? "+" : "−"}${Math.round(Math.abs(value / avg - 1) * 100)} %` : ""}`,
+            "aria-label":`${label}, ${dayLabels[i]}: ${Math.round(value)} ${unit}. Details öffnen`,
+            style:`--i:${i}`,
+            onclick:() => showActivityDetail(`${label} · ${dayLabels[i]}`, [{label, value:`${Math.round(value)} ${unit}`, hint:"Team gesamt für diesen Tag"}])},
+            h("span", {class:"viz-track", style:`--h:${pct.toFixed(2)}%`},
+              h("span", {class:"viz-bar"}),
+              value > 0 && (i === peakIndex || maxDays <= 10) ? h("em", {class:"viz-bar-value"}, formatValue(value, true)) : null),
+            h("span", {class:"viz-bar-label" + (showLabel(i) ? "" : " is-hidden")}, maxDays <= 10 ? h("b", {}, dayWeek[i]) : null, h("span", {}, maxDays <= 10 ? dayLabels[i].slice(0, 5) : dayLabels[i].slice(0, 2) + ".")));
+        })
+      )
     );
   };
-  const card = (title, subtitle, chart, legend) => h("article", {class:"activity-chart-card"},
-    h("h3", {class:"activity-chart-title"}, h("span", {}, title, h("small", {class:"activity-chart-sub"}, subtitle))),
-    chart, legend ? h("div", {class:"activity-chart-legend"}, legend) : null
+
+  const kpi = (value, caption, countTarget, countFormat) => {
+    const num = h("strong", {class:"viz-kpi-value"}, value);
+    if (countTarget != null && intro) { num.textContent = countFormat(0); vizCountUp(num, countTarget, countFormat); }
+    return h("div", {class:"viz-kpi"}, num, h("small", {}, caption));
+  };
+
+  const card = (title, subtitle, headKpi, chart, legend) => h("article", {class:"activity-chart-card viz-card"},
+    h("header", {class:"viz-head"},
+      h("h3", {class:"activity-chart-title"}, h("span", {}, title, h("small", {class:"activity-chart-sub"}, subtitle))),
+      headKpi
+    ),
+    chart, legend ? h("div", {class:"activity-chart-legend viz-legend"}, legend) : null
   );
-  const legend = (label, cls="") => h("span", {}, h("i", {class:cls}), label);
+  const legend = (label, cls="", avgText) => h("span", {class:"viz-legend-group"}, h("span", {}, h("i", {class:cls}), label), avgText ? h("span", {}, h("i", {class:"avg"}), avgText) : null);
+
+  const msgTotal = messages.reduce((a, b) => a + b, 0);
+  const voiceTotalMin = voice.reduce((a, b) => a + b, 0) / 60;
+  const msgAvg = msgTotal / maxDays;
+  const voiceAvgMin = voiceTotalMin / maxDays;
+  const fmtMsg = (v) => numFmt.format(Math.round(v));
+  const fmtVoice = (minutes, short) => short
+    ? (minutes >= 60 ? `${(minutes / 60).toFixed(1).replace(".", ",")} Std` : `${Math.round(minutes)} Min`)
+    : voiceText(minutes * 60);
+
+  /* ---- Heatmap ---- */
   const heatRows = [...items].sort((a,b) => String(a.name||"").localeCompare(String(b.name||""), "de")).slice(0, 40);
-  const maxScore = Math.max(1, ...heatRows.flatMap(item => (item.daily||[]).slice(-maxDays).map(d => (Number(d?.[0])||0) + (Number(d?.[1])||0)/60)));
-  const heatmap = h("div", {class:"activity-heatmap", style:`--heat-days:${maxDays}`, role:"table", "aria-label":"Tägliche Teamaktivität je Person"},
-    h("div", {class:"heatmap-row", role:"row"}, h("span", {class:"heatmap-name"}, "Teammitglied"), ...dayLabels.map(label => h("span", {class:"heatmap-day", role:"columnheader"}, label))),
-    ...heatRows.map(item => {
-      const row = (Array.isArray(item.daily) ? item.daily : []).slice(-maxDays);
-      const offset = maxDays - row.length;
-      return h("div", {class:"heatmap-row", role:"row"},
-        h("span", {class:"heatmap-name", title:item.name||""}, item.name||"Unbekannt"),
-        ...Array.from({length:maxDays}, (_,i) => {
-          const d = row[i-offset];
-          const score = d ? (Number(d[0])||0) + (Number(d[1])||0)/60 : 0;
-          const level = score <= 0 ? 0 : score < maxScore*.25 ? 1 : score < maxScore*.5 ? 2 : score < maxScore*.75 ? 3 : 4;
-          return h("button", {type:"button", class:"heatmap-cell", "data-level":String(level), role:"button", tabindex:"0", title:`${item.name}: ${dayLabels[i]} · ${d ? Number(d[0])||0 : 0} Nachrichten · ${d ? voiceText(Number(d[1])||0) : voiceText(0)} · Details öffnen`, "aria-label":`${item.name}, ${dayLabels[i]}: ${d ? Number(d[0])||0 : 0} Nachrichten und ${d ? voiceText(Number(d[1])||0) : voiceText(0)} Voice-Zeit`, onclick:() => showActivityDetail(`${item.name || "Teammitglied"} · ${dayLabels[i]}`, [{label:"Nachrichten", value:String(d ? Number(d[0])||0 : 0)}, {label:"Voice-Zeit", value:d ? voiceText(Number(d[1])||0) : voiceText(0)}])});
-        })
-      );
-    })
+  const scoreOf = (d) => d ? (Number(d[0])||0) + (Number(d[1])||0)/60 : 0;
+  const maxScore = Math.max(1, ...heatRows.flatMap(item => (item.daily||[]).slice(-maxDays).map(scoreOf)));
+  const levelOf = (score) => {
+    if (score <= 0) return 0;
+    const ratio = Math.pow(score / maxScore, .6);
+    return ratio < .3 ? 1 : ratio < .55 ? 2 : ratio < .8 ? 3 : 4;
+  };
+  const dayTotals = Array(maxDays).fill(0);
+  const heatBody = heatRows.map((item, r) => {
+    const row = (Array.isArray(item.daily) ? item.daily : []).slice(-maxDays);
+    const offset = maxDays - row.length;
+    let rowMsgs = 0, rowVoice = 0;
+    const cells = Array.from({length:maxDays}, (_, i) => {
+      const d = row[i-offset];
+      const msgs = d ? Number(d[0])||0 : 0;
+      const vs = d ? Number(d[1])||0 : 0;
+      const score = scoreOf(d);
+      rowMsgs += msgs; rowVoice += vs; dayTotals[i] += score;
+      const level = levelOf(score);
+      const dow = dayDates[i].getDay();
+      return h("button", {type:"button", class:"viz-cell" + (dow === 0 || dow === 6 ? " is-weekend" : "") + (i === maxDays - 1 ? " is-today" : ""),
+        "data-level":String(level), "data-tip-title":`${item.name || "Teammitglied"} · ${dayWeek[i]}, ${dayLabels[i]}`,
+        "data-tip-body":`Nachrichten|${numFmt.format(msgs)}\nVoice-Zeit|${voiceText(vs)}`,
+        "aria-label":`${item.name}, ${dayLabels[i]}: ${msgs} Nachrichten und ${voiceText(vs)} Voice-Zeit`,
+        style:`--d:${Math.min(900, (r * 18) + (i * 14))}ms`,
+        onclick:() => showActivityDetail(`${item.name || "Teammitglied"} · ${dayLabels[i]}`, [{label:"Nachrichten", value:String(msgs)}, {label:"Voice-Zeit", value:voiceText(vs)}])});
+    });
+    return h("div", {class:"viz-heat-row", role:"row"},
+      h("span", {class:"viz-heat-name", title:item.name||"", role:"rowheader"}, item.name||"Unbekannt"),
+      ...cells,
+      h("span", {class:"viz-heat-sum", "data-tip-title":item.name || "Teammitglied", "data-tip-body":`Nachrichten|${numFmt.format(rowMsgs)}\nVoice-Zeit|${voiceText(rowVoice)}`, tabindex:"0"}, numFmt.format(Math.round(rowMsgs + rowVoice / 60))));
+  });
+  const activeCells = heatRows.reduce((sum, item) => sum + (item.daily||[]).slice(-maxDays).filter((d) => scoreOf(d) > 0).length, 0);
+  const heatmap = h("div", {class:"viz-heat-scroll"},
+    h("div", {class:"viz-heat", style:`--heat-days:${maxDays}`, role:"table", "aria-label":"Tägliche Teamaktivität je Person"},
+      h("div", {class:"viz-heat-row viz-heat-head", role:"row"},
+        h("span", {class:"viz-heat-name", role:"columnheader"}, "Teammitglied"),
+        ...dayLabels.map((label, i) => h("span", {class:"viz-heat-day" + (i === maxDays - 1 ? " is-today" : "") + (showLabel(i) ? "" : " is-hidden"), role:"columnheader"},
+          maxDays <= 14 ? h("b", {}, dayWeek[i]) : null, h("span", {}, maxDays <= 14 ? label.slice(0, 5) : label.slice(0, 2) + "."))),
+        h("span", {class:"viz-heat-sum-head", role:"columnheader", title:"Summe aus Nachrichten und Voice-Minuten"}, "Σ")),
+      ...heatBody
+    )
   );
+  const scaleLegend = h("div", {class:"viz-scale", "aria-hidden":"true"},
+    h("span", {}, "Weniger"), ...[0,1,2,3,4].map((l) => h("i", {class:"viz-cell-swatch", "data-level":String(l)})), h("span", {}, "Mehr"));
+
   root.append(
-    card("Nachrichten pro Tag", `Team gesamt · letzte ${maxDays} Tage`, makeBars(messages,"messages","Nachrichten pro Tag","Nachrichten"), legend("Nachrichten")),
-    card("Voice-Zeit pro Tag", `Team gesamt · letzte ${maxDays} Tage`, makeBars(voice.map(v => v/60),"voice","Voice-Minuten pro Tag","Minuten"), legend("Voice-Minuten","voice")),
-    h("article", {class:"activity-chart-card", style:"grid-column:1/-1"},
-      h("h3", {class:"activity-chart-title"}, h("span", {}, "Aktivitäts-Heatmap", h("small", {class:"activity-chart-sub"}, `Tageswerte pro Teammitglied · ${maxDays} Tage · maximal 40 Personen angezeigt`))),
+    card("Nachrichten pro Tag", `Team gesamt · letzte ${maxDays} Tage`,
+      kpi(fmtMsg(msgTotal), `Ø ${fmtMsg(msgAvg)} / Tag`, msgTotal, fmtMsg),
+      makeBars(messages,"messages","Nachrichten","Nachrichten", (v) => fmtMsg(v)), legend("Nachrichten", "", `Durchschnitt ${fmtMsg(msgAvg)} / Tag`)),
+    card("Voice-Zeit pro Tag", `Team gesamt · letzte ${maxDays} Tage`,
+      kpi(fmtVoice(voiceTotalMin), `Ø ${fmtVoice(voiceAvgMin, true)} / Tag`),
+      makeBars(voice.map(v => v/60),"voice","Voice-Minuten","Minuten", (v, short) => fmtVoice(v, short)), legend("Voice-Minuten", "voice", `Durchschnitt ${fmtVoice(voiceAvgMin, true)} / Tag`)),
+    h("article", {class:"activity-chart-card viz-card viz-card-wide", style:"grid-column:1/-1"},
+      h("header", {class:"viz-head"},
+        h("h3", {class:"activity-chart-title"}, h("span", {}, "Aktivitäts-Heatmap", h("small", {class:"activity-chart-sub"}, `Tageswerte pro Teammitglied · ${maxDays} Tage${items.length > 40 ? " · maximal 40 Personen angezeigt" : ""}`))),
+        kpi(`${numFmt.format(activeCells)}`, `aktive Tage gesamt`, activeCells, fmtMsg)),
       heatmap,
-      h("div", {class:"activity-chart-legend"}, legend("Keine Aktivität"), legend("Niedrig"), legend("Mittel"), legend("Hoch"), legend("Sehr hoch","voice"))
+      h("div", {class:"activity-chart-legend viz-legend viz-legend-split"}, scaleLegend, h("small", {}, "Wert = Nachrichten + Voice-Minuten · Σ = Summe im Zeitraum"))
     )
   );
 }
@@ -7538,8 +8081,8 @@ function renderActivity() {
   );
 
   $("#actWarn").replaceChildren(
-    diagnosticsPanel(data.diagnostics),
-    ...(data.diagnostics ? [] : (data.warnings || []).map((text) => h("p", { class: "callout warn", role: "alert" }, icon("alert"), h("span", {}, text))))
+    ...[diagnosticsPanel(data.diagnostics),
+    ...(data.diagnostics ? [] : (data.warnings || []).map((text) => h("p", { class: "callout warn", role: "alert" }, icon("alert"), h("span", {}, text))))].filter(Boolean)
   );
   renderActivityCharts(data);
 
@@ -9398,6 +9941,41 @@ function replaySectionMotion() {
   setTimeout(() => active.classList.remove('motion-refresh'), 700);
 }
 
+
+/* ---------- Zahlen in Statistik-Karten zählen sanft hoch (nur bei Änderung) ---------- */
+(function vizStatCountUp() {
+  const last = new Map();
+  const run = (el, from, to) => {
+    const start = performance.now();
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / 700);
+      el.textContent = String(Math.round(from + (to - from) * (1 - Math.pow(1 - t, 3))));
+      if (t < 1 && el.isConnected) requestAnimationFrame(tick);
+      else el.textContent = String(to);
+    };
+    requestAnimationFrame(tick);
+  };
+  const scan = (box) => {
+    box.querySelectorAll(".stat").forEach((card) => {
+      if (card.dataset.vizCount) return;
+      card.dataset.vizCount = "1";
+      const strong = card.querySelector("strong");
+      const label = card.querySelector("div > span");
+      if (!strong || !/^\d+$/.test(strong.textContent.trim())) return;
+      const to = Number(strong.textContent.trim());
+      const key = (label ? label.textContent : "") + "|" + (box.id || "");
+      const from = last.has(key) ? last.get(key) : 0;
+      last.set(key, to);
+      if (from === to || VIZ_REDUCED()) return;
+      strong.textContent = String(from);
+      run(strong, from, to);
+    });
+  };
+  document.querySelectorAll(".stats").forEach((box) => {
+    scan(box);
+    new MutationObserver(() => scan(box)).observe(box, { childList: true });
+  });
+})();
 </script>
 </body>
 </html>
