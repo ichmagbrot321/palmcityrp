@@ -5842,6 +5842,116 @@ html body .row.wide-actions .actions { justify-content: flex-end; }
 }
 </style>
 
+<style id="td-motion-v8">
+/* ============================================================
+   MOTION v8 · durchgängige, ruhige Animationen
+   Eintritt nur beim Tab-Wechsel (kein Flackern bei Live-Updates)
+   ============================================================ */
+@keyframes m-rise { from { opacity: 0; transform: translateY(14px) scale(.985); } to { opacity: 1; transform: none; } }
+@keyframes m-wipe { from { clip-path: inset(0 100% 0 0 round 999px); } to { clip-path: inset(0 0 0 0 round 999px); } }
+@keyframes m-title { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes m-ripple { from { transform: scale(0); opacity: .45; } to { transform: scale(1); opacity: 0; } }
+@keyframes m-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes m-slide { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
+
+/* Dauer-Wiederholung der alten Listen-Animation aus (verursachte Flackern bei Updates) */
+html body .list > .row, html body .list > .empty { animation: none; }
+
+/* Gestaffeltes Einblenden beim Öffnen eines Tabs */
+section[data-enter] :is(.stats,.team-grid,.list,.activity-charts,.chips,.application-stats,.probation-info-grid) > :nth-child(1) { --k: 0; }
+section[data-enter] :is(.stats,.team-grid,.list,.activity-charts,.chips,.application-stats,.probation-info-grid) > :nth-child(2) { --k: 1; }
+section[data-enter] :is(.stats,.team-grid,.list,.activity-charts,.chips,.application-stats,.probation-info-grid) > :nth-child(3) { --k: 2; }
+section[data-enter] :is(.stats,.team-grid,.list,.activity-charts,.chips,.application-stats,.probation-info-grid) > :nth-child(4) { --k: 3; }
+section[data-enter] :is(.stats,.team-grid,.list,.activity-charts,.chips,.application-stats,.probation-info-grid) > :nth-child(5) { --k: 4; }
+section[data-enter] :is(.stats,.team-grid,.list,.activity-charts,.chips,.application-stats,.probation-info-grid) > :nth-child(6) { --k: 5; }
+section[data-enter] :is(.stats,.team-grid,.list,.activity-charts,.chips,.application-stats,.probation-info-grid) > :nth-child(7) { --k: 6; }
+section[data-enter] :is(.stats,.team-grid,.list,.activity-charts,.chips,.application-stats,.probation-info-grid) > :nth-child(8) { --k: 7; }
+section[data-enter] :is(.stats,.team-grid,.list,.activity-charts,.chips,.application-stats,.probation-info-grid) > :nth-child(9) { --k: 8; }
+section[data-enter] :is(.stats,.team-grid,.list,.activity-charts,.chips,.application-stats,.probation-info-grid) > :nth-child(10) { --k: 9; }
+section[data-enter] :is(.stats,.team-grid,.list,.activity-charts,.chips,.application-stats,.probation-info-grid) > :nth-child(11) { --k: 10; }
+section[data-enter] :is(.stats,.team-grid,.list,.activity-charts,.chips,.application-stats,.probation-info-grid) > :nth-child(12) { --k: 11; }
+
+section[data-enter] :is(.stats > .stat, .team-grid > .team-card, .list > .row, .list > .empty, .activity-charts > .activity-chart-card, .application-stats > *, .applications-hero, .applications-workspace, .hero, .shift-total, .filters, .chips > *, .subhead, .probation-info-grid > *, #p-rules > .card, #p-settings > .card, #p-settings > *) {
+  animation: m-rise .6s var(--p-ease, cubic-bezier(.2,.75,.25,1)) backwards; animation-delay: calc(var(--k, 0) * 55ms);
+}
+section[data-enter] :is(.probation-progress > span, .meter i, .shift-bar > span, .goal .meter i) { animation: m-wipe 1s var(--p-ease, cubic-bezier(.2,.75,.25,1)) .25s backwards; }
+section[data-enter] .spark span::after { animation: viz-rise .6s var(--p-ease, cubic-bezier(.2,.75,.25,1)) backwards; }
+section[data-enter] .spark span:nth-child(1)::after { animation-delay: 28ms; }
+section[data-enter] .spark span:nth-child(2)::after { animation-delay: 56ms; }
+section[data-enter] .spark span:nth-child(3)::after { animation-delay: 84ms; }
+section[data-enter] .spark span:nth-child(4)::after { animation-delay: 112ms; }
+section[data-enter] .spark span:nth-child(5)::after { animation-delay: 140ms; }
+section[data-enter] .spark span:nth-child(6)::after { animation-delay: 168ms; }
+section[data-enter] .spark span:nth-child(7)::after { animation-delay: 196ms; }
+section[data-enter] .spark span:nth-child(8)::after { animation-delay: 224ms; }
+section[data-enter] .spark span:nth-child(9)::after { animation-delay: 252ms; }
+section[data-enter] .spark span:nth-child(10)::after { animation-delay: 280ms; }
+section[data-enter] .spark span:nth-child(11)::after { animation-delay: 308ms; }
+section[data-enter] .spark span:nth-child(12)::after { animation-delay: 336ms; }
+section[data-enter] .spark span:nth-child(13)::after { animation-delay: 364ms; }
+section[data-enter] .spark span:nth-child(14)::after { animation-delay: 392ms; }
+section[data-enter] .spark span:nth-child(15)::after { animation-delay: 420ms; }
+section[data-enter] .spark span:nth-child(16)::after { animation-delay: 448ms; }
+section[data-enter] .spark span:nth-child(17)::after { animation-delay: 476ms; }
+section[data-enter] .spark span:nth-child(18)::after { animation-delay: 504ms; }
+section[data-enter] .spark span:nth-child(19)::after { animation-delay: 532ms; }
+section[data-enter] .spark span:nth-child(20)::after { animation-delay: 560ms; }
+section[data-enter] .spark span:nth-child(21)::after { animation-delay: 588ms; }
+section[data-enter] .spark span:nth-child(22)::after { animation-delay: 616ms; }
+section[data-enter] .spark span:nth-child(23)::after { animation-delay: 644ms; }
+section[data-enter] .spark span:nth-child(24)::after { animation-delay: 672ms; }
+section[data-enter] .spark span:nth-child(25)::after { animation-delay: 700ms; }
+section[data-enter] .spark span:nth-child(26)::after { animation-delay: 728ms; }
+section[data-enter] .spark span:nth-child(27)::after { animation-delay: 756ms; }
+section[data-enter] .spark span:nth-child(28)::after { animation-delay: 784ms; }
+section[data-enter] .spark span:nth-child(29)::after { animation-delay: 812ms; }
+section[data-enter] .spark span:nth-child(30)::after { animation-delay: 840ms; }
+
+body[data-entering] #pageTitle { animation: m-title .5s var(--p-ease, cubic-bezier(.2,.75,.25,1)) both; }
+body[data-entering] #pageSub { animation: m-title .5s var(--p-ease, cubic-bezier(.2,.75,.25,1)) .07s both; }
+
+/* Button-Ripple */
+html body .btn { position: relative; overflow: hidden; }
+.p-ripple { position: absolute; border-radius: 50%; pointer-events: none; background: radial-gradient(circle, rgba(255,255,255,.55), rgba(255,255,255,0) 65%); animation: m-ripple .6s ease-out forwards; }
+html[data-theme="light"] .btn:not(.primary) .p-ripple { background: radial-gradient(circle, color-mix(in srgb, var(--p-brand) 35%, transparent), transparent 65%); }
+
+/* Dialog: Inhalte folgen nacheinander */
+html body .modal > * { animation: m-rise .45s var(--p-ease, cubic-bezier(.2,.75,.25,1)) backwards; }
+html body .modal > :nth-child(1) { animation-delay: 60ms; }
+html body .modal > :nth-child(2) { animation-delay: 100ms; }
+html body .modal > :nth-child(3) { animation-delay: 140ms; }
+html body .modal > :nth-child(4) { animation-delay: 180ms; }
+html body .modal > :nth-child(5) { animation-delay: 220ms; }
+html body .modal > :nth-child(6) { animation-delay: 260ms; }
+
+/* Login */
+#login .login-card { animation: p-pop .7s var(--p-ease, cubic-bezier(.2,.75,.25,1)) both; }
+#login .login-card .logo { animation: m-float 5.5s ease-in-out infinite; }
+#login .login-card > * { animation: m-rise .6s var(--p-ease, cubic-bezier(.2,.75,.25,1)) backwards; }
+#login .login-card > :nth-child(2) { animation-delay: .08s; }
+#login .login-card > :nth-child(3) { animation-delay: .16s; }
+#login .login-card > :nth-child(4) { animation-delay: .24s; }
+#login .login-card > :nth-child(5) { animation-delay: .32s; }
+
+/* Weicher Theme-Wechsel */
+html.theme-anim *, html.theme-anim *::before, html.theme-anim *::after {
+  transition: background-color .4s ease, color .4s ease, border-color .4s ease, box-shadow .4s ease, fill .4s ease, stroke .4s ease !important;
+}
+
+/* Mikro-Details */
+html body .who > img, html body .who > .avatar, html body .me img { transition: transform .25s var(--p-ease, cubic-bezier(.2,.75,.25,1)), box-shadow .25s ease; }
+html body .row:hover .who > img, html body .team-card:hover .who > img { transform: scale(1.06); }
+html body .badge { transition: transform .2s var(--p-ease, cubic-bezier(.2,.75,.25,1)), background-color .2s ease; }
+html body .row:hover .badge, html body .team-card:hover .badge { transform: translateY(-1px); }
+html body .live i, html body .live-dot { animation-duration: 2s; }
+html body .toast { transform-origin: right center; }
+html body .skeleton { border-radius: 14px; }
+
+@media (prefers-reduced-motion: reduce) {
+  section[data-enter] *, body[data-entering] #pageTitle, body[data-entering] #pageSub, html body .modal > *, #login .login-card, #login .login-card > *, #login .login-card .logo, .p-ripple { animation: none !important; }
+}
+</style>
+
 </head>
 <body>
 
@@ -10024,6 +10134,53 @@ function replaySectionMotion() {
     scan(box);
     new MutationObserver(() => scan(box)).observe(box, { childList: true });
   });
+})();
+
+/* ---------- Motion: Tab-Eintritt, Button-Ripple, Theme-Übergang ---------- */
+(function tdMotion() {
+  const reduced = () => window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const enter = (section) => {
+    if (!section || reduced()) return;
+    section.removeAttribute("data-enter");
+    void section.offsetWidth;
+    section.setAttribute("data-enter", "1");
+    clearTimeout(section._tdEnter);
+    section._tdEnter = setTimeout(() => section.removeAttribute("data-enter"), 1500);
+    document.body.dataset.entering = "1";
+    clearTimeout(document.body._tdEnter);
+    document.body._tdEnter = setTimeout(() => { delete document.body.dataset.entering; }, 700);
+  };
+
+  const sections = document.querySelectorAll("main > section");
+  const observer = new MutationObserver((records) => {
+    for (const record of records) {
+      if (record.target.hidden) continue;
+      if (record.target.id === "app") enter(document.querySelector("main > section:not([hidden])"));
+      else enter(record.target);
+    }
+  });
+  sections.forEach((section) => observer.observe(section, { attributes: true, attributeFilter: ["hidden"] }));
+  const app = document.getElementById("app");
+  if (app) observer.observe(app, { attributes: true, attributeFilter: ["hidden"] });
+
+  document.addEventListener("pointerdown", (event) => {
+    const button = event.target.closest && event.target.closest(".btn");
+    if (!button || button.disabled || reduced()) return;
+    const rect = button.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height) * 2;
+    const ripple = document.createElement("span");
+    ripple.className = "p-ripple";
+    ripple.style.cssText = `width:${size}px;height:${size}px;left:${event.clientX - rect.left - size / 2}px;top:${event.clientY - rect.top - size / 2}px`;
+    button.append(ripple);
+    setTimeout(() => ripple.remove(), 650);
+  }, { passive: true });
+
+  const toggle = document.getElementById("themeToggle");
+  if (toggle) toggle.addEventListener("click", () => {
+    document.documentElement.classList.add("theme-anim");
+    setTimeout(() => document.documentElement.classList.remove("theme-anim"), 500);
+  }, true);
 })();
 </script>
 </body>
