@@ -28,7 +28,7 @@ function normalizeBotUrl(raw) {
 }
 
 const BOT_API_URL = normalizeBotUrl(
-  process.env.TEAM_API_URL || "http://server.infynix.de:40002"
+  process.env.TEAM_API_URL || "http://server.infynix.de:40377"
 );
 
 const SITE_URL = "https://palmcityrp.vercel.app";
