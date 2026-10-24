@@ -31,9 +31,9 @@ const BOT_API_URL = normalizeBotUrl(
   process.env.TEAM_API_URL || "http://server.infynix.de:40377"
 );
 
-const SITE_URL = "https://palmcityrp.vercel.app";
+const SITE_URL = "https://palm-city-rp.vercel.app";
 const OAUTH_REDIRECT_URI =
-  "https://notruf-craftopia.vercel.app/api/team-dashboard?action=callback";
+  "https://palm-city-rp.vercel.app/api/team-dashboard?action=callback";
 
 const DASHBOARD_PATH = "/team-dashboard";
 const SESSION_COOKIE = "td_session";
