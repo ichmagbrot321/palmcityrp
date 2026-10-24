@@ -28,7 +28,7 @@ function normalizeBotUrl(raw) {
 }
 
 const BOT_API_URL = normalizeBotUrl(
-  process.env.TEAM_API_URL || "http://server.infynix.de:40002"
+  process.env.TEAM_API_URL || "http://server.infynix.de:40377"
 );
 
 const SITE_URL = "https://palmcityrp.vercel.app";
@@ -160,8 +160,8 @@ function getSession(req) {
 // Kritische Berechtigungsprüfung: Der Cookie allein reicht niemals aus.
 // Discord-Mitgliedschaft und zwingende Zugriffsrolle werden bei jeder Anfrage
 // live über die Bot-API geprüft. Bei API-Ausfall wird der Zugriff verweigert.
-const ACCESS_GUILD_ID = process.env.DISCORD_GUILD_ID || "1555883394301173822";
-const ACCESS_ROLE_ID = "1555884009496514570";
+const ACCESS_GUILD_ID = process.env.DISCORD_GUILD_ID || "1548652649866596473";
+const ACCESS_ROLE_ID = "1556719122648408197";
 const ACCESS_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 async function verifyDashboardAccess(session) {
   if (!session?.id || !ACCESS_BOT_TOKEN) return false;
@@ -692,7 +692,7 @@ async function checkBotHealth(session) {
 // Team-Dashboard-API darunter zu verändern.
 
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
-const PUBLIC_TEAM_GUILD_ID = "1555883394301173822";
+const PUBLIC_TEAM_GUILD_ID = "1548652649866596473";
 const PUBLIC_TEAM_ROLE_ID = "1551649116675768414";
 
 // 60 s Cache: schont das Discord-Rate-Limit und beschleunigt die Website.
