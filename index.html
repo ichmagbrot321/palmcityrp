@@ -4,10 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#050a14">
-<meta name="description" content="Notruf Craftopia – neuer Notruf Hamburg RP Server. Baue mit uns eine Stadt, in der Entscheidungen Geschichten schreiben.">
-<link rel="canonical" href="https://notrufcraftopia.vercel.app/">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎃%3C/text%3E%3C/svg%3E">
-<title>Notruf Craftopia — Deine Stadt. Deine Geschichte.</title>
+<meta name="description" content="Palm City RP – neuer Notruf Hamburg RP Server. Baue mit uns eine Stadt, in der Entscheidungen Geschichten schreiben.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🌴%3C/text%3E%3C/svg%3E">
+<title>Palm City RP — Deine Stadt. Deine Entscheidungen.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Inter:wght@400;500;600;700&display=swap">
 <style>
@@ -243,128 +242,76 @@ dialog[open]{animation:in .25s var(--ease)}
   html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition-duration:.01ms!important}
 }
 </style>
-<style id="halloween-extreme-css">
-/* ================= HALLOWEEN SPECIAL ================= */
-body.halloween{background:#07030b!important;overflow-x:hidden}
-body.halloween::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9997;background:radial-gradient(circle at 50% 15%,rgba(130,40,255,.16),transparent 28%),radial-gradient(circle at 10% 80%,rgba(255,92,0,.12),transparent 25%),radial-gradient(circle at 90% 70%,rgba(255,55,0,.10),transparent 24%);mix-blend-mode:screen}
-.halloween-banner{position:relative;z-index:10002!important;background:linear-gradient(90deg,#120016,#2a0710,#120016)!important;border-bottom:1px solid rgba(255,112,0,.55)!important;box-shadow:0 0 30px rgba(255,72,0,.2),inset 0 -1px 0 rgba(255,145,0,.25)!important;color:#ffd7a3!important;text-shadow:0 0 10px rgba(255,92,0,.65)}
-.halloween-banner::before{content:"🕷️  🦇  🎃  🕸️  👻  🕷️  🦇  🎃  🕸️";display:block;position:absolute;left:0;right:0;top:-25px;opacity:.7;font-size:18px;letter-spacing:12px;white-space:nowrap;overflow:hidden;pointer-events:none}
-.halloween-decor{position:fixed;inset:0;pointer-events:none;z-index:9998;overflow:hidden}
-.halloween-decor span{position:absolute;filter:drop-shadow(0 0 10px rgba(255,100,0,.5));user-select:none}
-.bat1{top:13%;left:4%;font-size:42px;animation:batFly 9s ease-in-out infinite}
-.bat2{top:22%;right:7%;font-size:30px;animation:batFly 12s ease-in-out infinite reverse}
-.pumpkin1{bottom:5%;left:2%;font-size:65px;animation:pumpGlow 2.8s ease-in-out infinite}
-.pumpkin2{bottom:7%;right:3%;font-size:52px;animation:pumpGlow 3.5s ease-in-out infinite reverse}
-@keyframes batFly{0%,100%{transform:translate(0,0) rotate(-5deg)}50%{transform:translate(90px,35px) rotate(7deg)}}
-@keyframes pumpGlow{0%,100%{filter:drop-shadow(0 0 5px rgba(255,85,0,.35))}50%{filter:drop-shadow(0 0 25px rgba(255,85,0,.9))}}
-/* Moon */
-.halloween-decor::before{content:"";position:absolute;width:190px;height:190px;border-radius:50%;right:7%;top:115px;background:radial-gradient(circle at 35% 30%,#fff0b0 0 7%,transparent 8%),radial-gradient(circle at 65% 60%,rgba(120,55,20,.28) 0 8%,transparent 9%),radial-gradient(circle at 45% 75%,rgba(120,55,20,.18) 0 5%,transparent 6%),#ffb84d;box-shadow:0 0 45px rgba(255,145,45,.6),0 0 100px rgba(255,82,0,.25);opacity:.72}
-/* Fog layers */
-.halloween-decor::after{content:"";position:absolute;left:-10%;right:-10%;bottom:-40px;height:30%;background:radial-gradient(ellipse at 20% 50%,rgba(180,180,220,.08),transparent 55%),radial-gradient(ellipse at 70% 40%,rgba(255,100,0,.08),transparent 55%);filter:blur(18px);animation:fogMove 14s ease-in-out infinite alternate}
-@keyframes fogMove{from{transform:translateX(-3%)}to{transform:translateX(5%)}}
-/* Webs around the page */
-.halloween-web{position:fixed;z-index:10000;pointer-events:none;color:rgba(240,220,255,.55);font-size:100px;line-height:1;filter:drop-shadow(0 0 8px rgba(255,255,255,.15))}
-.halloween-web.tl{top:65px;left:-10px}.halloween-web.tr{top:65px;right:-10px;transform:scaleX(-1)}
-.halloween-web.bl{bottom:0;left:-12px;transform:rotate(180deg)}.halloween-web.br{bottom:0;right:-12px;transform:rotate(90deg)}
-/* Creepy hanging strings */
-.hanging-spider{position:fixed;z-index:10001;top:0;pointer-events:none;font-size:27px;animation:spiderSway 4s ease-in-out infinite}
-.hanging-spider::before{content:"";position:absolute;left:50%;bottom:100%;width:1px;height:150px;background:rgba(255,255,255,.3)}
-.spider-a{left:16%;animation-delay:-1s}.spider-b{right:18%;top:70px;animation-delay:-2s}.spider-c{left:72%;top:0;font-size:21px;animation-delay:-3s}
-@keyframes spiderSway{0%,100%{transform:translateX(0) rotate(-4deg)}50%{transform:translateX(18px) rotate(5deg)}}
-/* Tombstones */
-.tombstone{position:fixed;bottom:-5px;z-index:9999;pointer-events:none;font-size:58px;opacity:.72;filter:drop-shadow(0 0 12px rgba(80,0,100,.8))}.t1{left:11%}.t2{right:12%;font-size:48px}
-/* Hero horror treatment */
-body.halloween .hero{position:relative}
-body.halloween .hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 45%,transparent 0 32%,rgba(0,0,0,.32) 75%),linear-gradient(180deg,rgba(12,0,18,.08),rgba(0,0,0,.35));z-index:0}
-body.halloween .hero-inner{position:relative;z-index:2}
-body.halloween .hero-card{box-shadow:0 0 0 1px rgba(255,95,0,.18),0 0 40px rgba(255,65,0,.16),0 25px 80px rgba(0,0,0,.5)!important}
-body.halloween .hero-card::after{content:"🕸️";position:absolute;right:-15px;top:-20px;font-size:75px;opacity:.7;pointer-events:none;filter:drop-shadow(0 0 5px rgba(255,255,255,.2))}
-/* Halloween cards */
-body.halloween .mission-card,body.halloween .feature,body.halloween .team-card,body.halloween .partner-card,body.halloween .discord-box{border-color:rgba(255,105,0,.18)!important;box-shadow:0 0 25px rgba(255,65,0,.05)}
-body.halloween .mission-card:hover,body.halloween .feature:hover,body.halloween .team-card:hover,body.halloween .partner-card:hover{border-color:rgba(255,105,0,.4)!important;box-shadow:0 0 35px rgba(255,65,0,.11)}
-/* Music control */
-#halloweenMusic{position:fixed;right:18px;bottom:18px;z-index:10020;border:1px solid rgba(255,111,0,.45);background:rgba(12,5,17,.88);color:#ffd9b0;border-radius:999px;padding:11px 16px;font:600 12px/1 system-ui,sans-serif;letter-spacing:.4px;backdrop-filter:blur(10px);box-shadow:0 0 25px rgba(255,70,0,.15);cursor:pointer;transition:.2s}
-#halloweenMusic:hover{transform:translateY(-2px);border-color:rgba(255,140,0,.8);box-shadow:0 0 30px rgba(255,70,0,.3)}
-#halloweenMusic .music-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#777;margin-right:8px;box-shadow:0 0 0 transparent;vertical-align:middle}
-#halloweenMusic.on .music-dot{background:#ff7a18;box-shadow:0 0 12px #ff7a18;animation:musicPulse 1.4s infinite}
-@keyframes musicPulse{50%{opacity:.35;transform:scale(.75)}}
-@media(max-width:700px){.halloween-decor::before{width:100px;height:100px;right:4%;top:95px}.halloween-web{font-size:65px}.tombstone{font-size:38px}.hanging-spider{display:none}#halloweenMusic{right:10px;bottom:10px}.pumpkin1{font-size:45px}.pumpkin2{font-size:38px}}
-@media(prefers-reduced-motion:reduce){.bat1,.bat2,.pumpkin1,.pumpkin2,.halloween-decor::after,.hanging-spider,#halloweenMusic .music-dot{animation:none!important}}
-</style>
 <script>if('IntersectionObserver'in window&&!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('js')</script>
 <style id="design-upgrade-css">
 /* ================= DESIGN UPGRADE: Glas, Tiefe, Bewegung ================= */
 @keyframes in{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
-:root{--grad:linear-gradient(135deg,#f76707 0%,#d6336c 60%,#9c36b5 100%);--ring:inset 0 1px 0 rgba(255,255,255,.07);--out:cubic-bezier(.16,1,.3,1)}
-body.halloween{--color-bg:#07030b;--color-surface:#120a1c;--color-surface-2:#1a1028;--color-surface-hover:#241636;--color-border:rgba(255,160,90,.14);--color-border-strong:rgba(255,160,90,.3);--color-primary:#e8590c;--color-primary-hover:#f76707;--color-primary-soft:#ffb877;--color-navy:#2a0f3a;--color-focus:#ffb877;--color-text-soft:#cdbfdc;--color-muted:#a99bbc}
-::selection{background:rgba(247,103,7,.35);color:#fff}
-html{scrollbar-color:#3a2250 transparent;scrollbar-width:thin}
+:root{--grad:linear-gradient(120deg,#1f6bff 0%,#38b6ff 100%);--ring:inset 0 1px 0 rgba(255,255,255,.07);--out:cubic-bezier(.16,1,.3,1)}
+::selection{background:rgba(45,140,255,.35);color:#fff}
+html{scrollbar-color:#1d3a6e transparent;scrollbar-width:thin}
 body{text-rendering:optimizeLegibility}
 .noise{position:fixed;inset:0;z-index:9996;pointer-events:none;opacity:.07;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
-#scrollbar{position:fixed;left:0;top:0;height:3px;width:100%;transform-origin:0 50%;transform:scaleX(0);background:var(--grad);z-index:10030;pointer-events:none;box-shadow:0 0 12px rgba(247,103,7,.6)}
+#scrollbar{position:fixed;left:0;top:0;height:3px;width:100%;transform-origin:0 50%;transform:scaleX(0);background:var(--grad);z-index:10030;pointer-events:none;box-shadow:0 0 12px rgba(45,140,255,.6)}
 
 /* Navigation */
-.nav{background:rgba(10,4,16,.7);backdrop-filter:saturate(1.4) blur(18px);-webkit-backdrop-filter:saturate(1.4) blur(18px);box-shadow:0 10px 30px rgba(0,0,0,.35)}
-.brand img{box-shadow:0 0 0 3px rgba(247,103,7,.15),0 0 18px rgba(247,103,7,.35)}
+.nav{background:rgba(5,10,20,.78);backdrop-filter:saturate(1.4) blur(18px);-webkit-backdrop-filter:saturate(1.4) blur(18px);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.brand img{box-shadow:0 0 0 3px rgba(45,140,255,.15),0 0 18px rgba(45,140,255,.35)}
 .links a:not(.btn){position:relative}
 .links a:not(.btn)::after{content:"";position:absolute;left:var(--s3);right:var(--s3);bottom:4px;height:2px;border-radius:2px;background:var(--grad);transform:scaleX(0);transition:transform .25s var(--out)}
 .links a:not(.btn):hover::after,.links a.active::after{transform:scaleX(1)}
-.links a.active{background:rgba(247,103,7,.1)}
+.links a.active{background:rgba(45,140,255,.1)}
 
 /* Buttons */
 .btn{position:relative;overflow:hidden;isolation:isolate;transition:transform .2s var(--out),background .2s,border-color .2s,box-shadow .25s,filter .2s}
 .btn:active{transform:scale(.97)}
-.btn-primary{background:var(--grad);border-color:transparent;box-shadow:0 8px 24px -6px rgba(247,103,7,.55),var(--ring)}
-.btn-primary:hover{background:var(--grad);border-color:transparent;filter:brightness(1.08);box-shadow:0 14px 34px -8px rgba(247,103,7,.7)}
+.btn-primary{background:var(--grad);border-color:transparent;box-shadow:0 8px 24px -6px rgba(45,140,255,.55),var(--ring)}
+.btn-primary:hover{background:var(--grad);border-color:transparent;filter:brightness(1.08);box-shadow:0 14px 34px -8px rgba(45,140,255,.7)}
 .btn-primary::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);transform:translateX(-120%);transition:transform .7s var(--out)}
 .btn-primary:hover::after{transform:translateX(120%)}
-.siren-row .btn{border-color:rgba(255,160,90,.5);background:rgba(247,103,7,.14)}
+.siren-row .btn{border-color:rgba(110,170,255,.5);background:rgba(45,140,255,.14)}
 
 /* Hero */
-body.halloween .hero{background:radial-gradient(70% 55% at 50% 0%,rgba(124,58,237,.35),transparent 70%),radial-gradient(50% 40% at 85% 20%,rgba(247,103,7,.18),transparent 70%),var(--color-bg)}
-h1 span{-webkit-text-stroke:0;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 28px rgba(247,103,7,.35))}
+h1 span{-webkit-text-stroke:0;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 28px rgba(45,140,255,.35))}
 .pill{backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:var(--ring),0 6px 20px -8px rgba(0,0,0,.6)}
 .hero .v{filter:drop-shadow(0 16px 20px rgba(0,0,0,.55));transition:transform .35s var(--out)}
 .hero .v:hover{transform:translateY(-6px) scale(1.05)}
-.strip{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.01)),rgba(14,6,22,.7);box-shadow:var(--ring),0 24px 60px -24px rgba(0,0,0,.8)}
-.strip dd{background:linear-gradient(180deg,#fff,#ffcfa3);-webkit-background-clip:text;background-clip:text;color:transparent}
+.strip{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.01)),rgba(8,16,32,.78);box-shadow:var(--ring),0 24px 60px -24px rgba(0,0,0,.8)}
+.strip dd{background:linear-gradient(180deg,#fff,#bcd9ff);-webkit-background-clip:text;background-clip:text;color:transparent}
 
 /* Karten: Glas, Innenlicht, Spotlight */
 .panel:not(.sum),.value,.q,.member{position:relative}
 .panel,.value,.q,.member{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015) 40%),var(--color-surface);box-shadow:var(--ring),0 1px 2px rgba(0,0,0,.4),0 18px 40px -22px rgba(0,0,0,.8);transition:transform .3s var(--out),border-color .25s,box-shadow .3s,background .25s}
-.q.main{background:var(--grad);border-color:transparent;box-shadow:0 14px 34px -12px rgba(247,103,7,.65)}
+.q.main{background:var(--grad);border-color:transparent;box-shadow:0 14px 34px -12px rgba(45,140,255,.65)}
 .q.main:hover{background:var(--grad);filter:brightness(1.08)}
-.panel::before,.value::before,.q::before,.member::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(255,150,70,.14),transparent 55%)}
+.panel::before,.value::before,.q::before,.member::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(110,170,255,.14),transparent 55%)}
 .panel:hover::before,.value:hover::before,.q:hover::before,.member:hover::before{opacity:1}
 .panel:hover,.value:hover,.member:hover{border-color:var(--color-border-strong)}
 .value:hover,.member:hover{transform:translateY(-3px)}
-.value svg,.q svg{background:linear-gradient(135deg,rgba(247,103,7,.25),rgba(156,54,181,.18));box-shadow:inset 0 0 0 1px rgba(255,160,90,.2);color:var(--color-primary-soft)}
+.value svg,.q svg{background:linear-gradient(135deg,rgba(45,140,255,.25),rgba(124,58,237,.18));box-shadow:inset 0 0 0 1px rgba(110,170,255,.2);color:var(--color-primary-soft)}
 .q.main svg{background:rgba(255,255,255,.2);color:#fff}
-.avatar{box-shadow:0 0 0 2px rgba(255,160,90,.25)}
+.avatar{box-shadow:0 0 0 2px rgba(110,170,255,.25)}
 
 /* Typografie */
-h2{background:linear-gradient(180deg,#fff 30%,#c9b6e0);-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{background:linear-gradient(180deg,#fff 30%,#9fb3d4);-webkit-background-clip:text;background-clip:text;color:transparent}
 .kicker{display:inline-flex;align-items:center;gap:10px;text-transform:uppercase;letter-spacing:.14em;font-size:.75rem}
 .kicker::before{content:"";width:28px;height:2px;border-radius:2px;background:var(--grad)}
-.statement .wrap{border-image:linear-gradient(180deg,#f76707,#9c36b5) 1}
+.statement .wrap{border-image:linear-gradient(180deg,#2d8cff,#7c3aed) 1}
 .statement span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
 .cols .col{transition:background .3s,padding .3s var(--out)}
-@media(hover:hover){.cols .col:hover{background:linear-gradient(90deg,rgba(247,103,7,.07),transparent 70%);padding-left:var(--s4)}}
+@media(hover:hover){.cols .col:hover{background:linear-gradient(90deg,rgba(45,140,255,.07),transparent 70%);padding-left:var(--s4)}}
 
 /* Formulare */
 input,select,textarea{background:rgba(255,255,255,.035)}
-input:focus,select:focus,textarea:focus{border-color:var(--color-primary-hover);box-shadow:0 0 0 4px rgba(247,103,7,.2)}
-select option{background:#120a1c;color:var(--color-text)}
+input:focus,select:focus,textarea:focus{border-color:var(--color-primary-hover);box-shadow:0 0 0 4px rgba(45,140,255,.2)}
+select option{background:#0b1424;color:var(--color-text)}
 .stars label:hover{transform:scale(1.15)}
 .bar i::after{background:var(--grad)}
-.tag{background:rgba(247,103,7,.12)}
-.tabs .on{background:rgba(247,103,7,.12)}
+.tag{background:rgba(45,140,255,.12)}
+.tabs .on{background:rgba(45,140,255,.12)}
 
 /* CTA, Dialog, Footer, Musik-Button */
-body.halloween .cta .dark{border-color:rgba(247,103,7,.45);background:radial-gradient(90% 120% at 0% 0%,rgba(247,103,7,.34),transparent 60%),radial-gradient(70% 100% at 100% 100%,rgba(156,54,181,.3),transparent 60%),var(--color-surface)}
-dialog::backdrop{background:rgba(5,1,10,.75);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+dialog::backdrop{background:rgba(2,5,12,.78);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 footer{background:linear-gradient(180deg,rgba(255,255,255,.02),transparent),var(--color-surface)}
-#halloweenMusic{background:rgba(18,8,28,.8);box-shadow:var(--ring),0 10px 30px -8px rgba(0,0,0,.7),0 0 24px rgba(247,103,7,.18)}
 
 /* Scroll-Reveal (nur mit JS) */
 .js .reveal{opacity:0;transform:translateY(28px);filter:blur(6px);transition:opacity .8s var(--out),transform .8s var(--out),filter .8s var(--out);transition-delay:calc(var(--i,0)*80ms)}
@@ -373,33 +320,26 @@ footer{background:linear-gradient(180deg,rgba(255,255,255,.02),transparent),var(
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@500;600&display=swap">
 <style id="design-v2-css">
 /* ===== DESIGN V2: Zinc + Amber/Coral, asymmetrisch, echtes App-Gefühl ===== */
-:root{--grad:linear-gradient(120deg,#ffb020 0%,#ff6a3d 100%);--mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
-body.halloween{--color-bg:#09090b;--color-surface:#111114;--color-surface-2:#18181c;--color-surface-hover:#212127;--color-border:rgba(255,255,255,.08);--color-border-strong:rgba(255,255,255,.16);--color-text:#fafafa;--color-text-soft:#c6c6ce;--color-muted:#92929c;--color-primary:#ff6a3d;--color-primary-hover:#ff7f55;--color-primary-soft:#ffc15e;--color-navy:#1a0b02;--color-focus:#ffc15e;--color-success:#b6f35c}
-body.halloween{background:#09090b!important}
-body.halloween::before{background:radial-gradient(circle at 50% 15%,rgba(255,176,32,.08),transparent 28%),radial-gradient(circle at 10% 80%,rgba(255,106,61,.1),transparent 25%),radial-gradient(circle at 90% 70%,rgba(255,106,61,.08),transparent 24%)}
-.halloween-banner{background:linear-gradient(90deg,#0c0a09,#1f1308,#0c0a09)!important}
-::selection{background:rgba(255,176,32,.35)}
-.nav{background:rgba(9,9,11,.72)}
-body.halloween .hero{background:radial-gradient(60% 50% at 12% 0%,rgba(255,176,32,.16),transparent 70%),radial-gradient(45% 40% at 90% 15%,rgba(255,106,61,.12),transparent 70%),var(--color-bg)}
-body.halloween .cta .dark{border-color:rgba(255,176,32,.35);background:radial-gradient(90% 120% at 0% 0%,rgba(255,176,32,.22),transparent 60%),radial-gradient(70% 100% at 100% 100%,rgba(255,106,61,.2),transparent 60%),var(--color-surface)}
+:root{--grad:linear-gradient(120deg,#1f6bff 0%,#38b6ff 100%);--mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+::selection{background:rgba(56,170,255,.35)}
+.nav{background:rgba(5,10,20,.78)}
 
 /* Buttons & Akzente (dunkle Schrift auf Amber/Coral) */
-.btn-primary{color:#1a0b02;box-shadow:0 8px 24px -8px rgba(255,140,40,.55),var(--ring)}
-.btn-primary:hover{box-shadow:0 14px 34px -10px rgba(255,140,40,.7)}
-.q.main{color:#1a0b02;box-shadow:0 14px 34px -14px rgba(255,140,40,.6)}
-.q.main span{color:rgba(26,11,2,.72)}
-.q.main svg{background:rgba(26,11,2,.14);color:#1a0b02}
-h1 span{filter:drop-shadow(0 0 28px rgba(255,150,40,.3))}
+.btn-primary{color:#ffffff;box-shadow:0 8px 24px -8px rgba(45,140,255,.55),var(--ring)}
+.btn-primary:hover{box-shadow:0 14px 34px -10px rgba(45,140,255,.7)}
+.q.main{color:#ffffff;box-shadow:0 14px 34px -14px rgba(45,140,255,.6)}
+.q.main span{color:rgba(255,255,255,.82)}
+.q.main svg{background:rgba(255,255,255,.2);color:#ffffff}
+h1 span{filter:drop-shadow(0 0 28px rgba(45,140,255,.3))}
 h2{background:linear-gradient(180deg,#fafafa 35%,#a1a1aa);-webkit-background-clip:text;background-clip:text;color:transparent}
-.statement .wrap{border-image:linear-gradient(180deg,#ffb020,#ff6a3d) 1}
-.panel::before,.value::before,.q::before,.member::before{background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(255,176,32,.11),transparent 55%)}
-.value svg,.q svg{background:linear-gradient(135deg,rgba(255,176,32,.2),rgba(255,106,61,.1));box-shadow:inset 0 0 0 1px rgba(255,176,32,.22)}
-.avatar{box-shadow:0 0 0 2px rgba(255,176,32,.25)}
-.brand img{box-shadow:0 0 0 3px rgba(255,176,32,.14),0 0 18px rgba(255,150,40,.35)}
-input:focus,select:focus,textarea:focus{box-shadow:0 0 0 4px rgba(255,176,32,.2)}
-select option{background:#111114}
-dialog::backdrop{background:rgba(4,4,6,.78)}
-#halloweenMusic,#soundHint{background:rgba(17,17,20,.88)}
+.statement .wrap{border-image:linear-gradient(180deg,#2d8cff,#38b6ff) 1}
+.panel::before,.value::before,.q::before,.member::before{background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(56,170,255,.11),transparent 55%)}
+.value svg,.q svg{background:linear-gradient(135deg,rgba(56,170,255,.2),rgba(45,140,255,.1));box-shadow:inset 0 0 0 1px rgba(56,170,255,.22)}
+.avatar{box-shadow:0 0 0 2px rgba(56,170,255,.25)}
+.brand img{box-shadow:0 0 0 3px rgba(56,170,255,.14),0 0 18px rgba(45,140,255,.35)}
+input:focus,select:focus,textarea:focus{box-shadow:0 0 0 4px rgba(56,170,255,.2)}
+select option{background:#0b1424}
+dialog::backdrop{background:rgba(2,5,12,.78)}
 footer{background:linear-gradient(180deg,rgba(255,255,255,.02),transparent),var(--color-surface)}
 
 /* Echtes UI-Gefühl: Mono-Labels, Live-Badge, Tastaturkürzel */
@@ -412,16 +352,16 @@ footer{background:linear-gradient(180deg,rgba(255,255,255,.02),transparent),var(
 kbd{font:600 .6875rem/1 var(--mono);padding:4px 6px;border-radius:6px;border:1px solid var(--color-border-strong);border-bottom-width:2px;background:rgba(255,255,255,.04);color:var(--color-text-soft)}
 .ck-btn{display:inline-flex;align-items:center;gap:10px;min-height:36px;margin-left:var(--s2);padding:0 8px 0 12px;border:1px solid var(--color-border-strong);border-radius:10px;background:rgba(255,255,255,.04);color:var(--color-muted);font:inherit;font-size:.8125rem;cursor:pointer;transition:color .2s,border-color .2s,background .2s,transform .2s var(--out)}
 .ck-btn svg{width:16px;height:16px}
-.ck-btn:hover{color:var(--color-text);border-color:var(--color-primary-soft);background:rgba(255,176,32,.07)}
+.ck-btn:hover{color:var(--color-text);border-color:var(--color-primary-soft);background:rgba(56,170,255,.07)}
 .ck-btn:active{transform:scale(.97)}
-#cmdk{width:min(560px,100% - 32px);margin:12vh auto auto;background:rgba(17,17,20,.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 0 0 1px rgba(255,176,32,.08),0 40px 100px rgba(0,0,0,.7)}
+#cmdk{width:min(560px,100% - 32px);margin:12vh auto auto;background:rgba(11,20,36,.94);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 0 0 1px rgba(56,170,255,.08),0 40px 100px rgba(0,0,0,.7)}
 .ck-top{display:flex;align-items:center;gap:12px;padding:0 16px;border-bottom:1px solid var(--color-border);color:var(--color-muted)}
 #cmdk input{min-height:56px;padding:0;border:0;background:transparent;box-shadow:none;font-size:1rem}
 #cmdk input:focus{box-shadow:none}
 #ckList{list-style:none;padding:8px;max-height:50vh;overflow:auto}
 #ckList li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border-radius:10px;cursor:pointer;color:var(--color-text-soft);font-size:.9375rem}
 #ckList li small{font:500 .6875rem/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--color-muted)}
-#ckList li[aria-selected=true]{background:rgba(255,176,32,.1);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,176,32,.25)}
+#ckList li[aria-selected=true]{background:rgba(56,170,255,.1);color:#fff;box-shadow:inset 0 0 0 1px rgba(56,170,255,.25)}
 #ckList .ck-empty{cursor:default;color:var(--color-muted)}
 .ck-hint{display:inline-flex;align-items:center;gap:8px}
 
@@ -444,14 +384,20 @@ kbd{font:600 .6875rem/1 var(--mono);padding:4px 6px;border-radius:6px;border:1px
 .secret:hover{opacity:.3}
 .secret:focus-visible{opacity:.8}
 </style>
+<style id="palm-city-css">
+/* ===== PALM CITY RP: Look vom Logo (Nachtblau, Elektroblau, Sunset) ===== */
+.hero{background:radial-gradient(70% 55% at 50% 0%,rgba(45,140,255,.28),transparent 70%),radial-gradient(100% 60% at 50% 100%,rgba(255,122,60,.46),rgba(214,51,108,.24) 45%,transparent 78%),var(--color-bg)}
+.cta .dark{border-color:rgba(45,140,255,.5);background:radial-gradient(90% 120% at 0% 0%,rgba(45,140,255,.34),transparent 60%),radial-gradient(70% 100% at 100% 100%,rgba(255,122,60,.2),transparent 60%),var(--color-surface)}
+h1{overflow-wrap:anywhere}
+h1 span{filter:drop-shadow(0 0 28px rgba(45,140,255,.45))}
+.hero-logo{position:absolute;right:0;top:var(--s6);width:clamp(220px,26vw,330px);height:auto;aspect-ratio:1;border-radius:50%;box-shadow:0 0 0 1px rgba(45,140,255,.5),0 0 40px rgba(45,140,255,.45),0 0 120px rgba(45,140,255,.25);animation:float 7s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-8px)}}
+.brand img{width:36px;height:36px}
+@media(max-width:960px){.hero-logo{position:relative;right:auto;top:auto;width:150px;margin-bottom:var(--s6)}}
+</style>
 </head>
-<body class="halloween">
+<body>
 <div class="noise" aria-hidden="true"></div>
-<div class="halloween-decor" aria-hidden="true"><span class="bat1">🦇</span><span class="bat2">🦇</span><span class="pumpkin1">🎃</span><span class="pumpkin2">🎃</span></div>
-<div class="halloween-web tl" aria-hidden="true">🕸️</div><div class="halloween-web tr" aria-hidden="true">🕸️</div><div class="halloween-web bl" aria-hidden="true">🕸️</div><div class="halloween-web br" aria-hidden="true">🕸️</div>
-<div class="hanging-spider spider-a" aria-hidden="true">🕷️</div><div class="hanging-spider spider-b" aria-hidden="true">🕷️</div><div class="hanging-spider spider-c" aria-hidden="true">🕷️</div><div class="tombstone t1" aria-hidden="true">🪦</div><div class="tombstone t2" aria-hidden="true">🪦</div>
-<button id="halloweenMusic" type="button" aria-label="Gruselige Hintergrundmusik ein- oder ausschalten"><span class="music-dot"></span>🎃 Gruselmusik AN</button>
-<div class="halloween-banner">🎃 Halloween in Notruf Craftopia · Gruselige Nächte · Neues RP · Neue Geschichten 👻</div>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
 <symbol id="i-siren" viewBox="0 0 24 24"><path d="M7 18v-6a5 5 0 1 1 10 0v6"/><path d="M5 21a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2z"/><path d="M21 12h1M2 12h1M12 2v1M4.93 4.93l1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
@@ -482,7 +428,7 @@ kbd{font:600 .6875rem/1 var(--mono);padding:4px 6px;border-radius:6px;border:1px
 
 <nav class="nav" aria-label="Hauptnavigation">
   <div class="wrap">
-    <a class="brand" href="#top"><img src="logo.png" alt="" width="36" height="36"><span>Notruf Craftopia</span></a>
+    <a class="brand" href="#top"><img src="logo.png" alt="" width="36" height="36"><span>Palm City RP</span></a>
     <div class="links" id="links">
       <a href="#mission">Mission</a><a href="#team">Team</a><a href="#partner">Partner</a>
       <a href="#bewertungen">Bewertungen</a><a href="#kontakt">Kontakt</a><a href="#einspruch">Einspruch</a>
@@ -498,16 +444,17 @@ kbd{font:600 .6875rem/1 var(--mono);padding:4px 6px;border-radius:6px;border:1px
 <header class="hero" id="top">
   <div class="glow glow-b" aria-hidden="true"></div><div class="glow glow-b2" aria-hidden="true"></div>
   <div class="wrap">
-    <div class="fleet" role="group" aria-label="Einsatzfahrzeuge"><figure class="v em"><div class="car"><svg viewBox="0 0 200 150" role="img" aria-label="Polizeiwagen von vorne mit Blaulicht"><g class="gl l"><ellipse cx="80.5" cy="40" rx="44" ry="24" fill="url(#glow)"/><ellipse cx="70" cy="141" rx="56" ry="9" fill="url(#glow)"/></g><g class="gl r"><ellipse cx="119.5" cy="40" rx="44" ry="24" fill="url(#glow)"/><ellipse cx="130" cy="141" rx="56" ry="9" fill="url(#glow)"/></g><ellipse cx="100" cy="141" rx="80.0" ry="5" fill="#000" opacity=".6"/><rect x="32.0" y="106" width="13" height="36" rx="4" fill="#07090e"/><rect x="34.5" y="109" width="2" height="30" rx="1" fill="#222a3a"/><rect x="155.0" y="106" width="13" height="36" rx="4" fill="#07090e"/><rect x="157.5" y="109" width="2" height="30" rx="1" fill="#222a3a"/><rect x="24.0" y="63" width="10" height="17" rx="4" fill="#10141d"/><rect x="26.0" y="65" width="4" height="12" rx="2" fill="#2c3547"/><rect x="166.0" y="63" width="10" height="17" rx="4" fill="#10141d"/><rect x="168.0" y="65" width="4" height="12" rx="2" fill="#2c3547"/><rect x="34.0" y="48" width="132" height="78" rx="16" fill="#e9eef7"/><rect x="34.0" y="48" width="132" height="78" rx="16" fill="url(#shade)"/><rect x="34.0" y="48" width="132" height="78" rx="16" fill="url(#side)"/><path d="M48.0 49.5H152.0" stroke="#fff" stroke-opacity=".45" stroke-width="1.6" stroke-linecap="round"/><path d="M39.0 87H161.0L164.0 104H36.0z" fill="#e9eef7"/><path d="M39.0 87H161.0L164.0 104H36.0z" fill="url(#bonh)"/><path d="M100 87V104" stroke="#fff" stroke-opacity=".16"/><path d="M49.0 89L44.0 104M151.0 89L156.0 104" stroke="#000" stroke-opacity=".28"/><rect x="35.0" y="92" width="130" height="15" fill="#1d4fb5"/><rect x="35.0" y="92" width="130" height="15" fill="url(#shade)" opacity=".7"/><path d="M43.0 57H157.0L162.0 87H38.0z" fill="url(#glass)" stroke="#05070c" stroke-width="2.5" stroke-linejoin="round"/><rect x="65.68" y="68.4" width="15" height="16.5" rx="5" fill="#070a12" opacity=".75"/><rect x="119.32" y="68.4" width="15" height="16.5" rx="5" fill="#070a12" opacity=".75"/><ellipse cx="73.6" cy="82" rx="9" ry="3" fill="none" stroke="#04060a" stroke-width="1.6" opacity=".8"/><polygon points="56.0,57 80.0,57 64.0,87 40.0,87" fill="#fff" opacity=".1"/><path d="M44.0 85L96 78M156.0 85L104 78" stroke="#04060a" stroke-width="1.2"/><text x="100" y="104" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-size="11" letter-spacing=".8" fill="#fff">POLIZEI</text><rect x="39.0" y="104" width="24" height="12" rx="5" fill="#151a25" stroke="#05070c"/><ellipse cx="51.0" cy="110" rx="9" ry="4.2" fill="url(#hlg)"/><rect x="43.0" y="113" width="16" height="1.8" rx=".9" fill="#eaf6ff"/><rect x="40.0" y="105.5" width="4" height="2.5" rx="1" fill="#ff9d1a"/><rect x="137.0" y="104" width="24" height="12" rx="5" fill="#151a25" stroke="#05070c"/><ellipse cx="149.0" cy="110" rx="9" ry="4.2" fill="url(#hlg)"/><rect x="141.0" y="113" width="16" height="1.8" rx=".9" fill="#eaf6ff"/><rect x="156.0" y="105.5" width="4" height="2.5" rx="1" fill="#ff9d1a"/><rect x="74.92" y="104" width="50.160000000000004" height="14" rx="3" fill="#0d1119" stroke="#8d97a8" stroke-width="1"/><path d="M77.56 108h44.88M77.56 112h44.88" stroke="#2a3345"/><circle cx="100" cy="111" r="3.2" fill="#cbd3e0" stroke="#5a6478" stroke-width=".6"/><rect x="32.0" y="118" width="136" height="13" rx="5" fill="url(#bump)"/><rect x="42.0" y="122" width="23.759999999999998" height="5" rx="2" fill="#05070c"/><rect x="134.24" y="122" width="23.759999999999998" height="5" rx="2" fill="#05070c"/><rect x="82" y="119.5" width="36" height="10" rx="1.5" fill="#fff" stroke="#222" stroke-width=".6"/><rect x="82" y="119.5" width="5" height="10" fill="#1d4fb5"/><text x="103" y="127.5" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="5.4" fill="#111">HH-PO 110</text><rect x="68.0" y="44" width="6" height="6" fill="#0a0f1a"/><rect x="126.0" y="44" width="6" height="6" fill="#0a0f1a"/><rect x="62.0" y="44" width="76" height="5" rx="2" fill="#1a2238"/><rect x="62.0" y="35" width="76" height="10" rx="5" fill="url(#lens)" stroke="#9cc4ff" stroke-opacity=".3" stroke-width=".6"/><g class="lit l"><rect x="64.0" y="36" width="33.0" height="8" rx="4" fill="url(#litg)"/><ellipse cx="73.9" cy="40" rx="5" ry="3" fill="url(#hot)"/><ellipse cx="87.1" cy="40" rx="5" ry="3" fill="url(#hot)"/><path d="M36.0 87H100L100 104H36.0z" fill="#2f8cff" fill-opacity=".3"/><rect x="43.0" y="100" width="14" height="3.5" rx="1.7" fill="url(#litg)"/></g><g class="lit r"><rect x="103" y="36" width="33.0" height="8" rx="4" fill="url(#litg)"/><ellipse cx="112.9" cy="40" rx="5" ry="3" fill="url(#hot)"/><ellipse cx="126.1" cy="40" rx="5" ry="3" fill="url(#hot)"/><path d="M100 87H164.0L164.0 104H100z" fill="#2f8cff" fill-opacity=".3"/><rect x="143.0" y="100" width="14" height="3.5" rx="1.7" fill="url(#litg)"/></g></svg></div><figcaption>Polizei</figcaption></figure><figure class="v em"><div class="car"><svg viewBox="0 0 200 150" role="img" aria-label="Feuerwehrfahrzeug von vorne mit Blaulicht"><g class="gl l"><ellipse cx="76.5" cy="22" rx="44" ry="24" fill="url(#glow)"/><ellipse cx="70" cy="141" rx="56" ry="9" fill="url(#glow)"/></g><g class="gl r"><ellipse cx="123.5" cy="22" rx="44" ry="24" fill="url(#glow)"/><ellipse cx="130" cy="141" rx="56" ry="9" fill="url(#glow)"/></g><ellipse cx="100" cy="141" rx="89.0" ry="5" fill="#000" opacity=".6"/><rect x="23.0" y="106" width="13" height="36" rx="4" fill="#07090e"/><rect x="25.5" y="109" width="2" height="30" rx="1" fill="#222a3a"/><rect x="164.0" y="106" width="13" height="36" rx="4" fill="#07090e"/><rect x="166.5" y="109" width="2" height="30" rx="1" fill="#222a3a"/><rect x="15.0" y="45" width="10" height="17" rx="4" fill="#10141d"/><rect x="17.0" y="47" width="4" height="12" rx="2" fill="#2c3547"/><rect x="175.0" y="45" width="10" height="17" rx="4" fill="#10141d"/><rect x="177.0" y="47" width="4" height="12" rx="2" fill="#2c3547"/><rect x="25.0" y="30" width="150" height="96" rx="16" fill="#d3241c"/><rect x="25.0" y="30" width="150" height="96" rx="16" fill="url(#shade)"/><rect x="25.0" y="30" width="150" height="96" rx="16" fill="url(#side)"/><path d="M39.0 31.5H161.0" stroke="#fff" stroke-opacity=".45" stroke-width="1.6" stroke-linecap="round"/><path d="M30.0 79H170.0L173.0 104H27.0z" fill="#d3241c"/><path d="M30.0 79H170.0L173.0 104H27.0z" fill="url(#bonh)"/><path d="M100 79V104" stroke="#fff" stroke-opacity=".16"/><path d="M40.0 81L35.0 104M160.0 81L165.0 104" stroke="#000" stroke-opacity=".28"/><rect x="26.0" y="84" width="148" height="15" fill="#fff"/><rect x="26.0" y="84" width="148" height="15" fill="url(#shade)" opacity=".7"/><path d="M34.0 39H166.0L171.0 79H29.0z" fill="url(#glass)" stroke="#05070c" stroke-width="2.5" stroke-linejoin="round"/><rect x="61.0" y="54.2" width="15" height="22.0" rx="5" fill="#070a12" opacity=".75"/><rect x="124.0" y="54.2" width="15" height="22.0" rx="5" fill="#070a12" opacity=".75"/><ellipse cx="70.0" cy="74" rx="9" ry="3" fill="none" stroke="#04060a" stroke-width="1.6" opacity=".8"/><polygon points="47.0,39 71.0,39 55.0,79 31.0,79" fill="#fff" opacity=".1"/><path d="M35.0 77L96 70M165.0 77L104 70" stroke="#04060a" stroke-width="1.2"/><text x="100" y="96" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-size="10" letter-spacing=".8" fill="#d3241c">FEUERWEHR</text><rect x="30.0" y="104" width="24" height="12" rx="5" fill="#151a25" stroke="#05070c"/><ellipse cx="42.0" cy="110" rx="9" ry="4.2" fill="url(#hlg)"/><rect x="34.0" y="113" width="16" height="1.8" rx=".9" fill="#eaf6ff"/><rect x="31.0" y="105.5" width="4" height="2.5" rx="1" fill="#ff9d1a"/><rect x="146.0" y="104" width="24" height="12" rx="5" fill="#151a25" stroke="#05070c"/><ellipse cx="158.0" cy="110" rx="9" ry="4.2" fill="url(#hlg)"/><rect x="150.0" y="113" width="16" height="1.8" rx=".9" fill="#eaf6ff"/><rect x="165.0" y="105.5" width="4" height="2.5" rx="1" fill="#ff9d1a"/><rect x="71.5" y="104" width="57.0" height="14" rx="3" fill="#0d1119" stroke="#8d97a8" stroke-width="1"/><path d="M74.5 108h51.00000000000001M74.5 112h51.00000000000001" stroke="#2a3345"/><circle cx="100" cy="111" r="3.2" fill="#cbd3e0" stroke="#5a6478" stroke-width=".6"/><rect x="23.0" y="118" width="154" height="13" rx="5" fill="url(#bump)"/><rect x="33.0" y="122" width="27.0" height="5" rx="2" fill="#05070c"/><rect x="140.0" y="122" width="27.0" height="5" rx="2" fill="#05070c"/><rect x="82" y="119.5" width="36" height="10" rx="1.5" fill="#fff" stroke="#222" stroke-width=".6"/><rect x="82" y="119.5" width="5" height="10" fill="#1d4fb5"/><text x="103" y="127.5" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="5.4" fill="#111">HH-FW 112</text><rect x="60.0" y="26" width="6" height="6" fill="#0a0f1a"/><rect x="134.0" y="26" width="6" height="6" fill="#0a0f1a"/><rect x="54.0" y="26" width="92" height="5" rx="2" fill="#1a2238"/><rect x="54.0" y="17" width="92" height="10" rx="5" fill="url(#lens)" stroke="#9cc4ff" stroke-opacity=".3" stroke-width=".6"/><g class="lit l"><rect x="56.0" y="18" width="41.0" height="8" rx="4" fill="url(#litg)"/><ellipse cx="68.3" cy="22" rx="5" ry="3" fill="url(#hot)"/><ellipse cx="84.7" cy="22" rx="5" ry="3" fill="url(#hot)"/><path d="M27.0 79H100L100 104H27.0z" fill="#2f8cff" fill-opacity=".3"/><rect x="34.0" y="100" width="14" height="3.5" rx="1.7" fill="url(#litg)"/></g><g class="lit r"><rect x="103" y="18" width="41.0" height="8" rx="4" fill="url(#litg)"/><ellipse cx="115.3" cy="22" rx="5" ry="3" fill="url(#hot)"/><ellipse cx="131.7" cy="22" rx="5" ry="3" fill="url(#hot)"/><path d="M100 79H173.0L173.0 104H100z" fill="#2f8cff" fill-opacity=".3"/><rect x="152.0" y="100" width="14" height="3.5" rx="1.7" fill="url(#litg)"/></g></svg></div><figcaption>Feuerwehr</figcaption></figure><figure class="v em"><div class="car"><svg viewBox="0 0 200 150" role="img" aria-label="Rettungswagen von vorne mit Blaulicht"><g class="gl l"><ellipse cx="79.5" cy="28" rx="44" ry="24" fill="url(#glow)"/><ellipse cx="70" cy="141" rx="56" ry="9" fill="url(#glow)"/></g><g class="gl r"><ellipse cx="120.5" cy="28" rx="44" ry="24" fill="url(#glow)"/><ellipse cx="130" cy="141" rx="56" ry="9" fill="url(#glow)"/></g><ellipse cx="100" cy="141" rx="84.0" ry="5" fill="#000" opacity=".6"/><rect x="28.0" y="106" width="13" height="36" rx="4" fill="#07090e"/><rect x="30.5" y="109" width="2" height="30" rx="1" fill="#222a3a"/><rect x="159.0" y="106" width="13" height="36" rx="4" fill="#07090e"/><rect x="161.5" y="109" width="2" height="30" rx="1" fill="#222a3a"/><rect x="20.0" y="51" width="10" height="17" rx="4" fill="#10141d"/><rect x="22.0" y="53" width="4" height="12" rx="2" fill="#2c3547"/><rect x="170.0" y="51" width="10" height="17" rx="4" fill="#10141d"/><rect x="172.0" y="53" width="4" height="12" rx="2" fill="#2c3547"/><rect x="30.0" y="36" width="140" height="90" rx="16" fill="#f4f6fa"/><rect x="30.0" y="36" width="140" height="90" rx="16" fill="url(#shade)"/><rect x="30.0" y="36" width="140" height="90" rx="16" fill="url(#side)"/><path d="M44.0 37.5H156.0" stroke="#fff" stroke-opacity=".45" stroke-width="1.6" stroke-linecap="round"/><path d="M35.0 81H165.0L168.0 104H32.0z" fill="#f4f6fa"/><path d="M35.0 81H165.0L168.0 104H32.0z" fill="url(#bonh)"/><path d="M100 81V104" stroke="#fff" stroke-opacity=".16"/><path d="M45.0 83L40.0 104M155.0 83L160.0 104" stroke="#000" stroke-opacity=".28"/><rect x="31.0" y="86" width="138" height="15" fill="#e63b2e"/><rect x="31.0" y="86" width="138" height="15" fill="url(#shade)" opacity=".7"/><path d="M39.0 45H161.0L166.0 81H34.0z" fill="url(#glass)" stroke="#05070c" stroke-width="2.5" stroke-linejoin="round"/><rect x="63.6" y="58.68" width="15" height="19.8" rx="5" fill="#070a12" opacity=".75"/><rect x="121.4" y="58.68" width="15" height="19.8" rx="5" fill="#070a12" opacity=".75"/><ellipse cx="72.0" cy="76" rx="9" ry="3" fill="none" stroke="#04060a" stroke-width="1.6" opacity=".8"/><polygon points="52.0,45 76.0,45 60.0,81 36.0,81" fill="#fff" opacity=".1"/><path d="M40.0 79L96 72M160.0 79L104 72" stroke="#04060a" stroke-width="1.2"/><text x="100" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-size="9" letter-spacing=".8" fill="#fff">RETTUNGSDIENST</text><rect x="35.0" y="104" width="24" height="12" rx="5" fill="#151a25" stroke="#05070c"/><ellipse cx="47.0" cy="110" rx="9" ry="4.2" fill="url(#hlg)"/><rect x="39.0" y="113" width="16" height="1.8" rx=".9" fill="#eaf6ff"/><rect x="36.0" y="105.5" width="4" height="2.5" rx="1" fill="#ff9d1a"/><rect x="141.0" y="104" width="24" height="12" rx="5" fill="#151a25" stroke="#05070c"/><ellipse cx="153.0" cy="110" rx="9" ry="4.2" fill="url(#hlg)"/><rect x="145.0" y="113" width="16" height="1.8" rx=".9" fill="#eaf6ff"/><rect x="160.0" y="105.5" width="4" height="2.5" rx="1" fill="#ff9d1a"/><rect x="73.4" y="104" width="53.2" height="14" rx="3" fill="#0d1119" stroke="#8d97a8" stroke-width="1"/><path d="M76.2 108h47.6M76.2 112h47.6" stroke="#2a3345"/><circle cx="100" cy="111" r="3.2" fill="#cbd3e0" stroke="#5a6478" stroke-width=".6"/><rect x="28.0" y="118" width="144" height="13" rx="5" fill="url(#bump)"/><rect x="38.0" y="122" width="25.2" height="5" rx="2" fill="#05070c"/><rect x="136.8" y="122" width="25.2" height="5" rx="2" fill="#05070c"/><rect x="82" y="119.5" width="36" height="10" rx="1.5" fill="#fff" stroke="#222" stroke-width=".6"/><rect x="82" y="119.5" width="5" height="10" fill="#1d4fb5"/><text x="103" y="127.5" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="5.4" fill="#111">HH-RD 112</text><rect x="66.0" y="32" width="6" height="6" fill="#0a0f1a"/><rect x="128.0" y="32" width="6" height="6" fill="#0a0f1a"/><rect x="60.0" y="32" width="80" height="5" rx="2" fill="#1a2238"/><rect x="60.0" y="23" width="80" height="10" rx="5" fill="url(#lens)" stroke="#9cc4ff" stroke-opacity=".3" stroke-width=".6"/><g class="lit l"><rect x="62.0" y="24" width="35.0" height="8" rx="4" fill="url(#litg)"/><ellipse cx="72.5" cy="28" rx="5" ry="3" fill="url(#hot)"/><ellipse cx="86.5" cy="28" rx="5" ry="3" fill="url(#hot)"/><path d="M32.0 81H100L100 104H32.0z" fill="#2f8cff" fill-opacity=".3"/><rect x="39.0" y="100" width="14" height="3.5" rx="1.7" fill="url(#litg)"/></g><g class="lit r"><rect x="103" y="24" width="35.0" height="8" rx="4" fill="url(#litg)"/><ellipse cx="113.5" cy="28" rx="5" ry="3" fill="url(#hot)"/><ellipse cx="127.5" cy="28" rx="5" ry="3" fill="url(#hot)"/><path d="M100 81H168.0L168.0 104H100z" fill="#2f8cff" fill-opacity=".3"/><rect x="147.0" y="100" width="14" height="3.5" rx="1.7" fill="url(#litg)"/></g></svg></div><figcaption>Rettungsdienst</figcaption></figure><figure class="v am"><div class="car"><svg viewBox="0 0 200 150" role="img" aria-label="ADAC Pannenhilfe von vorne mit gelbem Rundumlicht"><g class="gl l"><ellipse cx="68" cy="34" rx="34" ry="22" fill="url(#glowa)"/></g><g class="gl r"><ellipse cx="132" cy="34" rx="34" ry="22" fill="url(#glowa)"/></g><ellipse cx="100" cy="141" rx="84.0" ry="5" fill="#000" opacity=".6"/><rect x="28.0" y="106" width="13" height="36" rx="4" fill="#07090e"/><rect x="30.5" y="109" width="2" height="30" rx="1" fill="#222a3a"/><rect x="159.0" y="106" width="13" height="36" rx="4" fill="#07090e"/><rect x="161.5" y="109" width="2" height="30" rx="1" fill="#222a3a"/><rect x="20.0" y="55" width="10" height="17" rx="4" fill="#10141d"/><rect x="22.0" y="57" width="4" height="12" rx="2" fill="#2c3547"/><rect x="170.0" y="55" width="10" height="17" rx="4" fill="#10141d"/><rect x="172.0" y="57" width="4" height="12" rx="2" fill="#2c3547"/><rect x="30.0" y="40" width="140" height="86" rx="16" fill="#ffcc00"/><rect x="30.0" y="40" width="140" height="86" rx="16" fill="url(#shade)"/><rect x="30.0" y="40" width="140" height="86" rx="16" fill="url(#side)"/><path d="M44.0 41.5H156.0" stroke="#fff" stroke-opacity=".45" stroke-width="1.6" stroke-linecap="round"/><path d="M35.0 83H165.0L168.0 104H32.0z" fill="#ffcc00"/><path d="M35.0 83H165.0L168.0 104H32.0z" fill="url(#bonh)"/><path d="M100 83V104" stroke="#fff" stroke-opacity=".16"/><path d="M45.0 85L40.0 104M155.0 85L160.0 104" stroke="#000" stroke-opacity=".28"/><rect x="31.0" y="88" width="138" height="15" fill="#111"/><rect x="31.0" y="88" width="138" height="15" fill="url(#shade)" opacity=".7"/><path d="M39.0 49H161.0L166.0 83H34.0z" fill="url(#glass)" stroke="#05070c" stroke-width="2.5" stroke-linejoin="round"/><rect x="63.6" y="61.92" width="15" height="18.700000000000003" rx="5" fill="#070a12" opacity=".75"/><rect x="121.4" y="61.92" width="15" height="18.700000000000003" rx="5" fill="#070a12" opacity=".75"/><ellipse cx="72.0" cy="78" rx="9" ry="3" fill="none" stroke="#04060a" stroke-width="1.6" opacity=".8"/><polygon points="52.0,49 76.0,49 60.0,83 36.0,83" fill="#fff" opacity=".1"/><path d="M40.0 81L96 74M160.0 81L104 74" stroke="#04060a" stroke-width="1.2"/><text x="100" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-size="12" letter-spacing=".8" fill="#ffcc00">ADAC</text><rect x="35.0" y="104" width="24" height="12" rx="5" fill="#151a25" stroke="#05070c"/><ellipse cx="47.0" cy="110" rx="9" ry="4.2" fill="url(#hlg)"/><rect x="39.0" y="113" width="16" height="1.8" rx=".9" fill="#eaf6ff"/><rect x="36.0" y="105.5" width="4" height="2.5" rx="1" fill="#ff9d1a"/><rect x="141.0" y="104" width="24" height="12" rx="5" fill="#151a25" stroke="#05070c"/><ellipse cx="153.0" cy="110" rx="9" ry="4.2" fill="url(#hlg)"/><rect x="145.0" y="113" width="16" height="1.8" rx=".9" fill="#eaf6ff"/><rect x="160.0" y="105.5" width="4" height="2.5" rx="1" fill="#ff9d1a"/><rect x="73.4" y="104" width="53.2" height="14" rx="3" fill="#0d1119" stroke="#8d97a8" stroke-width="1"/><path d="M76.2 108h47.6M76.2 112h47.6" stroke="#2a3345"/><circle cx="100" cy="111" r="3.2" fill="#cbd3e0" stroke="#5a6478" stroke-width=".6"/><rect x="28.0" y="118" width="144" height="13" rx="5" fill="url(#bump)"/><rect x="38.0" y="122" width="25.2" height="5" rx="2" fill="#05070c"/><rect x="136.8" y="122" width="25.2" height="5" rx="2" fill="#05070c"/><rect x="82" y="119.5" width="36" height="10" rx="1.5" fill="#fff" stroke="#222" stroke-width=".6"/><rect x="82" y="119.5" width="5" height="10" fill="#1d4fb5"/><text x="103" y="127.5" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="5.4" fill="#111">HH-AD 1</text><rect x="78" y="26" width="44" height="14" rx="2" fill="#ffcc00" stroke="#111"/><text x="100" y="36.5" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="10" fill="#111">ADAC</text><rect x="62" y="36" width="12" height="4" fill="#111"/><g class="lit l"><ellipse cx="68" cy="34" rx="8" ry="5.5" fill="#ffb000"/></g><rect x="126" y="36" width="12" height="4" fill="#111"/><g class="lit r"><ellipse cx="132" cy="34" rx="8" ry="5.5" fill="#ffb000"/></g></svg></div><figcaption>ADAC</figcaption></figure><figure class="v "><div class="car"><svg viewBox="0 0 200 150" role="img" aria-label="LKW von vorne"><ellipse cx="100" cy="141" rx="92.0" ry="5" fill="#000" opacity=".6"/><rect x="20.0" y="106" width="13" height="36" rx="4" fill="#07090e"/><rect x="22.5" y="109" width="2" height="30" rx="1" fill="#222a3a"/><rect x="167.0" y="106" width="13" height="36" rx="4" fill="#07090e"/><rect x="169.5" y="109" width="2" height="30" rx="1" fill="#222a3a"/><rect x="12.0" y="37" width="10" height="17" rx="4" fill="#10141d"/><rect x="14.0" y="39" width="4" height="12" rx="2" fill="#2c3547"/><rect x="178.0" y="37" width="10" height="17" rx="4" fill="#10141d"/><rect x="180.0" y="39" width="4" height="12" rx="2" fill="#2c3547"/><rect x="22.0" y="22" width="156" height="104" rx="16" fill="#3a6fc4"/><rect x="22.0" y="22" width="156" height="104" rx="16" fill="url(#shade)"/><rect x="22.0" y="22" width="156" height="104" rx="16" fill="url(#side)"/><path d="M36.0 23.5H164.0" stroke="#fff" stroke-opacity=".45" stroke-width="1.6" stroke-linecap="round"/><path d="M27.0 75H173.0L176.0 104H24.0z" fill="#3a6fc4"/><path d="M27.0 75H173.0L176.0 104H24.0z" fill="url(#bonh)"/><path d="M100 75V104" stroke="#fff" stroke-opacity=".16"/><path d="M37.0 77L32.0 104M163.0 77L168.0 104" stroke="#000" stroke-opacity=".28"/><path d="M31.0 31H169.0L174.0 75H26.0z" fill="url(#glass)" stroke="#05070c" stroke-width="2.5" stroke-linejoin="round"/><rect x="59.44" y="47.72" width="15" height="24.200000000000003" rx="5" fill="#070a12" opacity=".75"/><rect x="125.56" y="47.72" width="15" height="24.200000000000003" rx="5" fill="#070a12" opacity=".75"/><ellipse cx="68.8" cy="70" rx="9" ry="3" fill="none" stroke="#04060a" stroke-width="1.6" opacity=".8"/><polygon points="44.0,31 68.0,31 52.0,75 28.0,75" fill="#fff" opacity=".1"/><path d="M32.0 73L96 66M168.0 73L104 66" stroke="#04060a" stroke-width="1.2"/><rect x="27.0" y="104" width="24" height="12" rx="5" fill="#151a25" stroke="#05070c"/><ellipse cx="39.0" cy="110" rx="9" ry="4.2" fill="url(#hlg)"/><rect x="31.0" y="113" width="16" height="1.8" rx=".9" fill="#eaf6ff"/><rect x="28.0" y="105.5" width="4" height="2.5" rx="1" fill="#ff9d1a"/><rect x="149.0" y="104" width="24" height="12" rx="5" fill="#151a25" stroke="#05070c"/><ellipse cx="161.0" cy="110" rx="9" ry="4.2" fill="url(#hlg)"/><rect x="153.0" y="113" width="16" height="1.8" rx=".9" fill="#eaf6ff"/><rect x="168.0" y="105.5" width="4" height="2.5" rx="1" fill="#ff9d1a"/><rect x="70.36" y="104" width="59.28" height="14" rx="3" fill="#0d1119" stroke="#8d97a8" stroke-width="1"/><path d="M73.47999999999999 108h53.040000000000006M73.47999999999999 112h53.040000000000006" stroke="#2a3345"/><circle cx="100" cy="111" r="3.2" fill="#cbd3e0" stroke="#5a6478" stroke-width=".6"/><rect x="20.0" y="118" width="160" height="13" rx="5" fill="url(#bump)"/><rect x="30.0" y="122" width="28.08" height="5" rx="2" fill="#05070c"/><rect x="141.92000000000002" y="122" width="28.08" height="5" rx="2" fill="#05070c"/><rect x="82" y="119.5" width="36" height="10" rx="1.5" fill="#fff" stroke="#222" stroke-width=".6"/><rect x="82" y="119.5" width="5" height="10" fill="#1d4fb5"/><text x="103" y="127.5" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="5.4" fill="#111">HH-LK 40</text><rect x="86" y="18" width="8" height="4" rx="1" fill="#ffb000"/><rect x="96" y="18" width="8" height="4" rx="1" fill="#ffb000"/><rect x="106" y="18" width="8" height="4" rx="1" fill="#ffb000"/><rect x="30.0" y="24" width="140.0" height="6" rx="2" fill="#10141c"/><rect x="64" y="81" width="72" height="26" rx="3" fill="#0d1119" stroke="#8d97a8"/><path d="M64 88h72M64 95h72M64 102h72" stroke="#2a3345" stroke-width="1.5"/></svg></div><figcaption>LKW</figcaption></figure><figure class="v "><div class="car"><svg viewBox="0 0 200 150" role="img" aria-label="Linienbus von vorne"><ellipse cx="100" cy="141" rx="102.0" ry="5" fill="#000" opacity=".6"/><rect x="10.0" y="106" width="13" height="36" rx="4" fill="#07090e"/><rect x="12.5" y="109" width="2" height="30" rx="1" fill="#222a3a"/><rect x="177.0" y="106" width="13" height="36" rx="4" fill="#07090e"/><rect x="179.5" y="109" width="2" height="30" rx="1" fill="#222a3a"/><rect x="2.0" y="33" width="10" height="17" rx="4" fill="#10141d"/><rect x="4.0" y="35" width="4" height="12" rx="2" fill="#2c3547"/><rect x="188.0" y="33" width="10" height="17" rx="4" fill="#10141d"/><rect x="190.0" y="35" width="4" height="12" rx="2" fill="#2c3547"/><rect x="12.0" y="18" width="176" height="108" rx="16" fill="#d6342c"/><rect x="12.0" y="18" width="176" height="108" rx="16" fill="url(#shade)"/><rect x="12.0" y="18" width="176" height="108" rx="16" fill="url(#side)"/><path d="M26.0 19.5H174.0" stroke="#fff" stroke-opacity=".45" stroke-width="1.6" stroke-linecap="round"/><path d="M17.0 79H183.0L186.0 104H14.0z" fill="#d6342c"/><path d="M17.0 79H183.0L186.0 104H14.0z" fill="url(#bonh)"/><path d="M100 79V104" stroke="#fff" stroke-opacity=".16"/><path d="M27.0 81L22.0 104M173.0 81L178.0 104" stroke="#000" stroke-opacity=".28"/><rect x="13.0" y="84" width="174" height="15" fill="#fff"/><rect x="13.0" y="84" width="174" height="15" fill="url(#shade)" opacity=".7"/><path d="M21.0 27H179.0L184.0 79H16.0z" fill="url(#glass)" stroke="#05070c" stroke-width="2.5" stroke-linejoin="round"/><rect x="54.239999999999995" y="46.760000000000005" width="15" height="28.6" rx="5" fill="#070a12" opacity=".75"/><rect x="130.76" y="46.760000000000005" width="15" height="28.6" rx="5" fill="#070a12" opacity=".75"/><ellipse cx="64.8" cy="74" rx="9" ry="3" fill="none" stroke="#04060a" stroke-width="1.6" opacity=".8"/><polygon points="34.0,27 58.0,27 42.0,79 18.0,79" fill="#fff" opacity=".1"/><path d="M22.0 77L96 70M178.0 77L104 70" stroke="#04060a" stroke-width="1.2"/><rect x="17.0" y="104" width="24" height="12" rx="5" fill="#151a25" stroke="#05070c"/><ellipse cx="29.0" cy="110" rx="9" ry="4.2" fill="url(#hlg)"/><rect x="21.0" y="113" width="16" height="1.8" rx=".9" fill="#eaf6ff"/><rect x="18.0" y="105.5" width="4" height="2.5" rx="1" fill="#ff9d1a"/><rect x="159.0" y="104" width="24" height="12" rx="5" fill="#151a25" stroke="#05070c"/><ellipse cx="171.0" cy="110" rx="9" ry="4.2" fill="url(#hlg)"/><rect x="163.0" y="113" width="16" height="1.8" rx=".9" fill="#eaf6ff"/><rect x="178.0" y="105.5" width="4" height="2.5" rx="1" fill="#ff9d1a"/><rect x="66.56" y="104" width="66.88" height="14" rx="3" fill="#0d1119" stroke="#8d97a8" stroke-width="1"/><path d="M70.08 108h59.84M70.08 112h59.84" stroke="#2a3345"/><circle cx="100" cy="111" r="3.2" fill="#cbd3e0" stroke="#5a6478" stroke-width=".6"/><rect x="10.0" y="118" width="180" height="13" rx="5" fill="url(#bump)"/><rect x="20.0" y="122" width="31.68" height="5" rx="2" fill="#05070c"/><rect x="148.32" y="122" width="31.68" height="5" rx="2" fill="#05070c"/><rect x="82" y="119.5" width="36" height="10" rx="1.5" fill="#fff" stroke="#222" stroke-width=".6"/><rect x="82" y="119.5" width="5" height="10" fill="#1d4fb5"/><text x="103" y="127.5" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="5.4" fill="#111">HH-HB 5</text><rect x="58" y="29" width="84" height="11" rx="2" fill="#05080f"/><text x="100" y="38" text-anchor="middle" font-family="monospace" font-weight="700" font-size="8" fill="#ffb000">112 CRAFTOPIA</text></svg></div><figcaption>Linienbus</figcaption></figure></div>
+    <img class="hero-logo" src="logo.png" alt="Palm City RP Logo" width="330" height="330" fetchpriority="high">
+    <div class="fleet" role="group" aria-label="Einsatzfahrzeuge"><figure class="v em"><div class="car"><svg viewBox="0 0 200 150" role="img" aria-label="Polizeiwagen von vorne mit Blaulicht"><g class="gl l"><ellipse cx="80.5" cy="40" rx="44" ry="24" fill="url(#glow)"/><ellipse cx="70" cy="141" rx="56" ry="9" fill="url(#glow)"/></g><g class="gl r"><ellipse cx="119.5" cy="40" rx="44" ry="24" fill="url(#glow)"/><ellipse cx="130" cy="141" rx="56" ry="9" fill="url(#glow)"/></g><ellipse cx="100" cy="141" rx="80.0" ry="5" fill="#000" opacity=".6"/><rect x="32.0" y="106" width="13" height="36" rx="4" fill="#07090e"/><rect x="34.5" y="109" width="2" height="30" rx="1" fill="#222a3a"/><rect x="155.0" y="106" width="13" height="36" rx="4" fill="#07090e"/><rect x="157.5" y="109" width="2" height="30" rx="1" fill="#222a3a"/><rect x="24.0" y="63" width="10" height="17" rx="4" fill="#10141d"/><rect x="26.0" y="65" width="4" height="12" rx="2" fill="#2c3547"/><rect x="166.0" y="63" width="10" height="17" rx="4" fill="#10141d"/><rect x="168.0" y="65" width="4" height="12" rx="2" fill="#2c3547"/><rect x="34.0" y="48" width="132" height="78" rx="16" fill="#e9eef7"/><rect x="34.0" y="48" width="132" height="78" rx="16" fill="url(#shade)"/><rect x="34.0" y="48" width="132" height="78" rx="16" fill="url(#side)"/><path d="M48.0 49.5H152.0" stroke="#fff" stroke-opacity=".45" stroke-width="1.6" stroke-linecap="round"/><path d="M39.0 87H161.0L164.0 104H36.0z" fill="#e9eef7"/><path d="M39.0 87H161.0L164.0 104H36.0z" fill="url(#bonh)"/><path d="M100 87V104" stroke="#fff" stroke-opacity=".16"/><path d="M49.0 89L44.0 104M151.0 89L156.0 104" stroke="#000" stroke-opacity=".28"/><rect x="35.0" y="92" width="130" height="15" fill="#1d4fb5"/><rect x="35.0" y="92" width="130" height="15" fill="url(#shade)" opacity=".7"/><path d="M43.0 57H157.0L162.0 87H38.0z" fill="url(#glass)" stroke="#05070c" stroke-width="2.5" stroke-linejoin="round"/><rect x="65.68" y="68.4" width="15" height="16.5" rx="5" fill="#070a12" opacity=".75"/><rect x="119.32" y="68.4" width="15" height="16.5" rx="5" fill="#070a12" opacity=".75"/><ellipse cx="73.6" cy="82" rx="9" ry="3" fill="none" stroke="#04060a" stroke-width="1.6" opacity=".8"/><polygon points="56.0,57 80.0,57 64.0,87 40.0,87" fill="#fff" opacity=".1"/><path d="M44.0 85L96 78M156.0 85L104 78" stroke="#04060a" stroke-width="1.2"/><text x="100" y="104" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-size="11" letter-spacing=".8" fill="#fff">POLIZEI</text><rect x="39.0" y="104" width="24" height="12" rx="5" fill="#151a25" stroke="#05070c"/><ellipse cx="51.0" cy="110" rx="9" ry="4.2" fill="url(#hlg)"/><rect x="43.0" y="113" width="16" height="1.8" rx=".9" fill="#eaf6ff"/><rect x="40.0" y="105.5" width="4" height="2.5" rx="1" fill="#ff9d1a"/><rect x="137.0" y="104" width="24" height="12" rx="5" fill="#151a25" stroke="#05070c"/><ellipse cx="149.0" cy="110" rx="9" ry="4.2" fill="url(#hlg)"/><rect x="141.0" y="113" width="16" height="1.8" rx=".9" fill="#eaf6ff"/><rect x="156.0" y="105.5" width="4" height="2.5" rx="1" fill="#ff9d1a"/><rect x="74.92" y="104" width="50.160000000000004" height="14" rx="3" fill="#0d1119" stroke="#8d97a8" stroke-width="1"/><path d="M77.56 108h44.88M77.56 112h44.88" stroke="#2a3345"/><circle cx="100" cy="111" r="3.2" fill="#cbd3e0" stroke="#5a6478" stroke-width=".6"/><rect x="32.0" y="118" width="136" height="13" rx="5" fill="url(#bump)"/><rect x="42.0" y="122" width="23.759999999999998" height="5" rx="2" fill="#05070c"/><rect x="134.24" y="122" width="23.759999999999998" height="5" rx="2" fill="#05070c"/><rect x="82" y="119.5" width="36" height="10" rx="1.5" fill="#fff" stroke="#222" stroke-width=".6"/><rect x="82" y="119.5" width="5" height="10" fill="#1d4fb5"/><text x="103" y="127.5" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="5.4" fill="#111">HH-PO 110</text><rect x="68.0" y="44" width="6" height="6" fill="#0a0f1a"/><rect x="126.0" y="44" width="6" height="6" fill="#0a0f1a"/><rect x="62.0" y="44" width="76" height="5" rx="2" fill="#1a2238"/><rect x="62.0" y="35" width="76" height="10" rx="5" fill="url(#lens)" stroke="#9cc4ff" stroke-opacity=".3" stroke-width=".6"/><g class="lit l"><rect x="64.0" y="36" width="33.0" height="8" rx="4" fill="url(#litg)"/><ellipse cx="73.9" cy="40" rx="5" ry="3" fill="url(#hot)"/><ellipse cx="87.1" cy="40" rx="5" ry="3" fill="url(#hot)"/><path d="M36.0 87H100L100 104H36.0z" fill="#2f8cff" fill-opacity=".3"/><rect x="43.0" y="100" width="14" height="3.5" rx="1.7" fill="url(#litg)"/></g><g class="lit r"><rect x="103" y="36" width="33.0" height="8" rx="4" fill="url(#litg)"/><ellipse cx="112.9" cy="40" rx="5" ry="3" fill="url(#hot)"/><ellipse cx="126.1" cy="40" rx="5" ry="3" fill="url(#hot)"/><path d="M100 87H164.0L164.0 104H100z" fill="#2f8cff" fill-opacity=".3"/><rect x="143.0" y="100" width="14" height="3.5" rx="1.7" fill="url(#litg)"/></g></svg></div><figcaption>Polizei</figcaption></figure><figure class="v em"><div class="car"><svg viewBox="0 0 200 150" role="img" aria-label="Feuerwehrfahrzeug von vorne mit Blaulicht"><g class="gl l"><ellipse cx="76.5" cy="22" rx="44" ry="24" fill="url(#glow)"/><ellipse cx="70" cy="141" rx="56" ry="9" fill="url(#glow)"/></g><g class="gl r"><ellipse cx="123.5" cy="22" rx="44" ry="24" fill="url(#glow)"/><ellipse cx="130" cy="141" rx="56" ry="9" fill="url(#glow)"/></g><ellipse cx="100" cy="141" rx="89.0" ry="5" fill="#000" opacity=".6"/><rect x="23.0" y="106" width="13" height="36" rx="4" fill="#07090e"/><rect x="25.5" y="109" width="2" height="30" rx="1" fill="#222a3a"/><rect x="164.0" y="106" width="13" height="36" rx="4" fill="#07090e"/><rect x="166.5" y="109" width="2" height="30" rx="1" fill="#222a3a"/><rect x="15.0" y="45" width="10" height="17" rx="4" fill="#10141d"/><rect x="17.0" y="47" width="4" height="12" rx="2" fill="#2c3547"/><rect x="175.0" y="45" width="10" height="17" rx="4" fill="#10141d"/><rect x="177.0" y="47" width="4" height="12" rx="2" fill="#2c3547"/><rect x="25.0" y="30" width="150" height="96" rx="16" fill="#d3241c"/><rect x="25.0" y="30" width="150" height="96" rx="16" fill="url(#shade)"/><rect x="25.0" y="30" width="150" height="96" rx="16" fill="url(#side)"/><path d="M39.0 31.5H161.0" stroke="#fff" stroke-opacity=".45" stroke-width="1.6" stroke-linecap="round"/><path d="M30.0 79H170.0L173.0 104H27.0z" fill="#d3241c"/><path d="M30.0 79H170.0L173.0 104H27.0z" fill="url(#bonh)"/><path d="M100 79V104" stroke="#fff" stroke-opacity=".16"/><path d="M40.0 81L35.0 104M160.0 81L165.0 104" stroke="#000" stroke-opacity=".28"/><rect x="26.0" y="84" width="148" height="15" fill="#fff"/><rect x="26.0" y="84" width="148" height="15" fill="url(#shade)" opacity=".7"/><path d="M34.0 39H166.0L171.0 79H29.0z" fill="url(#glass)" stroke="#05070c" stroke-width="2.5" stroke-linejoin="round"/><rect x="61.0" y="54.2" width="15" height="22.0" rx="5" fill="#070a12" opacity=".75"/><rect x="124.0" y="54.2" width="15" height="22.0" rx="5" fill="#070a12" opacity=".75"/><ellipse cx="70.0" cy="74" rx="9" ry="3" fill="none" stroke="#04060a" stroke-width="1.6" opacity=".8"/><polygon points="47.0,39 71.0,39 55.0,79 31.0,79" fill="#fff" opacity=".1"/><path d="M35.0 77L96 70M165.0 77L104 70" stroke="#04060a" stroke-width="1.2"/><text x="100" y="96" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-size="10" letter-spacing=".8" fill="#d3241c">FEUERWEHR</text><rect x="30.0" y="104" width="24" height="12" rx="5" fill="#151a25" stroke="#05070c"/><ellipse cx="42.0" cy="110" rx="9" ry="4.2" fill="url(#hlg)"/><rect x="34.0" y="113" width="16" height="1.8" rx=".9" fill="#eaf6ff"/><rect x="31.0" y="105.5" width="4" height="2.5" rx="1" fill="#ff9d1a"/><rect x="146.0" y="104" width="24" height="12" rx="5" fill="#151a25" stroke="#05070c"/><ellipse cx="158.0" cy="110" rx="9" ry="4.2" fill="url(#hlg)"/><rect x="150.0" y="113" width="16" height="1.8" rx=".9" fill="#eaf6ff"/><rect x="165.0" y="105.5" width="4" height="2.5" rx="1" fill="#ff9d1a"/><rect x="71.5" y="104" width="57.0" height="14" rx="3" fill="#0d1119" stroke="#8d97a8" stroke-width="1"/><path d="M74.5 108h51.00000000000001M74.5 112h51.00000000000001" stroke="#2a3345"/><circle cx="100" cy="111" r="3.2" fill="#cbd3e0" stroke="#5a6478" stroke-width=".6"/><rect x="23.0" y="118" width="154" height="13" rx="5" fill="url(#bump)"/><rect x="33.0" y="122" width="27.0" height="5" rx="2" fill="#05070c"/><rect x="140.0" y="122" width="27.0" height="5" rx="2" fill="#05070c"/><rect x="82" y="119.5" width="36" height="10" rx="1.5" fill="#fff" stroke="#222" stroke-width=".6"/><rect x="82" y="119.5" width="5" height="10" fill="#1d4fb5"/><text x="103" y="127.5" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="5.4" fill="#111">HH-FW 112</text><rect x="60.0" y="26" width="6" height="6" fill="#0a0f1a"/><rect x="134.0" y="26" width="6" height="6" fill="#0a0f1a"/><rect x="54.0" y="26" width="92" height="5" rx="2" fill="#1a2238"/><rect x="54.0" y="17" width="92" height="10" rx="5" fill="url(#lens)" stroke="#9cc4ff" stroke-opacity=".3" stroke-width=".6"/><g class="lit l"><rect x="56.0" y="18" width="41.0" height="8" rx="4" fill="url(#litg)"/><ellipse cx="68.3" cy="22" rx="5" ry="3" fill="url(#hot)"/><ellipse cx="84.7" cy="22" rx="5" ry="3" fill="url(#hot)"/><path d="M27.0 79H100L100 104H27.0z" fill="#2f8cff" fill-opacity=".3"/><rect x="34.0" y="100" width="14" height="3.5" rx="1.7" fill="url(#litg)"/></g><g class="lit r"><rect x="103" y="18" width="41.0" height="8" rx="4" fill="url(#litg)"/><ellipse cx="115.3" cy="22" rx="5" ry="3" fill="url(#hot)"/><ellipse cx="131.7" cy="22" rx="5" ry="3" fill="url(#hot)"/><path d="M100 79H173.0L173.0 104H100z" fill="#2f8cff" fill-opacity=".3"/><rect x="152.0" y="100" width="14" height="3.5" rx="1.7" fill="url(#litg)"/></g></svg></div><figcaption>Feuerwehr</figcaption></figure><figure class="v em"><div class="car"><svg viewBox="0 0 200 150" role="img" aria-label="Rettungswagen von vorne mit Blaulicht"><g class="gl l"><ellipse cx="79.5" cy="28" rx="44" ry="24" fill="url(#glow)"/><ellipse cx="70" cy="141" rx="56" ry="9" fill="url(#glow)"/></g><g class="gl r"><ellipse cx="120.5" cy="28" rx="44" ry="24" fill="url(#glow)"/><ellipse cx="130" cy="141" rx="56" ry="9" fill="url(#glow)"/></g><ellipse cx="100" cy="141" rx="84.0" ry="5" fill="#000" opacity=".6"/><rect x="28.0" y="106" width="13" height="36" rx="4" fill="#07090e"/><rect x="30.5" y="109" width="2" height="30" rx="1" fill="#222a3a"/><rect x="159.0" y="106" width="13" height="36" rx="4" fill="#07090e"/><rect x="161.5" y="109" width="2" height="30" rx="1" fill="#222a3a"/><rect x="20.0" y="51" width="10" height="17" rx="4" fill="#10141d"/><rect x="22.0" y="53" width="4" height="12" rx="2" fill="#2c3547"/><rect x="170.0" y="51" width="10" height="17" rx="4" fill="#10141d"/><rect x="172.0" y="53" width="4" height="12" rx="2" fill="#2c3547"/><rect x="30.0" y="36" width="140" height="90" rx="16" fill="#f4f6fa"/><rect x="30.0" y="36" width="140" height="90" rx="16" fill="url(#shade)"/><rect x="30.0" y="36" width="140" height="90" rx="16" fill="url(#side)"/><path d="M44.0 37.5H156.0" stroke="#fff" stroke-opacity=".45" stroke-width="1.6" stroke-linecap="round"/><path d="M35.0 81H165.0L168.0 104H32.0z" fill="#f4f6fa"/><path d="M35.0 81H165.0L168.0 104H32.0z" fill="url(#bonh)"/><path d="M100 81V104" stroke="#fff" stroke-opacity=".16"/><path d="M45.0 83L40.0 104M155.0 83L160.0 104" stroke="#000" stroke-opacity=".28"/><rect x="31.0" y="86" width="138" height="15" fill="#e63b2e"/><rect x="31.0" y="86" width="138" height="15" fill="url(#shade)" opacity=".7"/><path d="M39.0 45H161.0L166.0 81H34.0z" fill="url(#glass)" stroke="#05070c" stroke-width="2.5" stroke-linejoin="round"/><rect x="63.6" y="58.68" width="15" height="19.8" rx="5" fill="#070a12" opacity=".75"/><rect x="121.4" y="58.68" width="15" height="19.8" rx="5" fill="#070a12" opacity=".75"/><ellipse cx="72.0" cy="76" rx="9" ry="3" fill="none" stroke="#04060a" stroke-width="1.6" opacity=".8"/><polygon points="52.0,45 76.0,45 60.0,81 36.0,81" fill="#fff" opacity=".1"/><path d="M40.0 79L96 72M160.0 79L104 72" stroke="#04060a" stroke-width="1.2"/><text x="100" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-size="9" letter-spacing=".8" fill="#fff">RETTUNGSDIENST</text><rect x="35.0" y="104" width="24" height="12" rx="5" fill="#151a25" stroke="#05070c"/><ellipse cx="47.0" cy="110" rx="9" ry="4.2" fill="url(#hlg)"/><rect x="39.0" y="113" width="16" height="1.8" rx=".9" fill="#eaf6ff"/><rect x="36.0" y="105.5" width="4" height="2.5" rx="1" fill="#ff9d1a"/><rect x="141.0" y="104" width="24" height="12" rx="5" fill="#151a25" stroke="#05070c"/><ellipse cx="153.0" cy="110" rx="9" ry="4.2" fill="url(#hlg)"/><rect x="145.0" y="113" width="16" height="1.8" rx=".9" fill="#eaf6ff"/><rect x="160.0" y="105.5" width="4" height="2.5" rx="1" fill="#ff9d1a"/><rect x="73.4" y="104" width="53.2" height="14" rx="3" fill="#0d1119" stroke="#8d97a8" stroke-width="1"/><path d="M76.2 108h47.6M76.2 112h47.6" stroke="#2a3345"/><circle cx="100" cy="111" r="3.2" fill="#cbd3e0" stroke="#5a6478" stroke-width=".6"/><rect x="28.0" y="118" width="144" height="13" rx="5" fill="url(#bump)"/><rect x="38.0" y="122" width="25.2" height="5" rx="2" fill="#05070c"/><rect x="136.8" y="122" width="25.2" height="5" rx="2" fill="#05070c"/><rect x="82" y="119.5" width="36" height="10" rx="1.5" fill="#fff" stroke="#222" stroke-width=".6"/><rect x="82" y="119.5" width="5" height="10" fill="#1d4fb5"/><text x="103" y="127.5" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="5.4" fill="#111">HH-RD 112</text><rect x="66.0" y="32" width="6" height="6" fill="#0a0f1a"/><rect x="128.0" y="32" width="6" height="6" fill="#0a0f1a"/><rect x="60.0" y="32" width="80" height="5" rx="2" fill="#1a2238"/><rect x="60.0" y="23" width="80" height="10" rx="5" fill="url(#lens)" stroke="#9cc4ff" stroke-opacity=".3" stroke-width=".6"/><g class="lit l"><rect x="62.0" y="24" width="35.0" height="8" rx="4" fill="url(#litg)"/><ellipse cx="72.5" cy="28" rx="5" ry="3" fill="url(#hot)"/><ellipse cx="86.5" cy="28" rx="5" ry="3" fill="url(#hot)"/><path d="M32.0 81H100L100 104H32.0z" fill="#2f8cff" fill-opacity=".3"/><rect x="39.0" y="100" width="14" height="3.5" rx="1.7" fill="url(#litg)"/></g><g class="lit r"><rect x="103" y="24" width="35.0" height="8" rx="4" fill="url(#litg)"/><ellipse cx="113.5" cy="28" rx="5" ry="3" fill="url(#hot)"/><ellipse cx="127.5" cy="28" rx="5" ry="3" fill="url(#hot)"/><path d="M100 81H168.0L168.0 104H100z" fill="#2f8cff" fill-opacity=".3"/><rect x="147.0" y="100" width="14" height="3.5" rx="1.7" fill="url(#litg)"/></g></svg></div><figcaption>Rettungsdienst</figcaption></figure><figure class="v am"><div class="car"><svg viewBox="0 0 200 150" role="img" aria-label="ADAC Pannenhilfe von vorne mit gelbem Rundumlicht"><g class="gl l"><ellipse cx="68" cy="34" rx="34" ry="22" fill="url(#glowa)"/></g><g class="gl r"><ellipse cx="132" cy="34" rx="34" ry="22" fill="url(#glowa)"/></g><ellipse cx="100" cy="141" rx="84.0" ry="5" fill="#000" opacity=".6"/><rect x="28.0" y="106" width="13" height="36" rx="4" fill="#07090e"/><rect x="30.5" y="109" width="2" height="30" rx="1" fill="#222a3a"/><rect x="159.0" y="106" width="13" height="36" rx="4" fill="#07090e"/><rect x="161.5" y="109" width="2" height="30" rx="1" fill="#222a3a"/><rect x="20.0" y="55" width="10" height="17" rx="4" fill="#10141d"/><rect x="22.0" y="57" width="4" height="12" rx="2" fill="#2c3547"/><rect x="170.0" y="55" width="10" height="17" rx="4" fill="#10141d"/><rect x="172.0" y="57" width="4" height="12" rx="2" fill="#2c3547"/><rect x="30.0" y="40" width="140" height="86" rx="16" fill="#ffcc00"/><rect x="30.0" y="40" width="140" height="86" rx="16" fill="url(#shade)"/><rect x="30.0" y="40" width="140" height="86" rx="16" fill="url(#side)"/><path d="M44.0 41.5H156.0" stroke="#fff" stroke-opacity=".45" stroke-width="1.6" stroke-linecap="round"/><path d="M35.0 83H165.0L168.0 104H32.0z" fill="#ffcc00"/><path d="M35.0 83H165.0L168.0 104H32.0z" fill="url(#bonh)"/><path d="M100 83V104" stroke="#fff" stroke-opacity=".16"/><path d="M45.0 85L40.0 104M155.0 85L160.0 104" stroke="#000" stroke-opacity=".28"/><rect x="31.0" y="88" width="138" height="15" fill="#111"/><rect x="31.0" y="88" width="138" height="15" fill="url(#shade)" opacity=".7"/><path d="M39.0 49H161.0L166.0 83H34.0z" fill="url(#glass)" stroke="#05070c" stroke-width="2.5" stroke-linejoin="round"/><rect x="63.6" y="61.92" width="15" height="18.700000000000003" rx="5" fill="#070a12" opacity=".75"/><rect x="121.4" y="61.92" width="15" height="18.700000000000003" rx="5" fill="#070a12" opacity=".75"/><ellipse cx="72.0" cy="78" rx="9" ry="3" fill="none" stroke="#04060a" stroke-width="1.6" opacity=".8"/><polygon points="52.0,49 76.0,49 60.0,83 36.0,83" fill="#fff" opacity=".1"/><path d="M40.0 81L96 74M160.0 81L104 74" stroke="#04060a" stroke-width="1.2"/><text x="100" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-size="12" letter-spacing=".8" fill="#ffcc00">ADAC</text><rect x="35.0" y="104" width="24" height="12" rx="5" fill="#151a25" stroke="#05070c"/><ellipse cx="47.0" cy="110" rx="9" ry="4.2" fill="url(#hlg)"/><rect x="39.0" y="113" width="16" height="1.8" rx=".9" fill="#eaf6ff"/><rect x="36.0" y="105.5" width="4" height="2.5" rx="1" fill="#ff9d1a"/><rect x="141.0" y="104" width="24" height="12" rx="5" fill="#151a25" stroke="#05070c"/><ellipse cx="153.0" cy="110" rx="9" ry="4.2" fill="url(#hlg)"/><rect x="145.0" y="113" width="16" height="1.8" rx=".9" fill="#eaf6ff"/><rect x="160.0" y="105.5" width="4" height="2.5" rx="1" fill="#ff9d1a"/><rect x="73.4" y="104" width="53.2" height="14" rx="3" fill="#0d1119" stroke="#8d97a8" stroke-width="1"/><path d="M76.2 108h47.6M76.2 112h47.6" stroke="#2a3345"/><circle cx="100" cy="111" r="3.2" fill="#cbd3e0" stroke="#5a6478" stroke-width=".6"/><rect x="28.0" y="118" width="144" height="13" rx="5" fill="url(#bump)"/><rect x="38.0" y="122" width="25.2" height="5" rx="2" fill="#05070c"/><rect x="136.8" y="122" width="25.2" height="5" rx="2" fill="#05070c"/><rect x="82" y="119.5" width="36" height="10" rx="1.5" fill="#fff" stroke="#222" stroke-width=".6"/><rect x="82" y="119.5" width="5" height="10" fill="#1d4fb5"/><text x="103" y="127.5" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="5.4" fill="#111">HH-AD 1</text><rect x="78" y="26" width="44" height="14" rx="2" fill="#ffcc00" stroke="#111"/><text x="100" y="36.5" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="10" fill="#111">ADAC</text><rect x="62" y="36" width="12" height="4" fill="#111"/><g class="lit l"><ellipse cx="68" cy="34" rx="8" ry="5.5" fill="#ffb000"/></g><rect x="126" y="36" width="12" height="4" fill="#111"/><g class="lit r"><ellipse cx="132" cy="34" rx="8" ry="5.5" fill="#ffb000"/></g></svg></div><figcaption>ADAC</figcaption></figure><figure class="v "><div class="car"><svg viewBox="0 0 200 150" role="img" aria-label="LKW von vorne"><ellipse cx="100" cy="141" rx="92.0" ry="5" fill="#000" opacity=".6"/><rect x="20.0" y="106" width="13" height="36" rx="4" fill="#07090e"/><rect x="22.5" y="109" width="2" height="30" rx="1" fill="#222a3a"/><rect x="167.0" y="106" width="13" height="36" rx="4" fill="#07090e"/><rect x="169.5" y="109" width="2" height="30" rx="1" fill="#222a3a"/><rect x="12.0" y="37" width="10" height="17" rx="4" fill="#10141d"/><rect x="14.0" y="39" width="4" height="12" rx="2" fill="#2c3547"/><rect x="178.0" y="37" width="10" height="17" rx="4" fill="#10141d"/><rect x="180.0" y="39" width="4" height="12" rx="2" fill="#2c3547"/><rect x="22.0" y="22" width="156" height="104" rx="16" fill="#3a6fc4"/><rect x="22.0" y="22" width="156" height="104" rx="16" fill="url(#shade)"/><rect x="22.0" y="22" width="156" height="104" rx="16" fill="url(#side)"/><path d="M36.0 23.5H164.0" stroke="#fff" stroke-opacity=".45" stroke-width="1.6" stroke-linecap="round"/><path d="M27.0 75H173.0L176.0 104H24.0z" fill="#3a6fc4"/><path d="M27.0 75H173.0L176.0 104H24.0z" fill="url(#bonh)"/><path d="M100 75V104" stroke="#fff" stroke-opacity=".16"/><path d="M37.0 77L32.0 104M163.0 77L168.0 104" stroke="#000" stroke-opacity=".28"/><path d="M31.0 31H169.0L174.0 75H26.0z" fill="url(#glass)" stroke="#05070c" stroke-width="2.5" stroke-linejoin="round"/><rect x="59.44" y="47.72" width="15" height="24.200000000000003" rx="5" fill="#070a12" opacity=".75"/><rect x="125.56" y="47.72" width="15" height="24.200000000000003" rx="5" fill="#070a12" opacity=".75"/><ellipse cx="68.8" cy="70" rx="9" ry="3" fill="none" stroke="#04060a" stroke-width="1.6" opacity=".8"/><polygon points="44.0,31 68.0,31 52.0,75 28.0,75" fill="#fff" opacity=".1"/><path d="M32.0 73L96 66M168.0 73L104 66" stroke="#04060a" stroke-width="1.2"/><rect x="27.0" y="104" width="24" height="12" rx="5" fill="#151a25" stroke="#05070c"/><ellipse cx="39.0" cy="110" rx="9" ry="4.2" fill="url(#hlg)"/><rect x="31.0" y="113" width="16" height="1.8" rx=".9" fill="#eaf6ff"/><rect x="28.0" y="105.5" width="4" height="2.5" rx="1" fill="#ff9d1a"/><rect x="149.0" y="104" width="24" height="12" rx="5" fill="#151a25" stroke="#05070c"/><ellipse cx="161.0" cy="110" rx="9" ry="4.2" fill="url(#hlg)"/><rect x="153.0" y="113" width="16" height="1.8" rx=".9" fill="#eaf6ff"/><rect x="168.0" y="105.5" width="4" height="2.5" rx="1" fill="#ff9d1a"/><rect x="70.36" y="104" width="59.28" height="14" rx="3" fill="#0d1119" stroke="#8d97a8" stroke-width="1"/><path d="M73.47999999999999 108h53.040000000000006M73.47999999999999 112h53.040000000000006" stroke="#2a3345"/><circle cx="100" cy="111" r="3.2" fill="#cbd3e0" stroke="#5a6478" stroke-width=".6"/><rect x="20.0" y="118" width="160" height="13" rx="5" fill="url(#bump)"/><rect x="30.0" y="122" width="28.08" height="5" rx="2" fill="#05070c"/><rect x="141.92000000000002" y="122" width="28.08" height="5" rx="2" fill="#05070c"/><rect x="82" y="119.5" width="36" height="10" rx="1.5" fill="#fff" stroke="#222" stroke-width=".6"/><rect x="82" y="119.5" width="5" height="10" fill="#1d4fb5"/><text x="103" y="127.5" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="5.4" fill="#111">HH-LK 40</text><rect x="86" y="18" width="8" height="4" rx="1" fill="#ffb000"/><rect x="96" y="18" width="8" height="4" rx="1" fill="#ffb000"/><rect x="106" y="18" width="8" height="4" rx="1" fill="#ffb000"/><rect x="30.0" y="24" width="140.0" height="6" rx="2" fill="#10141c"/><rect x="64" y="81" width="72" height="26" rx="3" fill="#0d1119" stroke="#8d97a8"/><path d="M64 88h72M64 95h72M64 102h72" stroke="#2a3345" stroke-width="1.5"/></svg></div><figcaption>LKW</figcaption></figure><figure class="v "><div class="car"><svg viewBox="0 0 200 150" role="img" aria-label="Linienbus von vorne"><ellipse cx="100" cy="141" rx="102.0" ry="5" fill="#000" opacity=".6"/><rect x="10.0" y="106" width="13" height="36" rx="4" fill="#07090e"/><rect x="12.5" y="109" width="2" height="30" rx="1" fill="#222a3a"/><rect x="177.0" y="106" width="13" height="36" rx="4" fill="#07090e"/><rect x="179.5" y="109" width="2" height="30" rx="1" fill="#222a3a"/><rect x="2.0" y="33" width="10" height="17" rx="4" fill="#10141d"/><rect x="4.0" y="35" width="4" height="12" rx="2" fill="#2c3547"/><rect x="188.0" y="33" width="10" height="17" rx="4" fill="#10141d"/><rect x="190.0" y="35" width="4" height="12" rx="2" fill="#2c3547"/><rect x="12.0" y="18" width="176" height="108" rx="16" fill="#d6342c"/><rect x="12.0" y="18" width="176" height="108" rx="16" fill="url(#shade)"/><rect x="12.0" y="18" width="176" height="108" rx="16" fill="url(#side)"/><path d="M26.0 19.5H174.0" stroke="#fff" stroke-opacity=".45" stroke-width="1.6" stroke-linecap="round"/><path d="M17.0 79H183.0L186.0 104H14.0z" fill="#d6342c"/><path d="M17.0 79H183.0L186.0 104H14.0z" fill="url(#bonh)"/><path d="M100 79V104" stroke="#fff" stroke-opacity=".16"/><path d="M27.0 81L22.0 104M173.0 81L178.0 104" stroke="#000" stroke-opacity=".28"/><rect x="13.0" y="84" width="174" height="15" fill="#fff"/><rect x="13.0" y="84" width="174" height="15" fill="url(#shade)" opacity=".7"/><path d="M21.0 27H179.0L184.0 79H16.0z" fill="url(#glass)" stroke="#05070c" stroke-width="2.5" stroke-linejoin="round"/><rect x="54.239999999999995" y="46.760000000000005" width="15" height="28.6" rx="5" fill="#070a12" opacity=".75"/><rect x="130.76" y="46.760000000000005" width="15" height="28.6" rx="5" fill="#070a12" opacity=".75"/><ellipse cx="64.8" cy="74" rx="9" ry="3" fill="none" stroke="#04060a" stroke-width="1.6" opacity=".8"/><polygon points="34.0,27 58.0,27 42.0,79 18.0,79" fill="#fff" opacity=".1"/><path d="M22.0 77L96 70M178.0 77L104 70" stroke="#04060a" stroke-width="1.2"/><rect x="17.0" y="104" width="24" height="12" rx="5" fill="#151a25" stroke="#05070c"/><ellipse cx="29.0" cy="110" rx="9" ry="4.2" fill="url(#hlg)"/><rect x="21.0" y="113" width="16" height="1.8" rx=".9" fill="#eaf6ff"/><rect x="18.0" y="105.5" width="4" height="2.5" rx="1" fill="#ff9d1a"/><rect x="159.0" y="104" width="24" height="12" rx="5" fill="#151a25" stroke="#05070c"/><ellipse cx="171.0" cy="110" rx="9" ry="4.2" fill="url(#hlg)"/><rect x="163.0" y="113" width="16" height="1.8" rx=".9" fill="#eaf6ff"/><rect x="178.0" y="105.5" width="4" height="2.5" rx="1" fill="#ff9d1a"/><rect x="66.56" y="104" width="66.88" height="14" rx="3" fill="#0d1119" stroke="#8d97a8" stroke-width="1"/><path d="M70.08 108h59.84M70.08 112h59.84" stroke="#2a3345"/><circle cx="100" cy="111" r="3.2" fill="#cbd3e0" stroke="#5a6478" stroke-width=".6"/><rect x="10.0" y="118" width="180" height="13" rx="5" fill="url(#bump)"/><rect x="20.0" y="122" width="31.68" height="5" rx="2" fill="#05070c"/><rect x="148.32" y="122" width="31.68" height="5" rx="2" fill="#05070c"/><rect x="82" y="119.5" width="36" height="10" rx="1.5" fill="#fff" stroke="#222" stroke-width=".6"/><rect x="82" y="119.5" width="5" height="10" fill="#1d4fb5"/><text x="103" y="127.5" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="5.4" fill="#111">HH-HB 5</text><rect x="58" y="29" width="84" height="11" rx="2" fill="#05080f"/><text x="100" y="38" text-anchor="middle" font-family="monospace" font-weight="700" font-size="8" fill="#ffb000">112 PALM CITY</text></svg></div><figcaption>Linienbus</figcaption></figure></div>
     <div class="siren-row"><button class="btn" type="button" id="sirenBtn"><svg class="i"><use href="#i-siren"/></svg><span>Sirene abspielen</span></button><span class="muted small">Martinshorn, 3 Sekunden</span></div>
     <div class="pill"><i class="live"></i>Neuer Notruf Hamburg RP Server</div>
-    <h1>Deine Stadt.<br><span>Deine Geschichte.</span></h1>
-    <p class="lead">Notruf Craftopia entsteht gerade von Grund auf. Hier ist nach einer Session nicht alles vergessen: Entscheidungen haben Konsequenzen und Charaktere schreiben ihre eigene Geschichte.</p>
+    <h1>Deine Stadt.<br><span>Deine Entscheidungen.</span></h1>
+    <p class="lead">Palm City RP entsteht gerade von Grund auf. Hier ist nach einer Session nicht alles vergessen: Entscheidungen haben Konsequenzen und Charaktere schreiben ihre eigene Geschichte.</p>
     <nav class="qgrid" aria-label="Schnellzugriff">
   <a class="q main" href="https://discord.gg/t7N6D43KFv" target="_blank" rel="noopener"><svg class="i"><use href="#i-users"/></svg><div><b>Discord beitreten</b><span>Komm auf den Server</span></div></a>
   <a class="q" href="#bewertungen"><svg class="i"><use href="#i-star"/></svg><div><b>Bewertung abgeben</b><span>1 bis 5 Sterne</span></div></a>
   <a class="q" href="#kontakt"><svg class="i"><use href="#i-mail"/></svg><div><b>Kontakt</b><span>Frage oder Bewerbung</span></div></a>
-  <a class="q warn" href="https://notrufcraftopia.vercel.app/einspruch" target="_blank" rel="noopener"><svg class="i"><use href="#i-scale"/></svg><div><b>Widerspruch</b><span>Entscheidung anfechten</span></div></a>
+  <a class="q warn" href="/einspruch"><svg class="i"><use href="#i-scale"/></svg><div><b>Widerspruch</b><span>Entscheidung anfechten</span></div></a>
 </nav>
     <dl class="strip" aria-label="Live-Status">
       <div><dt>Online auf Discord</dt><dd id="heroOnline">–</dd></div>
@@ -515,14 +462,14 @@ kbd{font:600 .6875rem/1 var(--mono);padding:4px 6px;border-radius:6px;border:1px
       <div><dt>Bewertung</dt><dd id="heroRating">–</dd></div>
     </dl>
   </div>
-  <svg class="sky" viewBox="0 0 1440 260" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><path fill="#14284d" d="M0 260V125h45V260zM45 260V184h64V260zM109 260V123h53V260zM162 260V120h60V260zM222 260V192h67V260zM289 260V199h68V260zM357 260V167h60V260zM417 260V171h65V260zM482 260V140h42V260zM524 260V130h64V260zM588 260V150h60V260zM648 260V181h70V260zM718 260V119h44V260zM762 260V134h39V260zM801 260V199h54V260zM855 260V192h72V260zM927 260V125h40V260zM967 260V162h32V260zM999 260V197h79V260zM1078 260V140h47V260zM1125 260V151h68V260zM1193 260V146h75V260zM1268 260V127h55V260zM1323 260V183h58V260zM1381 260V188h53V260zM1434 260V183h32V260z"/><path fill="#0f2040" d="M300 260V104h52v156zM308 104l18-74 18 74zM326 12v18M740 260V120l40-14 40 22 40-34 40 30 40-14v150zM1127 260V50h6v210z M1145 92a15 20 0 1 1-30 0a15 20 0 1 1 30 0z M1129 50V20h2v30z"/><path fill="#081124" d="M0 260V198h75V260zM75 260V185h83V260zM158 260V163h86V260zM244 260V171h37V260zM281 260V199h85V260zM366 260V224h77V260zM443 260V216h46V260zM489 260V170h59V260zM548 260V182h51V260zM599 260V217h70V260zM669 260V199h72V260zM741 260V203h36V260zM777 260V195h62V260zM839 260V181h47V260zM886 260V221h46V260zM932 260V151h44V260zM976 260V174h75V260zM1051 260V214h44V260zM1095 260V230h36V260zM1131 260V203h49V260zM1180 260V209h46V260zM1226 260V190h54V260zM1280 260V161h48V260zM1328 260V150h79V260zM1407 260V207h49V260z"/><path fill="#ffd98a" fill-opacity=".55" d="M8 236h3v5h-3zM20 208h3v5h-3zM20 250h3v5h-3zM32 236h3v5h-3zM44 250h3v5h-3zM56 222h3v5h-3zM83 251h3v5h-3zM95 251h3v5h-3zM119 223h3v5h-3zM131 195h3v5h-3zM131 237h3v5h-3zM143 195h3v5h-3zM143 251h3v5h-3zM166 173h3v5h-3zM166 201h3v5h-3zM166 215h3v5h-3zM178 215h3v5h-3zM190 201h3v5h-3zM190 243h3v5h-3zM202 215h3v5h-3zM214 201h3v5h-3zM226 187h3v5h-3zM252 223h3v5h-3zM264 237h3v5h-3zM289 209h3v5h-3zM289 237h3v5h-3zM349 209h3v5h-3zM386 234h3v5h-3zM386 248h3v5h-3zM422 248h3v5h-3zM434 248h3v5h-3zM451 226h3v5h-3zM463 226h3v5h-3zM497 250h3v5h-3zM509 180h3v5h-3zM509 236h3v5h-3zM521 194h3v5h-3zM533 250h3v5h-3zM568 206h3v5h-3zM580 220h3v5h-3zM619 227h3v5h-3zM677 223h3v5h-3zM689 237h3v5h-3zM701 237h3v5h-3zM713 237h3v5h-3zM725 237h3v5h-3zM761 227h3v5h-3zM797 205h3v5h-3zM797 219h3v5h-3zM847 247h3v5h-3zM859 191h3v5h-3zM859 219h3v5h-3zM871 219h3v5h-3zM940 189h3v5h-3zM984 226h3v5h-3zM1008 212h3v5h-3zM1020 226h3v5h-3zM1032 198h3v5h-3zM1032 212h3v5h-3zM1032 240h3v5h-3zM1032 254h3v5h-3zM1059 238h3v5h-3zM1083 252h3v5h-3zM1151 241h3v5h-3zM1163 227h3v5h-3zM1200 247h3v5h-3zM1246 228h3v5h-3zM1258 228h3v5h-3zM1258 242h3v5h-3zM1300 199h3v5h-3zM1312 241h3v5h-3zM1348 216h3v5h-3zM1360 202h3v5h-3zM1360 230h3v5h-3zM1372 202h3v5h-3zM1372 230h3v5h-3zM1396 160h3v5h-3zM1415 245h3v5h-3z"/><circle cx="1130" cy="20" r="3" fill="#cfe4ff" class="blink"/></svg>
+  <svg class="sky" viewBox="0 0 1440 260" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><path fill="#14284d" d="M0 260V125h45V260zM45 260V184h64V260zM109 260V123h53V260zM162 260V120h60V260zM222 260V192h67V260zM289 260V199h68V260zM357 260V167h60V260zM417 260V171h65V260zM482 260V140h42V260zM524 260V130h64V260zM588 260V150h60V260zM648 260V181h70V260zM718 260V119h44V260zM762 260V134h39V260zM801 260V199h54V260zM855 260V192h72V260zM927 260V125h40V260zM967 260V162h32V260zM999 260V197h79V260zM1078 260V140h47V260zM1125 260V151h68V260zM1193 260V146h75V260zM1268 260V127h55V260zM1323 260V183h58V260zM1381 260V188h53V260zM1434 260V183h32V260z"/><path fill="#0f2040" d="M300 260V104h52v156zM308 104l18-74 18 74zM326 12v18M740 260V120l40-14 40 22 40-34 40 30 40-14v150zM1127 260V50h6v210z M1145 92a15 20 0 1 1-30 0a15 20 0 1 1 30 0z M1129 50V20h2v30z"/><path fill="#081124" d="M0 260V198h75V260zM75 260V185h83V260zM158 260V163h86V260zM244 260V171h37V260zM281 260V199h85V260zM366 260V224h77V260zM443 260V216h46V260zM489 260V170h59V260zM548 260V182h51V260zM599 260V217h70V260zM669 260V199h72V260zM741 260V203h36V260zM777 260V195h62V260zM839 260V181h47V260zM886 260V221h46V260zM932 260V151h44V260zM976 260V174h75V260zM1051 260V214h44V260zM1095 260V230h36V260zM1131 260V203h49V260zM1180 260V209h46V260zM1226 260V190h54V260zM1280 260V161h48V260zM1328 260V150h79V260zM1407 260V207h49V260z"/><path fill="#ffd98a" fill-opacity=".55" d="M8 236h3v5h-3zM20 208h3v5h-3zM20 250h3v5h-3zM32 236h3v5h-3zM44 250h3v5h-3zM56 222h3v5h-3zM83 251h3v5h-3zM95 251h3v5h-3zM119 223h3v5h-3zM131 195h3v5h-3zM131 237h3v5h-3zM143 195h3v5h-3zM143 251h3v5h-3zM166 173h3v5h-3zM166 201h3v5h-3zM166 215h3v5h-3zM178 215h3v5h-3zM190 201h3v5h-3zM190 243h3v5h-3zM202 215h3v5h-3zM214 201h3v5h-3zM226 187h3v5h-3zM252 223h3v5h-3zM264 237h3v5h-3zM289 209h3v5h-3zM289 237h3v5h-3zM349 209h3v5h-3zM386 234h3v5h-3zM386 248h3v5h-3zM422 248h3v5h-3zM434 248h3v5h-3zM451 226h3v5h-3zM463 226h3v5h-3zM497 250h3v5h-3zM509 180h3v5h-3zM509 236h3v5h-3zM521 194h3v5h-3zM533 250h3v5h-3zM568 206h3v5h-3zM580 220h3v5h-3zM619 227h3v5h-3zM677 223h3v5h-3zM689 237h3v5h-3zM701 237h3v5h-3zM713 237h3v5h-3zM725 237h3v5h-3zM761 227h3v5h-3zM797 205h3v5h-3zM797 219h3v5h-3zM847 247h3v5h-3zM859 191h3v5h-3zM859 219h3v5h-3zM871 219h3v5h-3zM940 189h3v5h-3zM984 226h3v5h-3zM1008 212h3v5h-3zM1020 226h3v5h-3zM1032 198h3v5h-3zM1032 212h3v5h-3zM1032 240h3v5h-3zM1032 254h3v5h-3zM1059 238h3v5h-3zM1083 252h3v5h-3zM1151 241h3v5h-3zM1163 227h3v5h-3zM1200 247h3v5h-3zM1246 228h3v5h-3zM1258 228h3v5h-3zM1258 242h3v5h-3zM1300 199h3v5h-3zM1312 241h3v5h-3zM1348 216h3v5h-3zM1360 202h3v5h-3zM1360 230h3v5h-3zM1372 202h3v5h-3zM1372 230h3v5h-3zM1396 160h3v5h-3zM1415 245h3v5h-3z"/><g fill="none" stroke="#040b18" stroke-linecap="round"><path d="M96 260C100 220 94 190 104 150" stroke-width="7"/><g stroke-width="5"><path d="M104 150C84 138 62 140 44 154"/><path d="M104 150C90 128 68 120 50 124"/><path d="M104 150C108 126 124 112 146 108"/><path d="M104 150C122 136 146 138 164 152"/><path d="M104 150C100 134 92 120 80 108"/></g><path d="M1344 260C1340 222 1348 192 1338 152" stroke-width="7"/><g stroke-width="5"><path d="M1338 152C1358 140 1380 142 1398 156"/><path d="M1338 152C1352 130 1374 122 1392 126"/><path d="M1338 152C1334 128 1318 114 1296 110"/><path d="M1338 152C1320 138 1296 140 1278 154"/><path d="M1338 152C1342 136 1350 122 1362 110"/></g></g><circle cx="1130" cy="20" r="3" fill="#cfe4ff" class="blink"/></svg>
 </header>
 
 <section class="s" id="mission">
   <div class="wrap">
     <div class="head">
       <div><span class="kicker">Unsere Mission</span><h2>RP, das bleibt.</h2></div>
-      <p class="muted lead">Wir entwickeln Notruf Craftopia gemeinsam mit der Community und schaffen von Anfang an eine Basis für langfristige Geschichten.</p>
+      <p class="muted lead">Wir entwickeln Palm City RP gemeinsam mit der Community und schaffen von Anfang an eine Basis für langfristige Geschichten.</p>
     </div>
     <div class="cols">
       <article class="col"><h3>Deine Vergangenheit zählt.</h3><p class="muted">Ein Charakter beginnt nicht jeden Tag bei null. Schwere Straftaten und Entscheidungen werden Teil seiner Geschichte und können sich später etwa auf eine Bewerbung bei der Polizei auswirken.</p></article>
@@ -533,7 +480,7 @@ kbd{font:600 .6875rem/1 var(--mono);padding:4px 6px;border-radius:6px;border:1px
       <div class="value"><svg class="i"><use href="#i-siren"/></svg><b>Serious RP</b><span class="muted small">Langfristige Geschichten statt ständigem Neustart.</span></div>
       <div class="value"><svg class="i"><use href="#i-scale"/></svg><b>Recht &amp; Ordnung</b><span class="muted small">Anwälte, Gerichte und klare Konsequenzen.</span></div>
       <div class="value"><svg class="i"><use href="#i-user"/></svg><b>Freie Charaktere</b><span class="muted small">Fehler und Entwicklung gehören dazu.</span></div>
-      <div class="value"><svg class="i"><use href="#i-users"/></svg><b>Gemeinsam bauen</b><span class="muted small">Präge Notruf Craftopia von Anfang an mit.</span></div>
+      <div class="value"><svg class="i"><use href="#i-users"/></svg><b>Gemeinsam bauen</b><span class="muted small">Präge Palm City RP von Anfang an mit.</span></div>
     </div>
   </div>
 </section>
@@ -596,7 +543,7 @@ kbd{font:600 .6875rem/1 var(--mono);padding:4px 6px;border-radius:6px;border:1px
 <section class="s" id="discord">
   <div class="wrap cta">
     <div class="panel dark">
-      <h2>Werde Teil von Notruf Craftopia.</h2>
+      <h2>Werde Teil von Palm City RP.</h2>
       <p>Wir sind noch am Anfang. Genau deshalb kannst du mitbestimmen, wie der Server am Ende aussieht.</p>
       <div class="faces" id="faces"></div>
       <a class="btn btn-primary" href="https://discord.gg/t7N6D43KFv" target="_blank" rel="noopener">Discord öffnen<svg class="i"><use href="#i-out"/></svg></a>
@@ -604,13 +551,13 @@ kbd{font:600 .6875rem/1 var(--mono);padding:4px 6px;border-radius:6px;border:1px
     <div class="panel" id="einspruch">
       <h2>Entscheidung anfechten?</h2>
       <p>Du bist mit einer Moderationsentscheidung nicht einverstanden? Reiche deinen Fall direkt über das Einspruchssystem ein.</p>
-      <a class="btn btn-danger" href="https://notrufcraftopia.vercel.app/einspruch" target="_blank" rel="noopener">Widerspruch einreichen<svg class="i"><use href="#i-out"/></svg></a>
+      <a class="btn btn-danger" href="/einspruch">Widerspruch einreichen<svg class="i"><use href="#i-out"/></svg></a>
     </div>
   </div>
 </section>
 </main>
 
-<footer><div class="wrap"><span>© <span id="year"></span> Notruf Craftopia</span><span>Notruf Hamburg RP · Deine Stadt. Deine Geschichte.<button class="secret" id="adminDot" type="button" aria-label="Team-Menü"></button></span></div></footer>
+<footer><div class="wrap"><span>© <span id="year"></span> Palm City RP</span><span>Notruf Hamburg RP · Deine Stadt. Deine Entscheidungen.<button class="secret" id="adminDot" type="button" aria-label="Team-Menü"></button></span></div></footer>
 
 <dialog id="adminDlg" aria-labelledby="adminTitle">
   <div class="dhead"><h2 id="adminTitle">Team-Menü</h2><button class="btn btn-ghost" type="button" id="adminClose" aria-label="Schließen"><svg class="i"><use href="#i-x"/></svg></button></div>
@@ -668,7 +615,7 @@ function renderPartners(list, error) {
     const url = safeUrl(p.server_link);
     return `<article class="panel partner"><h3>${esc(p.server_name || "Unbekannter Server")}</h3>
       <span class="muted small">Ansprechpartner: ${esc(p.owner_name || "Unbekannt")}</span>
-      <p>${esc(p.advertisement || "Offizieller Partnerserver von Notruf Craftopia.")}</p>
+      <p>${esc(p.advertisement || "Offizieller Partnerserver von Palm City RP.")}</p>
       <div class="foot"><span class="small"><b>${Number(p.member_count || 0).toLocaleString("de-DE")}</b> Mitglieder</span>
       ${url ? `<a class="btn btn-sm" style="min-height:36px;padding:0 12px" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Öffnen${icon("out")}</a>` : ""}</div></article>`;
   }).join("");
@@ -701,7 +648,7 @@ async function renderReviewBox(reviewed) {
   let user = null;
   try { user = (await api("/api/session")).user; } catch {}
   if (!user) {
-    box.innerHTML = `<div class="field"><label>Wie gefällt dir Notruf Craftopia?</label>${starInput()}</div><p class="small muted">Wähle 1 bis 5 Sterne. Zum Absenden meldest du dich kurz mit Discord an.</p><a class="btn btn-primary" id="loginRev" href="/api/login?next=review">Anmelden und bewerten</a>`;
+    box.innerHTML = `<div class="field"><label>Wie gefällt dir Palm City RP?</label>${starInput()}</div><p class="small muted">Wähle 1 bis 5 Sterne. Zum Absenden meldest du dich kurz mit Discord an.</p><a class="btn btn-primary" id="loginRev" href="/api/login?next=review">Anmelden und bewerten</a>`;
     $("loginRev").onclick = () => { try { sessionStorage.setItem("pendingRating", box.querySelector("input[name=rating]:checked")?.value || ""); } catch {} };
     return;
   }
@@ -827,289 +774,6 @@ $("sirenBtn").onclick = () => {
 loadWidget(); loadTeam(); loadReviews();
 setInterval(loadWidget, 60000); setInterval(loadTeam, 60000);
 </script>
-<script id="halloween-music-script">
-(function(){
-  const btn=document.getElementById('halloweenMusic');
-  if(!btn) return;
-  const AC=window.AudioContext||window.webkitAudioContext;
-  if(!AC) return;
-
-  const VOLUME=.5; // Gesamtlautstärke (leise). 0.3 = noch leiser, 0.8 = lauter
-  let ctx=null, master=null, musicSend=null, noiseBuf=null;
-  let userMuted=false, loopsStarted=false, lastSfx=null;
-  const rand=(a,b)=>a+Math.random()*(b-a);
-  const running=()=>!!ctx&&ctx.state==='running';
-
-  /* ---------- Hilfsfunktionen ---------- */
-  const hint=document.createElement('div');
-  hint.id='soundHint';hint.setAttribute('role','status');
-  hint.textContent='🎃 Einmal tippen oder klicken – dann startet der Gruselsound';
-  const hintCss=document.createElement('style');
-  hintCss.textContent='#soundHint{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);z-index:10019;max-width:calc(100% - 32px);padding:10px 16px;border-radius:999px;border:1px solid rgba(255,140,60,.45);background:rgba(18,8,28,.88);color:#ffd9b0;font:600 13px/1.3 Inter,system-ui,sans-serif;text-align:center;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 10px 30px -8px rgba(0,0,0,.7),0 0 24px rgba(247,103,7,.25);pointer-events:none;animation:hintPulse 2s ease-in-out infinite}#soundHint[hidden]{display:none}@keyframes hintPulse{50%{box-shadow:0 10px 30px -8px rgba(0,0,0,.7),0 0 36px rgba(247,103,7,.55)}}';
-  document.head.appendChild(hintCss);document.body.appendChild(hint);
-  function setUi(){
-    const on=running()&&!userMuted;
-    hint.hidden=on||userMuted;
-    btn.classList.toggle('on',on);
-    const label=on?'🎃 Gruselmusik AN':userMuted?'🎃 Gruselmusik AUS':'🎃 Tippen für Ton';
-    btn.innerHTML='<span class="music-dot"></span>'+label;
-  }
-  function env(g,t,a,peak,d){
-    g.gain.setValueAtTime(.0001,t);
-    g.gain.exponentialRampToValueAtTime(peak,t+a);
-    g.gain.exponentialRampToValueAtTime(.0001,t+a+d);
-  }
-  function route(node,pan){
-    if(ctx.createStereoPanner){
-      const p=ctx.createStereoPanner();
-      p.pan.value=pan??rand(-.8,.8);
-      node.connect(p);p.connect(master);
-    }else node.connect(master);
-  }
-  function noise(){
-    const s=ctx.createBufferSource();
-    s.buffer=noiseBuf;s.loop=true;
-    return s;
-  }
-  function tone(freq,dur,vol,type='sine',when=0){
-    const t=ctx.currentTime+when,a=Math.min(.7,dur/3);
-    const o=ctx.createOscillator(),g=ctx.createGain(),f=ctx.createBiquadFilter();
-    o.type=type;o.frequency.setValueAtTime(freq,t);
-    f.type='lowpass';f.frequency.value=700;f.Q.value=.5;
-    env(g,t,a,vol,dur-a);
-    o.connect(f);f.connect(g);g.connect(master);
-    o.start(t);o.stop(t+dur+.1);
-  }
-
-  /* ---------- Dauerhafte Atmosphäre ---------- */
-  function wind(){
-    const n=noise(),f=ctx.createBiquadFilter(),g=ctx.createGain();
-    f.type='bandpass';f.frequency.value=450;f.Q.value=.8;g.gain.value=.05;
-    const l1=ctx.createOscillator(),d1=ctx.createGain();
-    l1.frequency.value=.07;d1.gain.value=.03;l1.connect(d1);d1.connect(g.gain);
-    const l2=ctx.createOscillator(),d2=ctx.createGain();
-    l2.frequency.value=.04;d2.gain.value=220;l2.connect(d2);d2.connect(f.frequency);
-    n.connect(f);f.connect(g);g.connect(master);
-    n.start();l1.start();l2.start();
-  }
-  const NOTES=[55,65.41,73.42,82.41,98,110];
-  function droneTick(){
-    if(!running()||userMuted) return;
-    tone(55,9,.05,'sine');
-    tone(82.8,9,.02,'triangle',.3);
-    tone(110,7,.012,'sine',.8);
-    const n=NOTES[Math.floor(Math.random()*NOTES.length)];
-    tone(n*2,4,.012,'sine');tone(n*3,3.2,.006,'triangle',.04);
-  }
-
-  /* ---------- Spieluhr-Melodie (Moll, mit Echo) ---------- */
-  const MELODY=[440,523.25,659.25,830.61,880,830.61,659.25,523.25,440,415.3,349.23,329.63];
-  function boxNote(freq,when,vol){
-    const t=ctx.currentTime+when;
-    [[1,1],[3,.25]].forEach(([m,v])=>{
-      const o=ctx.createOscillator(),g=ctx.createGain();
-      o.type='sine';o.frequency.value=freq*m;
-      env(g,t,.005,vol*v,1.6);
-      o.connect(g);g.connect(musicSend);
-      o.start(t);o.stop(t+1.8);
-    });
-  }
-  function melody(){
-    if(!running()||userMuted||document.hidden) return;
-    MELODY.forEach((f,i)=>boxNote(f,i*.55,.03));
-  }
-
-  /* ---------- Zufällige Halloween-Sounds ---------- */
-  function thunder(){
-    const t=ctx.currentTime,n=noise(),f=ctx.createBiquadFilter(),g=ctx.createGain();
-    f.type='lowpass';f.frequency.setValueAtTime(320,t);f.frequency.exponentialRampToValueAtTime(70,t+5);
-    g.gain.setValueAtTime(.0001,t);
-    [[.2,.35],[.9,.1],[1.5,.25],[2.6,.08],[5.5,.0001]].forEach(([s,v])=>g.gain.exponentialRampToValueAtTime(v,t+s));
-    n.connect(f);f.connect(g);route(g);n.start(t);n.stop(t+6);
-  }
-  function wolf(){
-    const t=ctx.currentTime,base=rand(280,340);
-    const o=ctx.createOscillator(),g=ctx.createGain(),f=ctx.createBiquadFilter();
-    const lfo=ctx.createOscillator(),lg=ctx.createGain();
-    o.type='triangle';
-    o.frequency.setValueAtTime(base,t);
-    o.frequency.linearRampToValueAtTime(base*1.7,t+1.4);
-    o.frequency.linearRampToValueAtTime(base*1.65,t+3);
-    o.frequency.linearRampToValueAtTime(base*1.2,t+4.6);
-    lfo.frequency.value=5.5;lg.gain.value=6;lfo.connect(lg);lg.connect(o.frequency);
-    f.type='lowpass';f.frequency.value=1400;
-    g.gain.setValueAtTime(.0001,t);
-    g.gain.exponentialRampToValueAtTime(.07,t+.8);
-    g.gain.exponentialRampToValueAtTime(.06,t+3.2);
-    g.gain.exponentialRampToValueAtTime(.0001,t+4.8);
-    o.connect(f);f.connect(g);route(g,rand(-.9,.9));
-    o.start(t);lfo.start(t);o.stop(t+5);lfo.stop(t+5);
-  }
-  function creak(){
-    const t=ctx.currentTime,dur=rand(1.2,2.2);
-    const o=ctx.createOscillator(),f=ctx.createBiquadFilter(),g=ctx.createGain();
-    o.type='sawtooth';f.type='bandpass';f.frequency.value=rand(450,800);f.Q.value=9;
-    o.frequency.setValueAtTime(rand(80,130),t);
-    for(let i=1;i<=14;i++) o.frequency.linearRampToValueAtTime(rand(70,260),t+dur*i/14);
-    env(g,t,.15,.06,dur-.15);
-    o.connect(f);f.connect(g);route(g);
-    o.start(t);o.stop(t+dur+.1);
-  }
-  function bell(){
-    const base=rand(140,190),pan=rand(-.6,.6);
-    for(let k=0;k<3;k++){
-      const t=ctx.currentTime+k*3.4;
-      [[1,1],[2.01,.5],[2.76,.35],[4.07,.18]].forEach(([m,v])=>{
-        const o=ctx.createOscillator(),g=ctx.createGain(),d=6/(m**.3);
-        o.type='sine';o.frequency.value=base*m;
-        env(g,t,.01,.05*v*(1-k*.2),d);
-        o.connect(g);route(g,pan);
-        o.start(t);o.stop(t+d+.2);
-      });
-    }
-  }
-  function bats(){
-    const pan=rand(-.8,.8),n=Math.floor(rand(4,8));
-    let t=ctx.currentTime;
-    for(let i=0;i<n;i++){
-      const o=ctx.createOscillator(),g=ctx.createGain();
-      o.type='sine';
-      o.frequency.setValueAtTime(5200,t);o.frequency.exponentialRampToValueAtTime(8200,t+.05);
-      env(g,t,.02,.012,.05);
-      o.connect(g);route(g,pan);
-      o.start(t);o.stop(t+.1);
-      t+=rand(.08,.14);
-    }
-  }
-  function whisper(){
-    const t=ctx.currentTime,n=noise(),f=ctx.createBiquadFilter(),g=ctx.createGain();
-    f.type='bandpass';f.frequency.value=rand(1800,3200);f.Q.value=2.5;
-    g.gain.setValueAtTime(.0001,t);
-    let c=t;const k=Math.floor(rand(5,9));
-    for(let i=0;i<k;i++){
-      const a=rand(.08,.18),h=rand(.05,.15);
-      g.gain.exponentialRampToValueAtTime(rand(.03,.06),c+a);c+=a+h;
-      g.gain.exponentialRampToValueAtTime(.002,c);c+=rand(.04,.1);
-    }
-    g.gain.exponentialRampToValueAtTime(.0001,c+.2);
-    n.connect(f);f.connect(g);route(g);n.start(t);n.stop(c+.3);
-  }
-  function owl(){
-    const pan=rand(-.8,.8);
-    [0,.55,1.1].forEach(s=>{
-      const t=ctx.currentTime+s,o=ctx.createOscillator(),g=ctx.createGain();
-      o.type='sine';o.frequency.setValueAtTime(430,t);o.frequency.exponentialRampToValueAtTime(350,t+.4);
-      env(g,t,.08,.05,.35);
-      o.connect(g);route(g,pan);
-      o.start(t);o.stop(t+.5);
-    });
-  }
-  const SFX=[[thunder,1],[wolf,1.2],[creak,2],[bell,1],[bats,1.5],[whisper,2],[owl,1.5]];
-  function pickSfx(){
-    const pool=SFX.filter(s=>s[0]!==lastSfx);
-    let r=Math.random()*pool.reduce((a,s)=>a+s[1],0);
-    for(const s of pool){ r-=s[1]; if(r<=0) return s[0]; }
-    return pool[0][0];
-  }
-  function sfxLoop(delay){
-    setTimeout(()=>{
-      if(running()&&!userMuted&&!document.hidden){
-        const fn=pickSfx();lastSfx=fn;
-        try{fn();}catch(e){}
-      }
-      sfxLoop(rand(6000,15000));
-    },delay);
-  }
-
-  /* ---------- Start / Audio-Kontext ---------- */
-  const EVENTS=['pointerdown','mousedown','touchstart','touchend','click','keydown','mousemove','pointermove','wheel','scroll','touchmove'];
-  const WEAK=new Set(['mousemove','pointermove','wheel','scroll','touchmove']);
-  let lastTry=0;
-  function startLoops(){
-    if(loopsStarted) return;
-    loopsStarted=true;
-    droneTick();setInterval(droneTick,8000);
-    setTimeout(melody,1500);setInterval(melody,15000);
-    sfxLoop(2500); // erster Gruselsound nach ca. 2,5 Sekunden
-  }
-  function onState(){
-    if(running()){
-      startLoops();
-      EVENTS.forEach(ev=>window.removeEventListener(ev,onGesture,true));
-    }
-    setUi();
-  }
-  function init(){
-    if(ctx) return;
-    ctx=new AC();
-    master=ctx.createGain();master.gain.value=0;
-    const comp=ctx.createDynamicsCompressor();
-    master.connect(comp);comp.connect(ctx.destination);
-    // Echo für die Spieluhr
-    musicSend=ctx.createGain();
-    const delay=ctx.createDelay(1),fb=ctx.createGain(),wet=ctx.createGain();
-    delay.delayTime.value=.42;fb.gain.value=.38;wet.gain.value=.5;
-    musicSend.connect(master);musicSend.connect(delay);
-    delay.connect(fb);fb.connect(delay);delay.connect(wet);wet.connect(master);
-    // Rauschpuffer für Wind, Donner, Flüstern
-    const len=ctx.sampleRate*2;
-    noiseBuf=ctx.createBuffer(1,len,ctx.sampleRate);
-    const d=noiseBuf.getChannelData(0);
-    for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
-    wind();
-    master.gain.linearRampToValueAtTime(VOLUME,ctx.currentTime+4); // sanftes Einblenden
-    ctx.onstatechange=onState;
-    setUi();
-  }
-  function wake(){
-    if(userMuted) return;
-    init();
-    if(ctx.state!=='running') ctx.resume().catch(()=>{});
-  }
-
-  /* Browser blockieren Ton vor der ersten Interaktion. Deshalb: sofort versuchen,
-     und beim allerersten Tippen/Klicken/Tastendruck irgendwo auf der Seite starten. */
-  function onGesture(e){
-    if(e.target&&e.target.closest&&e.target.closest('#halloweenMusic')) return;
-    if(WEAK.has(e.type)){
-      if(navigator.userActivation&&!navigator.userActivation.hasBeenActive) return; // Browser würde es eh blockieren
-      const now=performance.now();
-      if(now-lastTry<400) return; // Bewegen/Scrollen nur gelegentlich versuchen
-      lastTry=now;
-    }
-    wake();
-  }
-  EVENTS.forEach(ev=>window.addEventListener(ev,onGesture,{capture:true,passive:true}));
-
-  /* ---------- Button: Ton an/aus ---------- */
-  btn.addEventListener('click',()=>{
-    init();
-    const t=ctx.currentTime;
-    master.gain.cancelScheduledValues(t);
-    master.gain.setValueAtTime(master.gain.value,t);
-    if(running()&&!userMuted){
-      userMuted=true;
-      master.gain.linearRampToValueAtTime(0,t+.5);
-      setTimeout(()=>{if(userMuted&&ctx.state==='running')ctx.suspend().catch(()=>{});},600);
-    }else{
-      userMuted=false;
-      master.gain.linearRampToValueAtTime(VOLUME,t+1.5);
-      ctx.resume().catch(()=>{});
-    }
-    setUi();
-  });
-
-  /* Im Hintergrund-Tab pausieren, beim Zurückkehren weiter */
-  document.addEventListener('visibilitychange',()=>{
-    if(!ctx) return;
-    if(document.hidden){ if(ctx.state==='running') ctx.suspend().catch(()=>{}); }
-    else wake();
-  });
-  window.addEventListener('pageshow',wake);
-
-  wake(); // sofort versuchen
-})();
-</script>
 <script id="design-upgrade-script">
 (function(){
   const root=document.documentElement;
@@ -1141,7 +805,7 @@ setInterval(loadWidget, 60000); setInterval(loadTeam, 60000);
     ['Mission','Abschnitt','go','#mission'],['Team','Abschnitt','go','#team'],['Partner','Abschnitt','go','#partner'],
     ['Bewertungen','Abschnitt','go','#bewertungen'],['Kontakt','Abschnitt','go','#kontakt'],['Einspruch','Abschnitt','go','#einspruch'],
     ['Discord beitreten','Extern','open','https://discord.gg/t7N6D43KFv'],
-    ['Sirene abspielen','Aktion','click','sirenBtn'],['Gruselmusik an/aus','Aktion','click','halloweenMusic']];
+    ['Sirene abspielen','Aktion','click','sirenBtn']];
   const SEARCH='<svg class="i" aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
   const dlg=document.createElement('dialog');dlg.id='cmdk';dlg.setAttribute('aria-label','Schnellzugriff');
   dlg.innerHTML='<div class="ck-top">'+SEARCH+'<input id="ckIn" type="text" role="combobox" aria-expanded="true" aria-controls="ckList" aria-label="Suchen" placeholder="Springe zu …" autocomplete="off" spellcheck="false"><kbd>esc</kbd></div><ul id="ckList" role="listbox" aria-label="Ergebnisse"></ul>';
