@@ -31,9 +31,9 @@ const BOT_API_URL = normalizeBotUrl(
   process.env.TEAM_API_URL || "http://server.infynix.de:40377"
 );
 
-const SITE_URL = "https://palmcityrp.vercel.app";
+const SITE_URL = "https://palm-city-rp.vercel.app";
 const OAUTH_REDIRECT_URI =
-  "https://notruf-craftopia.vercel.app/api/team-dashboard?action=callback";
+  "https://palm-city-rp.vercel.app/api/team-dashboard?action=callback";
 
 const DASHBOARD_PATH = "/team-dashboard";
 const SESSION_COOKIE = "td_session";
@@ -160,7 +160,7 @@ function getSession(req) {
 // Kritische Berechtigungsprüfung: Der Cookie allein reicht niemals aus.
 // Discord-Mitgliedschaft und zwingende Zugriffsrolle werden bei jeder Anfrage
 // live über die Bot-API geprüft. Bei API-Ausfall wird der Zugriff verweigert.
-const ACCESS_GUILD_ID = process.env.DISCORD_GUILD_ID || "1548652649866596473";
+const ACCESS_GUILD_ID = process.env.DISCORD_GUILD_ID || "1555883394301173822";
 const ACCESS_ROLE_ID = "1556719122648408197";
 const ACCESS_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 async function verifyDashboardAccess(session) {
