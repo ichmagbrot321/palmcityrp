@@ -592,16 +592,14 @@ if ("IntersectionObserver" in window) {
   items.forEach(a => { const t = document.querySelector(a.hash); t && spy.observe(t); });
 }
 
-/* Discord Widget */
+/* Discord Widget: same-origin API uses the configured guild ID */
 async function loadWidget() {
   try {
-    const r = await fetch("https://discord.com/api/guilds/1548652649866596473/widget.json", { cache: "no-store" });
-    if (!r.ok) throw 0;
-    const d = await r.json();
+    const d = await api("/api/public-widget");
     $("heroOnline").textContent = d.presence_count ?? "–";
     $("faces").innerHTML = (d.members || []).slice(0, 8).map(m => `<img src="${esc(m.avatar_url || DEFAULT_AVATAR)}" alt="" loading="lazy">`).join("");
     if (d.instant_invite) document.querySelectorAll('a[href*="discord.gg/t7N6D43KFv"]').forEach(a => a.href = d.instant_invite);
-  } catch { $("heroOnline").textContent = "–"; }
+  } catch { $("heroOnline").textContent = "–"; $("faces").innerHTML = ""; }
 }
 
 /* Partner */
@@ -621,13 +619,12 @@ function renderPartners(list, error) {
   }).join("");
 }
 
-/* Team */
+/* Team: unabhängig von der Partnerliste laden */
 async function loadTeam() {
   const grid = $("teamGrid");
   try {
     const d = await api("/api/team");
     const m = Array.isArray(d.members) ? d.members : [];
-    renderPartners(Array.isArray(d.partners) ? d.partners : [], d.partners_error || null);
     $("teamCount").textContent = `${m.length} Teammitglied${m.length === 1 ? "" : "er"}`;
     $("teamUpdated").textContent = "Automatisch aktualisiert";
     $("heroTeam").textContent = m.length;
@@ -635,7 +632,18 @@ async function loadTeam() {
       : state("users", "Noch keine Teammitglieder", "Sobald jemand die Teamrolle erhält, erscheint er hier.");
   } catch {
     $("teamCount").textContent = "Teamliste nicht erreichbar";
-    grid.innerHTML = state("alert", "Teamliste konnte nicht geladen werden", "Bitte versuche es in ein paar Minuten erneut.", "err");
+    grid.innerHTML = state("alert", "Teamliste konnte nicht geladen werden", "Die Team-API ist momentan nicht erreichbar. Die Partnerliste wird unabhängig davon geladen.", "err");
+    $("heroTeam").textContent = "–";
+  }
+}
+
+/* Partner: eigener Endpunkt, unabhängig von Discord-Team */
+async function loadPartners() {
+  try {
+    const d = await api("/api/partners");
+    renderPartners(Array.isArray(d.partners) ? d.partners : [], null);
+  } catch (e) {
+    console.error("Partner API Fehler:", e);
     renderPartners([], true);
   }
 }
@@ -771,8 +779,8 @@ $("sirenBtn").onclick = () => {
   osc.start(t); osc.stop(t + 3.05);
 };
 
-loadWidget(); loadTeam(); loadReviews();
-setInterval(loadWidget, 60000); setInterval(loadTeam, 60000);
+loadWidget(); loadTeam(); loadPartners(); loadReviews();
+setInterval(loadWidget, 60000); setInterval(loadTeam, 60000); setInterval(loadPartners, 60000);
 </script>
 <script id="design-upgrade-script">
 (function(){
