@@ -5,7 +5,7 @@ const crypto = require('crypto');
    ========================================================= */
 
 const DISCORD = 'https://discord.com/api/v10';
-const GUILD = process.env.DISCORD_GUILD_ID || '1548652649866596473';
+const GUILD = process.env.DISCORD_GUILD_ID || '1555883394301173822';
 const BOT = process.env.DISCORD_BOT_TOKEN;
 const CLIENT = process.env.DISCORD_CLIENT_ID || '1547984607255994388';
 const SECRET = process.env.DISCORD_CLIENT_SECRET;
@@ -13,8 +13,8 @@ const SUPA = process.env.SUPABASE_URL;
 const SKEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
 const SITE = 'https://notruf-craftopia.vercel.app';
 const SESSION = process.env.SESSION_SECRET;
-const APPEAL_CHANNEL = process.env.DISCORD_APPEAL_CHANNEL_ID || '1551649399212347422';
-const TEAM_ROLE = process.env.DISCORD_TEAM_ROLE_ID || '1551649116675768414';
+const APPEAL_CHANNEL = process.env.DISCORD_APPEAL_CHANNEL_ID || '1555884182729785344';
+const TEAM_ROLE = process.env.DISCORD_TEAM_ROLE_ID || '1555884001179205673';
 
 const CONTACT_CHANNEL = process.env.DISCORD_CONTACT_CHANNEL_ID || '';
 const REVIEW_STATUS = process.env.REVIEWS_REQUIRE_APPROVAL === 'true' ? 'pending' : 'approved';
