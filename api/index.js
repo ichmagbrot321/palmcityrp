@@ -11,10 +11,11 @@ const CLIENT = process.env.DISCORD_CLIENT_ID || '1547984607255994388';
 const SECRET = process.env.DISCORD_CLIENT_SECRET;
 const SUPA = process.env.SUPABASE_URL;
 const SKEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
-const SITE = 'https://notruf-craftopia.vercel.app';
+const SITE = (process.env.SITE_URL || 'https://palm-city-rp.vercel.app').replace(/\/$/, '');
 const SESSION = process.env.SESSION_SECRET;
 const APPEAL_CHANNEL = process.env.DISCORD_APPEAL_CHANNEL_ID || '1555884182729785344';
 const TEAM_ROLE = process.env.DISCORD_TEAM_ROLE_ID || '1555884001179205673';
+const ADMIN_MENU_ROLE = process.env.DISCORD_ADMIN_MENU_ROLE_ID || '1555884009496514570';
 
 const CONTACT_CHANNEL = process.env.DISCORD_CONTACT_CHANNEL_ID || '';
 const REVIEW_STATUS = process.env.REVIEWS_REQUIRE_APPROVAL === 'true' ? 'pending' : 'approved';
@@ -23,7 +24,7 @@ const ADMIN_IDS = (process.env.ADMIN_DISCORD_IDS || '').split(',').map(x => x.tr
 const nextKey = k => (Object.hasOwn(NEXT, k) ? k : 'appeal');
 
 const DISCORD_INVITE = 'https://discord.gg/t7N6D43KFv';
-const WIDGET_URL = 'https://discord.com/api/guilds/1548652649866596473/widget.json';
+const WIDGET_URL = `https://discord.com/api/guilds/${encodeURIComponent(GUILD)}/widget.json`;
 
 const SESSION_MAX_AGE = 60 * 60 * 24 * 30; // 30 Tage statt 10 Jahre
 const ROBLOX_NAME = /^[A-Za-z0-9_]{3,20}$/;
@@ -428,7 +429,7 @@ function limited(key, max, ms) {
 async function isAdmin(me) {
   if (ADMIN_IDS.includes(String(me.id))) return true;
   const r = await dapi(`/guilds/${encodeURIComponent(GUILD)}/members/${encodeURIComponent(me.id)}`);
-  return r.ok && Array.isArray(r.data?.roles) && r.data.roles.includes(TEAM_ROLE);
+  return r.ok && Array.isArray(r.data?.roles) && r.data.roles.includes(ADMIN_MENU_ROLE);
 }
 const clientIp = req => String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
 const clip = (v, n) => String(v || '').trim().slice(0, n);
