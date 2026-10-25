@@ -11,11 +11,10 @@ const CLIENT = process.env.DISCORD_CLIENT_ID || '1547984607255994388';
 const SECRET = process.env.DISCORD_CLIENT_SECRET;
 const SUPA = process.env.SUPABASE_URL;
 const SKEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
-const SITE = (process.env.SITE_URL || 'https://palm-city-rp.vercel.app').replace(/\/$/, '');
+const SITE = process.env.SITE_URL || 'https://palm-city-rp.vercel.app';
 const SESSION = process.env.SESSION_SECRET;
 const APPEAL_CHANNEL = process.env.DISCORD_APPEAL_CHANNEL_ID || '1555884182729785344';
 const TEAM_ROLE = process.env.DISCORD_TEAM_ROLE_ID || '1555884001179205673';
-const ADMIN_MENU_ROLE = process.env.DISCORD_ADMIN_MENU_ROLE_ID || '1555884009496514570';
 
 const CONTACT_CHANNEL = process.env.DISCORD_CONTACT_CHANNEL_ID || '';
 const REVIEW_STATUS = process.env.REVIEWS_REQUIRE_APPROVAL === 'true' ? 'pending' : 'approved';
@@ -25,6 +24,8 @@ const nextKey = k => (Object.hasOwn(NEXT, k) ? k : 'appeal');
 
 const DISCORD_INVITE = 'https://discord.gg/t7N6D43KFv';
 const WIDGET_URL = `https://discord.com/api/guilds/${encodeURIComponent(GUILD)}/widget.json`;
+const TEAM_API_URL = String(process.env.TEAM_API_URL || 'http://server.infynix.de:40377').trim().replace(/\/+$/, '');
+const DASHBOARD_API_KEY = process.env.DASHBOARD_API_KEY;
 
 const SESSION_MAX_AGE = 60 * 60 * 24 * 30; // 30 Tage statt 10 Jahre
 const ROBLOX_NAME = /^[A-Za-z0-9_]{3,20}$/;
@@ -429,7 +430,7 @@ function limited(key, max, ms) {
 async function isAdmin(me) {
   if (ADMIN_IDS.includes(String(me.id))) return true;
   const r = await dapi(`/guilds/${encodeURIComponent(GUILD)}/members/${encodeURIComponent(me.id)}`);
-  return r.ok && Array.isArray(r.data?.roles) && r.data.roles.includes(ADMIN_MENU_ROLE);
+  return r.ok && Array.isArray(r.data?.roles) && r.data.roles.includes(TEAM_ROLE);
 }
 const clientIp = req => String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
 const clip = (v, n) => String(v || '').trim().slice(0, n);
@@ -505,6 +506,40 @@ module.exports = async (req, res) => {
       } catch (e) {
         console.error('Team API Fehler:', e);
         return send(res, 502, { error: 'Discord Team konnte nicht geladen werden.', detail: e.message });
+      }
+    }
+
+    if (p === '/api/partners' && req.method === 'GET') {
+      try {
+        if (!DASHBOARD_API_KEY) {
+          return send(res, 503, { error: 'Partner-API ist nicht konfiguriert.', code: 'dashboard_api_key_missing' });
+        }
+        if (!TEAM_API_URL) {
+          return send(res, 503, { error: 'TEAM_API_URL ist nicht konfiguriert.', code: 'team_api_url_missing' });
+        }
+        const r = await timedFetch(`${TEAM_API_URL}/team/partners`, {
+          headers: { Accept: 'application/json', 'X-API-Key': DASHBOARD_API_KEY, 'User-Agent': UA }
+        }, 7000);
+        const data = await r.json().catch(() => null);
+        if (!r.ok || !data || data.ok === false || !Array.isArray(data.partners)) {
+          console.error('Partner API Upstream Fehler:', r.status, data?.code || data?.error || 'Ungültige Antwort');
+          return send(res, 502, { error: 'Partner konnten nicht geladen werden.', code: data?.code || 'partner_upstream_error' });
+        }
+        return send(res, 200, {
+          partners: data.partners.map(partner => ({
+            id: String(partner.id || ''),
+            server_name: String(partner.server_name || partner.name || 'Unbekannter Server'),
+            server_link: String(partner.server_link || partner.link || partner.invite || ''),
+            member_count: Number(partner.member_count ?? partner.members ?? 0) || 0,
+            owner_name: String(partner.owner_name || 'Unbekannt'),
+            advertisement: String(partner.advertisement || 'Offizieller Partnerserver von Palm City RP.')
+          })),
+          total: data.partners.length,
+          updated_at: new Date().toISOString()
+        });
+      } catch (e) {
+        console.error('Partner API Fehler:', e);
+        return send(res, 502, { error: 'Partner-API momentan nicht erreichbar.', code: 'partner_api_unreachable' });
       }
     }
 
