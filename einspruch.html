@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Notruf Craftopia RP | Moderationsportal</title>
+<title>Palm City RP | Moderationsportal</title>
 <meta name="theme-color" content="#06101d">
 <link rel="icon" href="/logo.png" type="image/png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- Schriften werden bewusst NICHT von Google geladen (keine Drittanbieter-Verbindung ohne
+     Einwilligung, siehe LG München I, Urt. v. 20.01.2022 – 3 O 17493/20): Systemschriften
+     sehen Plus Jakarta Sans sehr ähnlich und brauchen keine externe Anfrage. -->
 
 <style>
 /* =========================================================
@@ -60,7 +60,7 @@
   --duration-base:.25s;
 
   /* Typografie */
-  --font:"Plus Jakarta Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
   --text-display:clamp(2.25rem,5.5vw,3.75rem);
   --text-h1:clamp(1.75rem,4vw,2.25rem);
   --text-h2:1.3125rem;
@@ -176,6 +176,16 @@ input:focus,textarea:focus{border-color:var(--color-primary);box-shadow:0 0 0 3p
 .row .btn{flex:1}
 .preview{display:flex;align-items:center;gap:var(--space-4);padding:var(--space-4);border-radius:var(--radius-md);background:var(--color-input);border:1px solid var(--color-border-strong)}
 .confirm-text{font-size:var(--text-small);color:var(--color-text-muted);margin-top:var(--space-4)}
+
+/* Verifizierungsschritt: Code in die Roblox-Bio eintragen */
+.verify-steps{list-style:none;margin:var(--space-5) 0;padding:0;display:grid;gap:var(--space-3)}
+.verify-steps li{display:flex;gap:var(--space-3);align-items:flex-start;font-size:var(--text-small);color:var(--color-text-soft)}
+.verify-steps b{display:grid;place-items:center;flex:0 0 24px;height:24px;margin-top:1px;border-radius:var(--radius-full);background:var(--color-surface-raised);border:1px solid var(--color-border-strong);font-size:var(--text-caption);color:var(--color-accent)}
+.code-box{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-4);border-radius:var(--radius-md);background:var(--color-input);border:1px dashed rgba(255,154,92,.55)}
+.code-box code{flex:1;font:700 1.0625rem/1 ui-monospace,"SF Mono",Consolas,monospace;letter-spacing:.06em;color:var(--color-accent);overflow-wrap:anywhere}
+.code-copied{color:var(--color-success-text)!important}
+.verify-expiry{font-size:var(--text-caption);color:var(--color-text-muted);margin-top:var(--space-3)}
+.verify-expiry.low{color:var(--color-warning-text)}
 
 /* =========================================================
    PORTAL
@@ -296,8 +306,8 @@ footer{border-top:1px solid var(--color-border);padding:var(--space-6) 0 var(--s
 <header class="nav">
   <div class="shell nav-in">
     <a class="brand" href="/">
-      <img src="/logo.png" alt="Notruf Craftopia RP">
-      <span>Notruf Craftopia RP<small>Moderationsportal</small></span>
+      <img src="/logo.png" alt="Palm City RP">
+      <span>Palm City RP<small>Moderationsportal</small></span>
     </a>
     <div class="nav-actions" id="nav-actions"></div>
   </div>
@@ -316,7 +326,7 @@ footer{border-top:1px solid var(--color-border);padding:var(--space-6) 0 var(--s
     <div class="hero-grid">
       <div>
         <h1>Deine Moderationen auf einen Blick</h1>
-        <p>Sieh deine Discord- und Roblox-Fälle ein und stelle Anträge direkt an das Notruf Craftopia RP Team.</p>
+        <p>Sieh deine Discord- und Roblox-Fälle ein und stelle Anträge direkt an das Palm City RP Team.</p>
         <a class="btn btn-primary" href="/api/login">
           <svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.54 5.32A16.6 16.6 0 0 0 15.5 4l-.5 1.02a15.6 15.6 0 0 0-4 0L10.5 4a16.6 16.6 0 0 0-4.04 1.32C3.9 9.13 3.2 12.86 3.55 16.54a16.4 16.4 0 0 0 4.95 2.5l1.2-1.65c-.66-.25-1.28-.56-1.86-.92l.45-.34c3.59 1.68 7.48 1.68 11.02 0l.46.34c-.58.36-1.2.67-1.86.92l1.2 1.65a16.4 16.4 0 0 0 4.95-2.5c.4-4.26-.68-7.95-3.52-11.22ZM9.73 14.67c-1.08 0-1.97-.98-1.97-2.18s.87-2.18 1.97-2.18c1.11 0 1.99.98 1.98 2.18 0 1.2-.87 2.18-1.98 2.18Zm4.54 0c-1.09 0-1.98-.98-1.98-2.18s.87-2.18 1.98-2.18c1.1 0 1.98.98 1.98 2.18s-.87 2.18-1.98 2.18Z"/></svg>
           Mit Discord anmelden
@@ -328,7 +338,7 @@ footer{border-top:1px solid var(--color-border);padding:var(--space-6) 0 var(--s
           <li><b>3</b><span>Fälle ansehen und bei Bedarf Widerspruch einlegen</span></li>
         </ol>
       </div>
-      <div class="hero-art"><img src="/logo.png" alt="Notruf Craftopia RP Logo"></div>
+      <div class="hero-art"><img src="/logo.png" alt="Palm City RP Logo"></div>
     </div>
   </section>
 
@@ -348,10 +358,30 @@ footer{border-top:1px solid var(--color-border);padding:var(--space-6) 0 var(--s
 
         <div id="setup-step2" class="hidden">
           <div class="preview" id="preview"></div>
-          <p class="confirm-text">Ist das dein Konto? Nach dem Speichern kannst du es nicht mehr ändern.</p>
+          <p class="confirm-text">Ist das dein Konto? So stellen wir sicher, dass es wirklich dir gehört, bevor wir es dauerhaft verknüpfen.</p>
           <div class="row">
             <button id="back" class="btn btn-ghost">Anderer Name</button>
-            <button id="save" class="btn btn-primary">Ja, verknüpfen</button>
+            <button id="save" class="btn btn-primary">Ja, das ist meins</button>
+          </div>
+        </div>
+
+        <div id="setup-step3" class="hidden">
+          <p>Damit niemand ein fremdes Roblox-Konto angeben kann, musst du kurz bestätigen, dass es dir gehört.</p>
+          <ol class="verify-steps">
+            <li><b>1</b><span>Öffne auf Roblox dein Profil und bearbeite deine Beschreibung ("About").</span></li>
+            <li><b>2</b><span>Füge diesen Code irgendwo in den Text ein und speichere:</span></li>
+          </ol>
+          <div class="code-box">
+            <code id="verifyCode"></code>
+            <button id="copyCode" class="btn btn-ghost btn-sm" type="button">Kopieren</button>
+          </div>
+          <ol class="verify-steps" start="3">
+            <li><b>3</b><span>Komm zurück und klicke auf "Jetzt prüfen". Du kannst den Code danach wieder entfernen.</span></li>
+          </ol>
+          <p class="verify-expiry" id="verifyExpiry"></p>
+          <div class="row">
+            <button id="verifyBack" class="btn btn-ghost">Zurück</button>
+            <button id="verifyCheck" class="btn btn-primary">Jetzt prüfen</button>
           </div>
         </div>
       </div>
@@ -400,7 +430,7 @@ footer{border-top:1px solid var(--color-border);padding:var(--space-6) 0 var(--s
 
 </div>
 
-<footer>Notruf Craftopia RP Moderationsportal</footer>
+<footer>Palm City RP Moderationsportal · <a href="/impressum">Impressum</a> · <a href="/datenschutz">Datenschutz</a></footer>
 
 <!-- Modal -->
 <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="mtitle">
@@ -815,22 +845,89 @@ $('back').onclick = () => {
   $('rbx').focus();
 };
 
+/* ---------- Verifizierung: Code in der Roblox-Bio bestätigen ---------- */
+let verifyToken = null, verifyTimer = null;
+
+function stopVerifyTimer() {
+  if (verifyTimer) { clearInterval(verifyTimer); verifyTimer = null; }
+}
+
+function startVerifyTimer(expiresAt) {
+  stopVerifyTimer();
+  const tick = () => {
+    const left = Math.max(0, Math.round((expiresAt - Date.now()) / 1000));
+    const m = String(Math.floor(left / 60)).padStart(2, '0');
+    const s = String(left % 60).padStart(2, '0');
+    const el = $('verifyExpiry');
+    el.textContent = left > 0 ? `Der Code ist noch ${m}:${s} Minuten gültig.` : 'Der Code ist abgelaufen. Bitte starte erneut.';
+    el.classList.toggle('low', left <= 60);
+    if (left <= 0) stopVerifyTimer();
+  };
+  tick();
+  verifyTimer = setInterval(tick, 1000);
+}
+
+function showVerifyStep(step) {
+  ['setup-step1', 'setup-step2', 'setup-step3'].forEach(id => $(id).classList.toggle('hidden', id !== step));
+}
+
 $('save').onclick = async () => {
   if (!lookedUp) return;
   const btn = $('save');
   btn.disabled = true;
-  btn.textContent = 'Wird gespeichert ...';
+  btn.textContent = 'Code wird erstellt ...';
   try {
-    await api('/api/roblox', {method:'POST', body:JSON.stringify({username: lookedUp.username})});
+    const res = await api('/api/roblox', {method:'POST', body:JSON.stringify({username: lookedUp.username, step:'start'})});
+    verifyToken = res.token;
+    $('verifyCode').textContent = res.code;
+    $('copyCode').textContent = 'Kopieren';
+    $('copyCode').classList.remove('code-copied');
+    startVerifyTimer(res.expiresAt);
+    showVerifyStep('setup-step3');
+  } catch (e) {
+    toastError(e);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Ja, das ist meins';
+  }
+};
+
+$('copyCode').onclick = async () => {
+  const code = $('verifyCode').textContent;
+  try {
+    await navigator.clipboard.writeText(code);
+    $('copyCode').textContent = 'Kopiert';
+    $('copyCode').classList.add('code-copied');
+    setTimeout(() => { $('copyCode').textContent = 'Kopieren'; $('copyCode').classList.remove('code-copied'); }, 2000);
+  } catch {
+    toast('Konnte nicht automatisch kopiert werden. Bitte markiere den Code von Hand.');
+  }
+};
+
+$('verifyBack').onclick = () => {
+  stopVerifyTimer();
+  verifyToken = null;
+  showVerifyStep('setup-step2');
+};
+
+$('verifyCheck').onclick = async () => {
+  if (!verifyToken) return;
+  const btn = $('verifyCheck');
+  btn.disabled = true;
+  btn.textContent = 'Wird geprüft ...';
+  try {
+    await api('/api/roblox', {method:'POST', body:JSON.stringify({step:'confirm', token: verifyToken})});
+    stopVerifyTimer();
+    verifyToken = null;
     toast('Roblox-Konto verknüpft.');
-    $('back').click();
+    showVerifyStep('setup-step1');
     $('rbx').value = '';
     await load();
   } catch (e) {
     toastError(e);
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Ja, verknüpfen';
+    btn.textContent = 'Jetzt prüfen';
   }
 };
 
