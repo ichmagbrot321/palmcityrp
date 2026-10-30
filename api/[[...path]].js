@@ -5,16 +5,16 @@ const crypto = require('crypto');
    ========================================================= */
 
 const DISCORD = 'https://discord.com/api/v10';
-const GUILD = process.env.DISCORD_GUILD_ID || '1548652649866596473';
+const GUILD = process.env.DISCORD_GUILD_ID || '1555883394301173822';
 const BOT = process.env.DISCORD_BOT_TOKEN;
 const CLIENT = process.env.DISCORD_CLIENT_ID || '1547984607255994388';
 const SECRET = process.env.DISCORD_CLIENT_SECRET;
 const SUPA = process.env.SUPABASE_URL;
 const SKEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
-const SITE = 'https://notruf-craftopia.vercel.app';
+const SITE = process.env.SITE_URL || 'https://palm-city-rp.vercel.app';
 const SESSION = process.env.SESSION_SECRET;
-const APPEAL_CHANNEL = process.env.DISCORD_APPEAL_CHANNEL_ID || '1551649399212347422';
-const TEAM_ROLE = process.env.DISCORD_TEAM_ROLE_ID || '1551649116675768414';
+const APPEAL_CHANNEL = process.env.DISCORD_APPEAL_CHANNEL_ID || '1555884182729785344';
+const TEAM_ROLE = process.env.DISCORD_TEAM_ROLE_ID || '1555884001179205673';
 
 const CONTACT_CHANNEL = process.env.DISCORD_CONTACT_CHANNEL_ID || '';
 const REVIEW_STATUS = process.env.REVIEWS_REQUIRE_APPROVAL === 'true' ? 'pending' : 'approved';
@@ -23,9 +23,11 @@ const ADMIN_IDS = (process.env.ADMIN_DISCORD_IDS || '').split(',').map(x => x.tr
 const nextKey = k => (Object.hasOwn(NEXT, k) ? k : 'appeal');
 
 const DISCORD_INVITE = 'https://discord.gg/t7N6D43KFv';
-const WIDGET_URL = 'https://discord.com/api/guilds/1548652649866596473/widget.json';
+const WIDGET_URL = `https://discord.com/api/guilds/${encodeURIComponent(GUILD)}/widget.json`;
+const TEAM_API_URL = String(process.env.TEAM_API_URL || 'http://server.infynix.de:40377').trim().replace(/\/+$/, '');
+const DASHBOARD_API_KEY = process.env.DASHBOARD_API_KEY;
 
-const SESSION_MAX_AGE = 60 * 60 * 24 * 365 * 10;
+const SESSION_MAX_AGE = 60 * 60 * 24 * 30; // 30 Tage statt 10 Jahre
 const ROBLOX_NAME = /^[A-Za-z0-9_]{3,20}$/;
 const UA = 'PalmCityRP-Moderationsportal/1.1';
 
@@ -508,6 +510,40 @@ module.exports = async (req, res) => {
     }
 
     /* ---------- Session-Status (öffentlich, leichtgewichtig) ---------- */
+    if (p === '/api/partners' && req.method === 'GET') {
+      try {
+        if (!DASHBOARD_API_KEY) {
+          return send(res, 503, { error: 'Partner-API ist nicht konfiguriert.', code: 'dashboard_api_key_missing' });
+        }
+        if (!TEAM_API_URL) {
+          return send(res, 503, { error: 'TEAM_API_URL ist nicht konfiguriert.', code: 'team_api_url_missing' });
+        }
+        const r = await timedFetch(`${TEAM_API_URL}/team/partners`, {
+          headers: { Accept: 'application/json', 'X-API-Key': DASHBOARD_API_KEY, 'User-Agent': UA }
+        }, 7000);
+        const data = await r.json().catch(() => null);
+        if (!r.ok || !data || data.ok === false || !Array.isArray(data.partners)) {
+          console.error('Partner API Upstream Fehler:', r.status, data?.code || data?.error || 'Ungültige Antwort');
+          return send(res, 502, { error: 'Partner konnten nicht geladen werden.', code: data?.code || 'partner_upstream_error' });
+        }
+        return send(res, 200, {
+          partners: data.partners.map(partner => ({
+            id: String(partner.id || ''),
+            server_name: String(partner.server_name || partner.name || 'Unbekannter Server'),
+            server_link: String(partner.server_link || partner.link || partner.invite || ''),
+            member_count: Number(partner.member_count ?? partner.members ?? 0) || 0,
+            owner_name: String(partner.owner_name || 'Unbekannt'),
+            advertisement: String(partner.advertisement || 'Offizieller Partnerserver von Palm City RP.')
+          })),
+          total: data.partners.length,
+          updated_at: new Date().toISOString()
+        });
+      } catch (e) {
+        console.error('Partner API Fehler:', e);
+        return send(res, 502, { error: 'Partner-API momentan nicht erreichbar.', code: 'partner_api_unreachable' });
+      }
+    }
+
     if (p === '/api/session' && req.method === 'GET') {
       const s = session(req);
       return send(res, 200, { user: s ? { id: s.id, username: s.username, global_name: s.global_name, avatar: s.avatar } : null });
