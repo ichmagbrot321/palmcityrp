@@ -692,8 +692,8 @@ async function checkBotHealth(session) {
 // Team-Dashboard-API darunter zu verändern.
 
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
-const PUBLIC_TEAM_GUILD_ID = "1548652649866596473";
-const PUBLIC_TEAM_ROLE_ID = "1551649116675768414";
+const PUBLIC_TEAM_GUILD_ID = "1555883394301173822";
+const PUBLIC_TEAM_ROLE_ID = "1555884001179205673";
 
 // 60 s Cache: schont das Discord-Rate-Limit und beschleunigt die Website.
 // Bei Discord-Fehlern wird die letzte gute Antwort weiterverwendet.
