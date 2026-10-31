@@ -49,7 +49,8 @@ const ROUTES = {
   hire: ["POST", "/team/hire"],
   rank: ["POST", "/team/rank"],
   team_note: ["POST", "/team/notes"],
-  uprank_proposal: ["POST", "/team/uprank-proposal"],
+  uprank_proposal: ["POST", "/team/uprank/proposal"],
+  uprank_review: ["POST", "/team/uprank/proposal/review"],
   kick: ["POST", "/team/kick"],
   probation_end: ["POST", "/team/probation/end"],
   probation_extend: ["POST", "/team/probation/extend"],
@@ -164,17 +165,34 @@ function getSession(req) {
 // live über die Bot-API geprüft. Bei API-Ausfall wird der Zugriff verweigert.
 const ACCESS_GUILD_ID = process.env.DISCORD_GUILD_ID || "1555883394301173822";
 const ACCESS_ROLE_ID = "1555884009496514570";
+const DEPARTMENT_LEADER_ROLE_IDS = new Set([
+  "1555883982095257670", // Adminleitung
+  "1555883988474667028", // Modleitung
+  "1555883995298799666", // Supportleitung
+]);
 const ACCESS_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
+// Kurzer Cache gegen doppelte Discord-Rollenabfragen beim initialen Laden.
+// Die Bot-API prüft bei jedem geschützten Aufruf zusätzlich live.
+const ACCESS_CACHE = new Map();
+const ACCESS_CACHE_TTL_MS = 4000;
 async function verifyDashboardAccess(session) {
   if (!session?.id || !ACCESS_BOT_TOKEN) return false;
+  const cached = ACCESS_CACHE.get(String(session.id));
+  if (cached && cached.expiresAt > Date.now()) return cached.allowed;
   try {
     const response = await fetch(
       `https://discord.com/api/v10/guilds/${ACCESS_GUILD_ID}/members/${encodeURIComponent(session.id)}`,
       { headers: { Authorization: `Bot ${ACCESS_BOT_TOKEN}`, Accept: "application/json" }, signal: AbortSignal.timeout(5000), cache: "no-store" }
     );
-    if (!response.ok) return false;
+    if (!response.ok) {
+      ACCESS_CACHE.set(String(session.id), { allowed: false, expiresAt: Date.now() + ACCESS_CACHE_TTL_MS });
+      return false;
+    }
     const member = await response.json();
-    return Array.isArray(member.roles) && member.roles.includes(ACCESS_ROLE_ID);
+    const roles = Array.isArray(member.roles) ? member.roles : [];
+    const allowed = roles.includes(ACCESS_ROLE_ID) || roles.some((roleId) => DEPARTMENT_LEADER_ROLE_IDS.has(roleId));
+    ACCESS_CACHE.set(String(session.id), { allowed, expiresAt: Date.now() + ACCESS_CACHE_TTL_MS });
+    return allowed;
   } catch (error) {
     console.error("Dashboard-Zugriffsprüfung fehlgeschlagen:", error?.message || error);
     return false;
@@ -742,7 +760,7 @@ async function handle(req, res) {
   if (!(await verifyDashboardAccess(session))) {
     return json(res, 403, {
       ok: false,
-      error: "Zugriff verweigert. Du musst auf dem Discord-Server sein und die erforderliche Zugriffsrolle besitzen.",
+      error: "Zugriff verweigert. Du benötigst die Dashboard-Zugriffsrolle oder eine berechtigte Abteilungsleitungsrolle.",
       code: "no_access",
     });
   }
