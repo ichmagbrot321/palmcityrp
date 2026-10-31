@@ -48,6 +48,8 @@ const ROUTES = {
   users: ["GET", "/team/users"],
   hire: ["POST", "/team/hire"],
   rank: ["POST", "/team/rank"],
+  team_note: ["POST", "/team/notes"],
+  uprank_proposal: ["POST", "/team/uprank-proposal"],
   kick: ["POST", "/team/kick"],
   probation_end: ["POST", "/team/probation/end"],
   probation_extend: ["POST", "/team/probation/extend"],
