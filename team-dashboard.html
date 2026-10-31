@@ -6231,29 +6231,28 @@ html[data-theme="light"] .side-brand strong { color: #0f1a33; }
   .stat:hover, .team-grid > li:hover, .list > .row:hover, .btn.primary:hover:not(:disabled) { transform: none; }
 }
 
-/* Final responsive fixes: application content must never overlap. */
-#p-applications .application-summary{grid-template-columns:minmax(0,1fr);align-items:start}
-#p-applications .application-summary-right{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
-#p-applications .application-main,#p-applications .application-main .names{min-width:0;max-width:100%}
-#p-applications .application-main strong{white-space:normal;overflow-wrap:anywhere;word-break:break-word}
-#p-applications .application-details{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
-#p-applications .application-detail-card{min-width:0;overflow-wrap:anywhere}
-#p-applications .application-detail-text{overflow-wrap:anywhere;word-break:break-word}
-#p-applications .application-actions{min-width:0;flex-wrap:wrap}
-#p-applications .application-actions .btn{max-width:100%;white-space:normal}
-@media(max-width:600px){#p-applications .application-summary{padding:14px}#p-applications .application-details{padding:0 14px 14px}#p-applications .application-summary-right{align-items:flex-start}}
-
-/* Uprank- und Bewerbungsinhalte bleiben auch bei langen Namen lesbar. */
-#p-applications .application-summary{grid-template-columns:minmax(0,1fr);align-items:start}
-#p-applications .application-summary-right{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
-#p-applications .application-main,#p-applications .application-main .names{min-width:0;max-width:100%}
-#p-applications .application-main strong{white-space:normal;overflow-wrap:anywhere;word-break:break-word}
-#p-applications .application-details{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
-#p-applications .application-detail-card{min-width:0;overflow-wrap:anywhere}
-#p-applications .application-detail-text{overflow-wrap:anywhere;word-break:break-word}
-#p-applications .application-actions{min-width:0;flex-wrap:wrap}
-#p-applications .application-actions .btn{max-width:100%;white-space:normal}
-@media(max-width:600px){#p-applications .application-summary{padding:14px}#p-applications .application-details{padding:0 14px 14px}#p-applications .application-summary-right{align-items:flex-start}}
+/* Uprank-Vorschläge: responsive, gut lesbare Teamleitungs-Ansicht */
+.uprank-center { margin: 0 0 18px; }
+.proposal-form { border: 1px solid var(--line, #26334b); border-radius: 16px; padding: 16px; background: linear-gradient(145deg, rgba(27,42,69,.72), rgba(10,17,31,.82)); display: grid; gap: 12px; }
+.proposal-form-head, .proposal-top, .proposal-foot { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; min-width: 0; }
+.proposal-form-head h3, .proposal-section-title { margin: 0; font-size: 15px; }
+.proposal-form-head .sub { margin: 4px 0 0; }
+.proposal-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.proposal-form .input, .proposal-form select, .proposal-form textarea { width: 100%; min-width: 0; box-sizing: border-box; }
+.proposal-form textarea { min-height: 76px; resize: vertical; }
+.proposal-section-title { margin: 16px 0 10px; }
+.proposal-group { display: grid; gap: 8px; }
+.proposal-group h4 { margin: 6px 0 0; font-size: 13px; color: var(--muted, #9aa9c2); }
+.proposal-list { display: grid; gap: 10px; }
+.proposal-card { min-width: 0; border: 1px solid var(--line, #26334b); background: rgba(7,13,25,.55); border-radius: 12px; padding: 13px; display: grid; gap: 10px; }
+.proposal-top strong, .proposal-ranks strong { display: block; overflow-wrap: anywhere; }
+.proposal-ranks { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center; gap: 12px; }
+.proposal-ranks span { min-width: 0; }
+.proposal-ranks small { display: block; color: var(--muted, #9aa9c2); margin-bottom: 3px; }
+.proposal-reason { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.proposal-foot { color: var(--muted, #9aa9c2); font-size: 11px; }
+.proposal-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+@media (max-width: 720px) { .proposal-form-grid { grid-template-columns: minmax(0,1fr); } .proposal-ranks { grid-template-columns: minmax(0,1fr); } .proposal-arrow { display: none; } }
 </style>
 </head>
 <body>
@@ -6312,6 +6311,7 @@ html[data-theme="light"] .side-brand strong { color: #0f1a33; }
     <main>
       <section id="p-team">
         <div class="stats" id="stats"></div>
+        <div id="uprankCenter" class="uprank-center"></div>
         <label class="search">
           <span class="ico" data-icon="search"></span>
           <input id="teamSearch" type="search" placeholder="Teammitglied suchen" autocomplete="off" aria-label="Teammitglied suchen">
@@ -6465,7 +6465,7 @@ html[data-theme="light"] .side-brand strong { color: #0f1a33; }
 "use strict";
 
 const API = "/api/team-dashboard";
-const POLL_MS = 5000;
+const POLL_MS = 5000; // Schnelle Statusaktualisierung; schwere Bereiche werden nur bei Tab-Aufruf geladen.
 
 const $ = (selector, root = document) => root.querySelector(selector);
 
@@ -6583,6 +6583,7 @@ const S = {
   tab: "team",
   expanded: new Set(),
   memberNotes: loadMemberNotes(),
+  uprankDraft: { userId: "", rankId: "", reason: "" },
   draft: [],
   dirty: false,
   keys: {},
@@ -6618,19 +6619,22 @@ const S = {
   rulesError: "",
 };
 
-// Gemeinsame Teamnotizen kommen vom Bot-Backend und werden für alle berechtigten Teammitglieder synchronisiert.
-function loadMemberNotes() { return {}; }
+// Gemeinsame Teamnotizen werden von der Bot-API geladen und gespeichert.
+function loadMemberNotes() {
+  return {};
+}
 
 async function saveMemberNote(member, value) {
   const text = String(value || "").trim().slice(0, 2000);
   try {
-    await api("team_note", { method: "POST", body: { user_id: member.id, note: text } });
-    if (text) S.memberNotes[member.id] = text;
-    else delete S.memberNotes[member.id];
-    toast(text ? "Gemeinsame Notiz gespeichert." : "Gemeinsame Notiz gelöscht.");
+    const data = await api("team_note", {
+      method: "POST",
+      body: { user_id: member.id, note: text },
+    });
+    toast(data.message || "Gemeinsame Notiz gespeichert.");
     await refresh();
   } catch (err) {
-    toast(err.message || "Notiz konnte nicht gespeichert werden.", true);
+    toast(err.message, true);
   }
 }
 
@@ -7110,7 +7114,9 @@ function memberCard(member) {
   const ranks = S.data.ranks;
   const open = S.expanded.has(member.id);
   const count = member.warns.length;
-  const note = S.memberNotes[member.id] || "";
+  const noteRecord = (S.data.team_notes || {})[member.id] || null;
+  const note = noteRecord?.text || "";
+  const departmentOnly = Boolean(S.data.actor?.department);
 
   const toggle = () => {
     if (open) S.expanded.delete(member.id);
@@ -7143,7 +7149,7 @@ function memberCard(member) {
           member.absence
             ? h("span", { class: "badge info", title: member.absence.reason }, icon("clock"), "Abgemeldet")
             : null,
-          member.probation && member.probation.status === "active"
+          !departmentOnly && member.probation && member.probation.status === "active"
             ? h("span", { class: "badge warn", title: `Probezeit bis ${formatDate(member.probation.ends_at)}` }, icon("clock"), "Probezeit")
             : null,
           count
@@ -7157,7 +7163,6 @@ function memberCard(member) {
   );
 
   const noteInput = h("textarea", {
-    id: `team-note-${member.id}`,
     maxlength: 2000,
     placeholder: "Interne Notiz zu diesem Teammitglied …",
     "aria-label": `Notiz für ${member.name}`,
@@ -7167,7 +7172,7 @@ function memberCard(member) {
   const details = h(
     "div",
     { class: "team-card-details" },
-    h(
+    !departmentOnly ? h(
       "div",
       { class: "team-card-actions" },
       h(
@@ -7179,7 +7184,7 @@ function memberCard(member) {
       button("Rang setzen", () => openRankModal(member), "", !ranks.length, "award"),
       button("Verwarnen", () => openWarnModal(member), "", false, "alert"),
       button("Entfernen", () => openKickModal(member), "danger", false, "userMinus")
-    ),
+    ) : null,
     member.probation && member.probation.status === "active"
       ? h(
           "div",
@@ -7199,7 +7204,7 @@ function memberCard(member) {
             button("Probezeit abbrechen", () => abortProbation(member), "danger", false, "userMinus")
           )
         )
-      : member.probation && member.probation.status !== "active"
+      : !departmentOnly && member.probation && member.probation.status !== "active"
         ? h(
             "div",
             { class: "team-warns" },
@@ -7213,11 +7218,16 @@ function memberCard(member) {
       "div",
       { class: "team-card-notes" },
       h("label", { for: `team-note-${member.id}` }, "Interne Notiz"),
-      noteInput,
+      h("textarea", {
+        id: `team-note-${member.id}`,
+        maxlength: 2000,
+        placeholder: "Interne Notiz zu diesem Teammitglied …",
+        "aria-label": `Notiz für ${member.name}`,
+      }),
       h(
         "div",
         { class: "team-note-actions" },
-        h("span", { class: "team-note-meta" }, "Gemeinsame Notiz · für berechtigte Teammitglieder sichtbar."),
+        h("span", { class: "team-note-meta" }, noteRecord ? `Gemeinsam · zuletzt von ${noteRecord.author_name || "Team"} am ${formatDate(noteRecord.updated_at)}` : "Gemeinsam für die berechtigte Teamleitung sichtbar."),
         button("Notiz löschen", () => saveMemberNote(member, ""), "ghost", !note, "x"),
         button("Notiz speichern", () => saveMemberNote(member, noteInput.value), "primary", false, "check")
       )
@@ -7272,34 +7282,161 @@ function renderStats() {
   );
 }
 
-async function openUprankProposalModal() {
-  const members = S.data.team || [];
-  if (!members.length) return toast("In deiner Abteilung sind keine Teammitglieder vorhanden.", true);
-  const memberSelect = h("select", { id: "uprankProposalMember" }, ...members.map((member) =>
-    h("option", { value: member.id }, `${member.name} · ${member.rank_name || "Ohne Rang"}`)
-  ));
-  const reasonInput = h("textarea", { id: "uprankProposalReason", maxlength: 1000, placeholder: "Warum soll die Person befördert werden?" });
-  modal({
-    title: "Uprank vorschlagen",
-    subtitle: "Der Vorschlag wird gesammelt und der Teamleitung im Dashboard angezeigt.",
-    content: h("div", { class: "stack" },
-      h("div", { class: "field" }, h("label", {}, "Teammitglied"), memberSelect),
-      h("div", { class: "field" }, h("label", {}, "Begründung"), reasonInput)
+function proposalStatusLabel(status) {
+  return ({ open: "Wartet auf Freigabe", approved: "Freigegeben", rejected: "Abgelehnt", stale: "Überholt" })[status] || status || "Unbekannt";
+}
+
+function proposalCard(item, canReview) {
+  const status = item.status || "open";
+  const card = h("article", { class: "proposal-card" },
+    h("div", { class: "proposal-top" },
+      h("div", {},
+        h("strong", {}, item.user_name || `User ${item.user_id}`),
+        h("span", { class: "sub" }, `${item.department_label || item.department || "Abteilung"} · vorgeschlagen von ${item.requested_by_name || "Unbekannt"}`)
+      ),
+      h("span", { class: `badge ${status === "open" ? "warn" : status === "approved" ? "ok" : "none"}` }, proposalStatusLabel(status))
     ),
-    confirm: "Vorschlag senden",
+    h("div", { class: "proposal-ranks" },
+      h("span", {}, h("small", {}, "Aktueller Rang"), h("strong", {}, item.current_rank || "Unbekannt")),
+      h("span", { class: "proposal-arrow", "aria-hidden": "true" }, "→"),
+      h("span", {}, h("small", {}, "Zielrang"), h("strong", {}, item.requested_rank || "Nicht angegeben"))
+    ),
+    h("p", { class: "proposal-reason" }, item.reason || "Keine Begründung angegeben."),
+    h("div", { class: "proposal-foot" },
+      h("span", { class: "sub" }, `${formatDate(item.created_at)}${item.reviewed_by_name ? ` · geprüft von ${item.reviewed_by_name}` : ""}`),
+      item.review_reason ? h("span", { class: "sub" }, `Prüfnotiz: ${item.review_reason}`) : null
+    ),
+    canReview && status === "open" ? h("div", { class: "proposal-actions" },
+      button("Freigeben & befördern", () => reviewUprankProposal(item, "approve"), "primary", false, "check"),
+      button("Ablehnen", () => reviewUprankProposal(item, "reject"), "danger", false, "x")
+    ) : null
+  );
+  return card;
+}
+
+function reviewUprankProposal(item, action) {
+  const note = h("textarea", { maxlength: 500, placeholder: action === "reject" ? "Begründung der Ablehnung (mindestens 3 Zeichen)" : "Optionale Prüfnotiz" });
+  modal({
+    title: action === "approve" ? "Beförderung freigeben" : "Vorschlag ablehnen",
+    subtitle: `${item.user_name}: ${item.current_rank} → ${item.requested_rank}`,
+    danger: action === "reject",
+    content: h("div", { class: "field" }, h("label", {}, action === "reject" ? "Ablehnungsgrund" : "Prüfnotiz"), note),
+    confirm: action === "approve" ? "Jetzt befördern" : "Vorschlag ablehnen",
     onConfirm: async () => {
-      await api("uprank_proposal", { method: "POST", body: {
-        user_id: memberSelect.value,
-        reason: reasonInput.value,
-      }});
-      toast("Uprank-Vorschlag an die Teamleitung gesendet.");
+      const review_reason = note.value.trim();
+      if (action === "reject" && review_reason.length < 3) throw new Error("Bitte gib einen Ablehnungsgrund an.");
+      const result = await api("uprank_review", { method: "POST", body: { proposal_id: item.id, action, review_reason } });
+      toast(result.message || "Vorschlag bearbeitet.");
       await refresh();
     },
   });
 }
 
+function renderUprankCenter() {
+  const box = $("#uprankCenter");
+  if (!box || !S.data) return;
+  const actor = S.data.actor || {};
+  const proposals = Array.isArray(S.data.uprank_proposals) ? S.data.uprank_proposals : [];
+  const membersKey = actor.department ? S.data.team.map(member => [member.id, member.rank_id, member.rank_index]) : [];
+  const renderKey = JSON.stringify([actor.department, actor.can_review_upranks, actor.rank_index, proposals, membersKey]);
+  if (renderKey === S.keys.uprankCenter) return;
+  const previousMember = box.querySelector(".proposal-member-select");
+  const previousRank = box.querySelector(".proposal-rank-select");
+  const previousReason = box.querySelector(".proposal-reason-input");
+  if (previousMember) S.uprankDraft.userId = previousMember.value;
+  if (previousRank) S.uprankDraft.rankId = previousRank.value;
+  if (previousReason) S.uprankDraft.reason = previousReason.value;
+  S.keys.uprankCenter = renderKey;
+  box.replaceChildren();
+  if (actor.department) {
+    const memberSelect = h("select", { class: "input proposal-member-select", "aria-label": "Teammitglied auswählen" },
+      h("option", { value: "" }, "Teammitglied auswählen"),
+      ...S.data.team.map(member => h("option", { value: member.id }, `${member.name} · ${member.rank_name || "Kein Rang"}`))
+    );
+    const targetSelect = h("select", { class: "input proposal-rank-select", "aria-label": "Zielrang auswählen", disabled: true }, h("option", { value: "" }, "Zuerst Teammitglied auswählen"));
+    const currentInfo = h("p", { class: "sub" }, "Wähle ein Teammitglied aus, um den aktuellen Rang und mögliche Zielränge zu sehen.");
+    const reason = h("textarea", { class: "proposal-reason-input", maxlength: 300, placeholder: "Begründung für den Uprank (mindestens 3 Zeichen)" });
+    memberSelect.value = S.uprankDraft.userId;
+    reason.value = S.uprankDraft.reason;
+    reason.addEventListener("input", () => { S.uprankDraft.reason = reason.value; });
+    targetSelect.addEventListener("change", () => { S.uprankDraft.rankId = targetSelect.value; });
+    const refreshTargets = () => {
+      const member = S.data.team.find(row => row.id === memberSelect.value);
+      targetSelect.replaceChildren();
+      if (!member) {
+        targetSelect.disabled = true;
+        targetSelect.append(h("option", { value: "" }, "Zuerst Teammitglied auswählen"));
+        currentInfo.textContent = "Wähle ein Teammitglied aus, um den aktuellen Rang und mögliche Zielränge zu sehen.";
+        return;
+      }
+      currentInfo.textContent = `Aktueller Rang: ${member.rank_name || "Unbekannt"}`;
+      const candidates = S.data.ranks.filter((rank, index) => index > member.rank_index && index < Number(S.data.actor.rank_index ?? S.data.ranks.length));
+      targetSelect.disabled = !candidates.length;
+      targetSelect.append(h("option", { value: "" }, candidates.length ? "Zielrang auswählen" : "Kein höherer Rang verfügbar"));
+      for (const rank of candidates) targetSelect.append(h("option", { value: rank.id }, rank.name));
+      if (candidates.some(rank => String(rank.id) === String(S.uprankDraft.rankId))) {
+        targetSelect.value = String(S.uprankDraft.rankId);
+      } else {
+        S.uprankDraft.rankId = "";
+      }
+    };
+    memberSelect.addEventListener("change", () => {
+      S.uprankDraft.userId = memberSelect.value;
+      S.uprankDraft.rankId = "";
+      refreshTargets();
+    });
+    refreshTargets();
+    const submit = button("Uprank vorschlagen", async () => {
+      if (!memberSelect.value || !targetSelect.value) return toast("Bitte Teammitglied und Zielrang auswählen.", true);
+      if (reason.value.trim().length < 3) return toast("Bitte gib eine Begründung mit mindestens 3 Zeichen an.", true);
+      try {
+        const result = await api("uprank_proposal", { method: "POST", body: { user_id: memberSelect.value, requested_rank_id: targetSelect.value, reason: reason.value.trim() } });
+        toast(result.message || "Vorschlag übermittelt.");
+        S.uprankDraft = { userId: "", rankId: "", reason: "" };
+        memberSelect.value = "";
+        targetSelect.value = "";
+        reason.value = "";
+        S.keys.uprankCenter = "";
+        await refresh();
+      } catch (err) { toast(err.message, true); }
+    }, "primary", false, "award");
+    const form = h("div", { class: "proposal-form" },
+      h("div", { class: "proposal-form-head" }, h("div", {}, h("h3", {}, "Uprank-Liste · " + ({ admin: "Admin", moderation: "Moderation", support: "Support" }[actor.department] || actor.department)), h("p", { class: "sub" }, "Deine Vorschläge werden gesammelt an die Teamleitung übermittelt."))),
+      h("div", { class: "proposal-form-grid" }, memberSelect, targetSelect), currentInfo, reason, submit
+    );
+    box.append(form);
+    if (proposals.length) {
+      box.append(h("h3", { class: "proposal-section-title" }, "Deine eingereichten Vorschläge"));
+      box.append(h("div", { class: "proposal-list" }, ...proposals.map(item => proposalCard(item, false))));
+    }
+    return;
+  }
+  if (actor.can_review_upranks) {
+    const open = proposals.filter(item => item.status === "open");
+    // Eine einzige gemeinsame Liste für die gesamte Teamverwaltung.
+    // Die Abteilung bleibt direkt an jedem Vorschlag erkennbar; es gibt
+    // bewusst keine getrennten Unterlisten oder Abteilungscontainer.
+    const allProposals = [...proposals].sort((a, b) =>
+      String(b.created_at || "").localeCompare(String(a.created_at || ""))
+    );
+    box.append(h("section", { class: "proposal-form" },
+      h("div", { class: "proposal-form-head" },
+        h("div", {},
+          h("h3", {}, "Alle Uprank-Vorschläge · Teamverwaltung"),
+          h("p", { class: "sub" }, `${allProposals.length} Vorschläge insgesamt · ${open.length} davon offen · alle Abteilungen in einer gemeinsamen Liste`)
+        ),
+        h("span", { class: `badge ${open.length ? "warn" : "ok"}` }, `${open.length} offen`)
+      ),
+      allProposals.length
+        ? h("div", { class: "proposal-list" }, ...allProposals.map(item => proposalCard(item, true)))
+        : emptyState("div", "Noch keine Uprank-Vorschläge vorhanden.")
+    ));
+  }
+}
+
 function renderTeam(force = false) {
   renderStats();
+  renderUprankCenter();
 
   const query = $("#teamSearch").value.trim().toLowerCase();
 
@@ -7325,35 +7462,7 @@ function renderTeam(force = false) {
   }
 
   box.className = "team-grid";
-  const extras = [];
-  if (S.data.actor && S.data.actor.department) {
-    extras.push(h("section", { class: "card team-warns" },
-      h("div", { class: "team-warns-title" }, "Abteilungsleitung · Uprank-Liste"),
-      h("p", { class: "sub" }, "Schlage Beförderungen für deine Abteilung vor. Die Teamleitung sieht alle Vorschläge gesammelt."),
-      button("Uprank vorschlagen", openUprankProposalModal, "primary", false, "up")
-    ));
-  } else if (Array.isArray(S.data.uprank_proposals) && S.data.uprank_proposals.length) {
-    extras.push(h("section", { class: "card team-warns" },
-      h("div", { class: "team-warns-title" }, "Uprank-Vorschläge der Abteilungen"),
-      ...["admin", "moderation", "support"].flatMap((department) => {
-        const rows = S.data.uprank_proposals
-          .filter((proposal) => proposal.department === department)
-          .sort((a,b) => String(b.created_at || "").localeCompare(String(a.created_at || "")));
-        if (!rows.length) return [];
-        const label = department === "admin" ? "Adminleitung" : department === "moderation" ? "Modleitung" : "Supportleitung";
-        return [
-          h("h4", {}, label),
-          ...rows.map((proposal) => h("div", { class: "team-warns" },
-            h("strong", {}, `${proposal.user_name} · ${proposal.current_rank}`),
-            h("p", { class: "sub" }, `Vorgeschlagen von ${proposal.requested_by_name}`),
-            h("p", {}, proposal.reason),
-            h("span", { class: "sub" }, formatDate(proposal.created_at))
-          ))
-        ];
-      })
-    ));
-  }
-  box.replaceChildren(...extras, ...list.map(memberCard));
+  box.replaceChildren(...list.map(memberCard));
 }
 
 function renderUsers(users, total) {
@@ -10067,7 +10176,7 @@ function renderRules() {
 function renderTabs() {
   const data = S.data;
 
-  const tabs = data.actor && data.actor.department
+  const tabs = data.actor?.department
     ? [["team", "Meine Abteilung", data.team.length, "users"]]
     : [
         ["team", "Teamliste", data.team.length, "users"],
@@ -10075,6 +10184,7 @@ function renderTabs() {
         ["bans", "Sperren", data.bans.length, "ban"],
       ];
 
+  if (!data.actor?.department) {
   if (data.features && data.features.extras) {
     const away = (data.absences || []).filter((item) => item.status === "active").length;
     const open = (data.complaints || []).filter((item) => item.status === "open" || item.status === "in_progress").length;
@@ -10103,12 +10213,13 @@ function renderTabs() {
     tabs.push(["feedback", "Feedback", (data.feedbacks || []).length || null, "message"]);
   }
 
-  if (!(data.actor && data.actor.department)) {
-    tabs.push(["rules", "Regelwerk", null, "book"]);
-    tabs.push(["history", "Verlauf", null, "history"]);
-  }
+  tabs.push(["rules", "Regelwerk", null, "book"]);
+
+  tabs.push(["history", "Verlauf", null, "history"]);
 
   if (data.actor.is_admin && (data.actor.can_config || (data.features && data.features.activity_settings))) tabs.push(["settings", "Einstellungen", null, "settings"]);
+
+  }
 
   const key = JSON.stringify([tabs, S.tab]);
   if (key === S.keys.tabs) return;
@@ -10186,7 +10297,11 @@ function renderAll() {
 
   renderTabs();
 
-  const [title, subtitle] = TITLES[S.tab];
+  const [defaultTitle, defaultSubtitle] = TITLES[S.tab];
+  const title = S.tab === "team" && S.data.actor?.department ? "Meine Abteilung" : defaultTitle;
+  const subtitle = S.tab === "team" && S.data.actor?.department
+    ? `Interne Teamübersicht · ${({ admin: "Admin", moderation: "Moderation", support: "Support" }[S.data.actor.department] || S.data.actor.department)}`
+    : defaultSubtitle;
   $("#pageTitle").textContent = title;
   $("#pageSub").textContent = subtitle;
 
@@ -10235,25 +10350,13 @@ async function refresh() {
   try {
     const data = await api("state");
     S.data = data;
-    S.memberNotes = Object.fromEntries((data.team_notes || []).map((row) => [String(row.user_id), String(row.text || "")]));
 
-    // Feedback kommt bereits im Haupt-State mit. Dadurch ist der Tab
-    // sofort nach dem Dashboard-Refresh befüllt und hängt nicht davon ab,
-    // ob der separate /team/feedback-Aufruf schon fertig ist.
-    S.feedback = {
-      items: Array.isArray(data.feedbacks) ? data.feedbacks : [],
-    };
-    S.feedbackAt = Date.now();
-    S.keys.feedback = "";
+    // Feedback wird nur bei geöffnetem Feedback-Tab separat geladen.
 
     setLocked(null);
     setLive(true, "Live · " + new Date().toLocaleTimeString("de-DE"));
     renderAll();
-    await loadUsers();
-    loadActivity();
-    loadShifts();
-    loadHistory();
-    loadSupport();
+    if (S.tab === "users") await loadUsers();
   } catch (err) {
     if (err.code === "no_session") return showLogin();
 
