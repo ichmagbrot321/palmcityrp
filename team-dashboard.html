@@ -6583,7 +6583,7 @@ const S = {
   tab: "team",
   expanded: new Set(),
   memberNotes: loadMemberNotes(),
-  uprankDraft: { userId: "", rankId: "", reason: "" },
+  uprankDraft: { userId: "", rankId: "", reason: "", changeType: "uprank" },
   draft: [],
   dirty: false,
   keys: {},
@@ -7288,17 +7288,20 @@ function proposalStatusLabel(status) {
 
 function proposalCard(item, canReview) {
   const status = item.status || "open";
+  const changeType = item.change_type === "downrank" ? "downrank" : "uprank";
+  const isDownrank = changeType === "downrank";
+  const typeLabel = isDownrank ? "Downrank" : "Uprank";
   const card = h("article", { class: "proposal-card" },
     h("div", { class: "proposal-top" },
       h("div", {},
         h("strong", {}, item.user_name || `User ${item.user_id}`),
-        h("span", { class: "sub" }, `${item.department_label || item.department || "Abteilung"} · vorgeschlagen von ${item.requested_by_name || "Unbekannt"}`)
+        h("span", { class: "sub" }, `${typeLabel} · ${item.department_label || item.department || "Abteilung"} · vorgeschlagen von ${item.requested_by_name || "Unbekannt"}`)
       ),
       h("span", { class: `badge ${status === "open" ? "warn" : status === "approved" ? "ok" : "none"}` }, proposalStatusLabel(status))
     ),
     h("div", { class: "proposal-ranks" },
       h("span", {}, h("small", {}, "Aktueller Rang"), h("strong", {}, item.current_rank || "Unbekannt")),
-      h("span", { class: "proposal-arrow", "aria-hidden": "true" }, "→"),
+      h("span", { class: "proposal-arrow", "aria-hidden": "true" }, isDownrank ? "↘" : "↗"),
       h("span", {}, h("small", {}, "Zielrang"), h("strong", {}, item.requested_rank || "Nicht angegeben"))
     ),
     h("p", { class: "proposal-reason" }, item.reason || "Keine Begründung angegeben."),
@@ -7307,7 +7310,7 @@ function proposalCard(item, canReview) {
       item.review_reason ? h("span", { class: "sub" }, `Prüfnotiz: ${item.review_reason}`) : null
     ),
     canReview && status === "open" ? h("div", { class: "proposal-actions" },
-      button("Freigeben & befördern", () => reviewUprankProposal(item, "approve"), "primary", false, "check"),
+      button(isDownrank ? "Freigeben & degradieren" : "Freigeben & befördern", () => reviewUprankProposal(item, "approve"), "primary", false, "check"),
       button("Ablehnen", () => reviewUprankProposal(item, "reject"), "danger", false, "x")
     ) : null
   );
@@ -7315,13 +7318,15 @@ function proposalCard(item, canReview) {
 }
 
 function reviewUprankProposal(item, action) {
+  const isDownrank = item.change_type === "downrank";
+  const changeLabel = isDownrank ? "Degradierung" : "Beförderung";
   const note = h("textarea", { maxlength: 500, placeholder: action === "reject" ? "Begründung der Ablehnung (mindestens 3 Zeichen)" : "Optionale Prüfnotiz" });
   modal({
-    title: action === "approve" ? "Beförderung freigeben" : "Vorschlag ablehnen",
+    title: action === "approve" ? `${changeLabel} freigeben` : "Rangvorschlag ablehnen",
     subtitle: `${item.user_name}: ${item.current_rank} → ${item.requested_rank}`,
     danger: action === "reject",
     content: h("div", { class: "field" }, h("label", {}, action === "reject" ? "Ablehnungsgrund" : "Prüfnotiz"), note),
-    confirm: action === "approve" ? "Jetzt befördern" : "Vorschlag ablehnen",
+    confirm: action === "approve" ? (isDownrank ? "Jetzt degradieren" : "Jetzt befördern") : "Vorschlag ablehnen",
     onConfirm: async () => {
       const review_reason = note.value.trim();
       if (action === "reject" && review_reason.length < 3) throw new Error("Bitte gib einen Ablehnungsgrund an.");
@@ -7343,9 +7348,11 @@ function renderUprankCenter() {
   const previousMember = box.querySelector(".proposal-member-select");
   const previousRank = box.querySelector(".proposal-rank-select");
   const previousReason = box.querySelector(".proposal-reason-input");
+  const previousType = box.querySelector(".proposal-type-select");
   if (previousMember) S.uprankDraft.userId = previousMember.value;
   if (previousRank) S.uprankDraft.rankId = previousRank.value;
   if (previousReason) S.uprankDraft.reason = previousReason.value;
+  if (previousType) S.uprankDraft.changeType = previousType.value;
   S.keys.uprankCenter = renderKey;
   box.replaceChildren();
   if (actor.department) {
@@ -7353,9 +7360,14 @@ function renderUprankCenter() {
       h("option", { value: "" }, "Teammitglied auswählen"),
       ...S.data.team.map(member => h("option", { value: member.id }, `${member.name} · ${member.rank_name || "Kein Rang"}`))
     );
+    const typeSelect = h("select", { class: "input proposal-type-select", "aria-label": "Art der Rangänderung" },
+      h("option", { value: "uprank" }, "⬆️ Uprank vorschlagen"),
+      h("option", { value: "downrank" }, "⬇️ Downrank vorschlagen")
+    );
+    typeSelect.value = S.uprankDraft.changeType || "uprank";
     const targetSelect = h("select", { class: "input proposal-rank-select", "aria-label": "Zielrang auswählen", disabled: true }, h("option", { value: "" }, "Zuerst Teammitglied auswählen"));
-    const currentInfo = h("p", { class: "sub" }, "Wähle ein Teammitglied aus, um den aktuellen Rang und mögliche Zielränge zu sehen.");
-    const reason = h("textarea", { class: "proposal-reason-input", maxlength: 300, placeholder: "Begründung für den Uprank (mindestens 3 Zeichen)" });
+    const currentInfo = h("p", { class: "sub" }, "Wähle ein Teammitglied und die Art der Rangänderung aus.");
+    const reason = h("textarea", { class: "proposal-reason-input", maxlength: 300, placeholder: "Begründung für die Rangänderung (mindestens 3 Zeichen)" });
     memberSelect.value = S.uprankDraft.userId;
     reason.value = S.uprankDraft.reason;
     reason.addEventListener("input", () => { S.uprankDraft.reason = reason.value; });
@@ -7366,13 +7378,16 @@ function renderUprankCenter() {
       if (!member) {
         targetSelect.disabled = true;
         targetSelect.append(h("option", { value: "" }, "Zuerst Teammitglied auswählen"));
-        currentInfo.textContent = "Wähle ein Teammitglied aus, um den aktuellen Rang und mögliche Zielränge zu sehen.";
+        currentInfo.textContent = "Wähle ein Teammitglied und die Art der Rangänderung aus.";
         return;
       }
-      currentInfo.textContent = `Aktueller Rang: ${member.rank_name || "Unbekannt"}`;
-      const candidates = S.data.ranks.filter((rank, index) => index > member.rank_index && index < Number(S.data.actor.rank_index ?? S.data.ranks.length));
+      const isDownrank = typeSelect.value === "downrank";
+      currentInfo.textContent = `Aktueller Rang: ${member.rank_name || "Unbekannt"} · ${isDownrank ? "Wähle einen niedrigeren Rang." : "Wähle einen höheren Rang."}`;
+      const candidates = S.data.ranks.filter((rank, index) => isDownrank
+        ? index < member.rank_index
+        : index > member.rank_index && index < Number(S.data.actor.rank_index ?? S.data.ranks.length));
       targetSelect.disabled = !candidates.length;
-      targetSelect.append(h("option", { value: "" }, candidates.length ? "Zielrang auswählen" : "Kein höherer Rang verfügbar"));
+      targetSelect.append(h("option", { value: "" }, candidates.length ? "Zielrang auswählen" : (isDownrank ? "Kein niedrigerer Rang verfügbar" : "Kein höherer Rang verfügbar")));
       for (const rank of candidates) targetSelect.append(h("option", { value: rank.id }, rank.name));
       if (candidates.some(rank => String(rank.id) === String(S.uprankDraft.rankId))) {
         targetSelect.value = String(S.uprankDraft.rankId);
@@ -7385,51 +7400,54 @@ function renderUprankCenter() {
       S.uprankDraft.rankId = "";
       refreshTargets();
     });
+    typeSelect.addEventListener("change", () => {
+      S.uprankDraft.changeType = typeSelect.value;
+      S.uprankDraft.rankId = "";
+      refreshTargets();
+    });
     refreshTargets();
-    const submit = button("Uprank vorschlagen", async () => {
+    const submit = button("Rangvorschlag senden", async () => {
       if (!memberSelect.value || !targetSelect.value) return toast("Bitte Teammitglied und Zielrang auswählen.", true);
       if (reason.value.trim().length < 3) return toast("Bitte gib eine Begründung mit mindestens 3 Zeichen an.", true);
       try {
-        const result = await api("uprank_proposal", { method: "POST", body: { user_id: memberSelect.value, requested_rank_id: targetSelect.value, reason: reason.value.trim() } });
-        toast(result.message || "Vorschlag übermittelt.");
-        S.uprankDraft = { userId: "", rankId: "", reason: "" };
+        const result = await api("uprank_proposal", { method: "POST", body: { user_id: memberSelect.value, requested_rank_id: targetSelect.value, change_type: typeSelect.value, reason: reason.value.trim() } });
+        toast(result.message || "Rangvorschlag übermittelt.");
+        S.uprankDraft = { userId: "", rankId: "", reason: "", changeType: "uprank" };
         memberSelect.value = "";
+        typeSelect.value = "uprank";
         targetSelect.value = "";
         reason.value = "";
         S.keys.uprankCenter = "";
         await refresh();
       } catch (err) { toast(err.message, true); }
-    }, "primary", false, "award");
+    }, "primary", false, "send");
     const form = h("div", { class: "proposal-form" },
-      h("div", { class: "proposal-form-head" }, h("div", {}, h("h3", {}, "Uprank-Liste · " + ({ admin: "Admin", moderation: "Moderation", support: "Support" }[actor.department] || actor.department)), h("p", { class: "sub" }, "Deine Vorschläge werden gesammelt an die Teamleitung übermittelt."))),
-      h("div", { class: "proposal-form-grid" }, memberSelect, targetSelect), currentInfo, reason, submit
+      h("div", { class: "proposal-form-head" }, h("div", {}, h("h3", {}, "Rangvorschläge · " + ({ admin: "Admin", moderation: "Moderation", support: "Support" }[actor.department] || actor.department)), h("p", { class: "sub" }, "Schlage Beförderungen oder Degradierungen für deine Abteilung vor. Die Teamleitung prüft jeden Vorschlag."))),
+      h("div", { class: "proposal-form-grid" }, memberSelect, typeSelect, targetSelect), currentInfo, reason, submit
     );
     box.append(form);
     if (proposals.length) {
-      box.append(h("h3", { class: "proposal-section-title" }, "Deine eingereichten Vorschläge"));
+      box.append(h("h3", { class: "proposal-section-title" }, "Deine eingereichten Rangvorschläge"));
       box.append(h("div", { class: "proposal-list" }, ...proposals.map(item => proposalCard(item, false))));
     }
     return;
   }
   if (actor.can_review_upranks) {
     const open = proposals.filter(item => item.status === "open");
-    // Eine einzige gemeinsame Liste für die gesamte Teamverwaltung.
-    // Die Abteilung bleibt direkt an jedem Vorschlag erkennbar; es gibt
-    // bewusst keine getrennten Unterlisten oder Abteilungscontainer.
     const allProposals = [...proposals].sort((a, b) =>
       String(b.created_at || "").localeCompare(String(a.created_at || ""))
     );
     box.append(h("section", { class: "proposal-form" },
       h("div", { class: "proposal-form-head" },
         h("div", {},
-          h("h3", {}, "Alle Uprank-Vorschläge · Teamverwaltung"),
+          h("h3", {}, "Alle Rangvorschläge · Teamverwaltung"),
           h("p", { class: "sub" }, `${allProposals.length} Vorschläge insgesamt · ${open.length} davon offen · alle Abteilungen in einer gemeinsamen Liste`)
         ),
         h("span", { class: `badge ${open.length ? "warn" : "ok"}` }, `${open.length} offen`)
       ),
       allProposals.length
         ? h("div", { class: "proposal-list" }, ...allProposals.map(item => proposalCard(item, true)))
-        : emptyState("div", "Noch keine Uprank-Vorschläge vorhanden.")
+        : emptyState("div", "Noch keine Rangvorschläge vorhanden.")
     ));
   }
 }
