@@ -6230,6 +6230,30 @@ html[data-theme="light"] .side-brand strong { color: #0f1a33; }
 @media (prefers-reduced-motion: reduce) {
   .stat:hover, .team-grid > li:hover, .list > .row:hover, .btn.primary:hover:not(:disabled) { transform: none; }
 }
+
+/* Final responsive fixes: application content must never overlap. */
+#p-applications .application-summary{grid-template-columns:minmax(0,1fr);align-items:start}
+#p-applications .application-summary-right{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
+#p-applications .application-main,#p-applications .application-main .names{min-width:0;max-width:100%}
+#p-applications .application-main strong{white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+#p-applications .application-details{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
+#p-applications .application-detail-card{min-width:0;overflow-wrap:anywhere}
+#p-applications .application-detail-text{overflow-wrap:anywhere;word-break:break-word}
+#p-applications .application-actions{min-width:0;flex-wrap:wrap}
+#p-applications .application-actions .btn{max-width:100%;white-space:normal}
+@media(max-width:600px){#p-applications .application-summary{padding:14px}#p-applications .application-details{padding:0 14px 14px}#p-applications .application-summary-right{align-items:flex-start}}
+
+/* Uprank- und Bewerbungsinhalte bleiben auch bei langen Namen lesbar. */
+#p-applications .application-summary{grid-template-columns:minmax(0,1fr);align-items:start}
+#p-applications .application-summary-right{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
+#p-applications .application-main,#p-applications .application-main .names{min-width:0;max-width:100%}
+#p-applications .application-main strong{white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+#p-applications .application-details{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
+#p-applications .application-detail-card{min-width:0;overflow-wrap:anywhere}
+#p-applications .application-detail-text{overflow-wrap:anywhere;word-break:break-word}
+#p-applications .application-actions{min-width:0;flex-wrap:wrap}
+#p-applications .application-actions .btn{max-width:100%;white-space:normal}
+@media(max-width:600px){#p-applications .application-summary{padding:14px}#p-applications .application-details{padding:0 14px 14px}#p-applications .application-summary-right{align-items:flex-start}}
 </style>
 </head>
 <body>
@@ -6244,6 +6268,7 @@ html[data-theme="light"] .side-brand strong { color: #0f1a33; }
       <a class="btn" href="/api/team-dashboard?action=logout" style="text-align:center">Abmelden / anderes Discord-Konto nutzen</a>
     </div>
     <p class="sub" style="margin-top:10px;font-size:12px">Wenn du mit dem falschen Konto angemeldet bist, melde dich zuerst ab. Danach kannst du dich erneut mit Discord anmelden.</p>
+    <p class="sub" style="margin-top:14px;font-size:11px"><a href="/impressum">Impressum</a> · <a href="/datenschutz">Datenschutz</a></p>
   </div>
 </div>
 
@@ -6267,6 +6292,7 @@ html[data-theme="light"] .side-brand strong { color: #0f1a33; }
           <a href="/api/team-dashboard?action=logout"><span class="ico" data-icon="logout"></span>Abmelden</a>
         </div>
       </div>
+      <p style="margin-top:10px;font-size:11px;opacity:.6"><a href="/impressum">Impressum</a> · <a href="/datenschutz">Datenschutz</a></p>
     </div>
   </aside>
 
@@ -6592,29 +6618,20 @@ const S = {
   rulesError: "",
 };
 
-// Persönliche Teamnotizen werden lokal pro Teammitglied gespeichert.
-function loadMemberNotes() {
-  try {
-    const raw = localStorage.getItem("palm-city-team-notes");
-    const data = raw ? JSON.parse(raw) : {};
-    return data && typeof data === "object" && !Array.isArray(data) ? data : {};
-  } catch {
-    return {};
-  }
-}
+// Gemeinsame Teamnotizen kommen vom Bot-Backend und werden für alle berechtigten Teammitglieder synchronisiert.
+function loadMemberNotes() { return {}; }
 
-function saveMemberNote(member, value) {
+async function saveMemberNote(member, value) {
   const text = String(value || "").trim().slice(0, 2000);
-  if (text) S.memberNotes[member.id] = text;
-  else delete S.memberNotes[member.id];
-
   try {
-    localStorage.setItem("palm-city-team-notes", JSON.stringify(S.memberNotes));
-  } catch {
-    // Falls der Browser lokalen Speicher blockiert, bleibt die Notiz bis zum Neuladen erhalten.
+    await api("team_note", { method: "POST", body: { user_id: member.id, note: text } });
+    if (text) S.memberNotes[member.id] = text;
+    else delete S.memberNotes[member.id];
+    toast(text ? "Gemeinsame Notiz gespeichert." : "Gemeinsame Notiz gelöscht.");
+    await refresh();
+  } catch (err) {
+    toast(err.message || "Notiz konnte nicht gespeichert werden.", true);
   }
-  toast(text ? "Notiz gespeichert." : "Notiz gelöscht.");
-  renderTeam(true);
 }
 
 // ============================================================
@@ -7140,6 +7157,7 @@ function memberCard(member) {
   );
 
   const noteInput = h("textarea", {
+    id: `team-note-${member.id}`,
     maxlength: 2000,
     placeholder: "Interne Notiz zu diesem Teammitglied …",
     "aria-label": `Notiz für ${member.name}`,
@@ -7195,16 +7213,11 @@ function memberCard(member) {
       "div",
       { class: "team-card-notes" },
       h("label", { for: `team-note-${member.id}` }, "Interne Notiz"),
-      h("textarea", {
-        id: `team-note-${member.id}`,
-        maxlength: 2000,
-        placeholder: "Interne Notiz zu diesem Teammitglied …",
-        "aria-label": `Notiz für ${member.name}`,
-      }),
+      noteInput,
       h(
         "div",
         { class: "team-note-actions" },
-        h("span", { class: "team-note-meta" }, "Wird lokal in diesem Browser gespeichert."),
+        h("span", { class: "team-note-meta" }, "Gemeinsame Notiz · für berechtigte Teammitglieder sichtbar."),
         button("Notiz löschen", () => saveMemberNote(member, ""), "ghost", !note, "x"),
         button("Notiz speichern", () => saveMemberNote(member, noteInput.value), "primary", false, "check")
       )
@@ -7259,6 +7272,32 @@ function renderStats() {
   );
 }
 
+async function openUprankProposalModal() {
+  const members = S.data.team || [];
+  if (!members.length) return toast("In deiner Abteilung sind keine Teammitglieder vorhanden.", true);
+  const memberSelect = h("select", { id: "uprankProposalMember" }, ...members.map((member) =>
+    h("option", { value: member.id }, `${member.name} · ${member.rank_name || "Ohne Rang"}`)
+  ));
+  const reasonInput = h("textarea", { id: "uprankProposalReason", maxlength: 1000, placeholder: "Warum soll die Person befördert werden?" });
+  modal({
+    title: "Uprank vorschlagen",
+    subtitle: "Der Vorschlag wird gesammelt und der Teamleitung im Dashboard angezeigt.",
+    content: h("div", { class: "stack" },
+      h("div", { class: "field" }, h("label", {}, "Teammitglied"), memberSelect),
+      h("div", { class: "field" }, h("label", {}, "Begründung"), reasonInput)
+    ),
+    confirm: "Vorschlag senden",
+    onConfirm: async () => {
+      await api("uprank_proposal", { method: "POST", body: {
+        user_id: memberSelect.value,
+        reason: reasonInput.value,
+      }});
+      toast("Uprank-Vorschlag an die Teamleitung gesendet.");
+      await refresh();
+    },
+  });
+}
+
 function renderTeam(force = false) {
   renderStats();
 
@@ -7286,7 +7325,35 @@ function renderTeam(force = false) {
   }
 
   box.className = "team-grid";
-  box.replaceChildren(...list.map(memberCard));
+  const extras = [];
+  if (S.data.actor && S.data.actor.department) {
+    extras.push(h("section", { class: "card team-warns" },
+      h("div", { class: "team-warns-title" }, "Abteilungsleitung · Uprank-Liste"),
+      h("p", { class: "sub" }, "Schlage Beförderungen für deine Abteilung vor. Die Teamleitung sieht alle Vorschläge gesammelt."),
+      button("Uprank vorschlagen", openUprankProposalModal, "primary", false, "up")
+    ));
+  } else if (Array.isArray(S.data.uprank_proposals) && S.data.uprank_proposals.length) {
+    extras.push(h("section", { class: "card team-warns" },
+      h("div", { class: "team-warns-title" }, "Uprank-Vorschläge der Abteilungen"),
+      ...["admin", "moderation", "support"].flatMap((department) => {
+        const rows = S.data.uprank_proposals
+          .filter((proposal) => proposal.department === department)
+          .sort((a,b) => String(b.created_at || "").localeCompare(String(a.created_at || "")));
+        if (!rows.length) return [];
+        const label = department === "admin" ? "Adminleitung" : department === "moderation" ? "Modleitung" : "Supportleitung";
+        return [
+          h("h4", {}, label),
+          ...rows.map((proposal) => h("div", { class: "team-warns" },
+            h("strong", {}, `${proposal.user_name} · ${proposal.current_rank}`),
+            h("p", { class: "sub" }, `Vorgeschlagen von ${proposal.requested_by_name}`),
+            h("p", {}, proposal.reason),
+            h("span", { class: "sub" }, formatDate(proposal.created_at))
+          ))
+        ];
+      })
+    ));
+  }
+  box.replaceChildren(...extras, ...list.map(memberCard));
 }
 
 function renderUsers(users, total) {
@@ -10000,11 +10067,13 @@ function renderRules() {
 function renderTabs() {
   const data = S.data;
 
-  const tabs = [
-    ["team", "Teamliste", data.team.length, "users"],
-    ["users", "Nutzer", null, "userPlus"],
-    ["bans", "Sperren", data.bans.length, "ban"],
-  ];
+  const tabs = data.actor && data.actor.department
+    ? [["team", "Meine Abteilung", data.team.length, "users"]]
+    : [
+        ["team", "Teamliste", data.team.length, "users"],
+        ["users", "Nutzer", null, "userPlus"],
+        ["bans", "Sperren", data.bans.length, "ban"],
+      ];
 
   if (data.features && data.features.extras) {
     const away = (data.absences || []).filter((item) => item.status === "active").length;
@@ -10034,9 +10103,10 @@ function renderTabs() {
     tabs.push(["feedback", "Feedback", (data.feedbacks || []).length || null, "message"]);
   }
 
-  tabs.push(["rules", "Regelwerk", null, "book"]);
-
-  tabs.push(["history", "Verlauf", null, "history"]);
+  if (!(data.actor && data.actor.department)) {
+    tabs.push(["rules", "Regelwerk", null, "book"]);
+    tabs.push(["history", "Verlauf", null, "history"]);
+  }
 
   if (data.actor.is_admin && (data.actor.can_config || (data.features && data.features.activity_settings))) tabs.push(["settings", "Einstellungen", null, "settings"]);
 
@@ -10165,6 +10235,7 @@ async function refresh() {
   try {
     const data = await api("state");
     S.data = data;
+    S.memberNotes = Object.fromEntries((data.team_notes || []).map((row) => [String(row.user_id), String(row.text || "")]));
 
     // Feedback kommt bereits im Haupt-State mit. Dadurch ist der Tab
     // sofort nach dem Dashboard-Refresh befüllt und hängt nicht davon ab,
