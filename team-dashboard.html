@@ -7172,7 +7172,7 @@ function memberCard(member) {
   const details = h(
     "div",
     { class: "team-card-details" },
-    !departmentOnly ? h(
+    h(
       "div",
       { class: "team-card-actions" },
       h(
@@ -7183,9 +7183,9 @@ function memberCard(member) {
       ),
       button("Rang setzen", () => openRankModal(member), "", !ranks.length, "award"),
       button("Verwarnen", () => openWarnModal(member), "", false, "alert"),
-      button("Entfernen", () => openKickModal(member), "danger", false, "userMinus")
-    ) : null,
-    member.probation && member.probation.status === "active"
+      button(departmentOnly ? "Teamkick" : "Entfernen", () => openKickModal(member), "danger", false, "userMinus")
+    ),
+    !departmentOnly && member.probation && member.probation.status === "active"
       ? h(
           "div",
           { class: "team-warns" },
