@@ -4,111 +4,149 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#050a14">
-<meta name="robots" content="noindex">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🌴%3C/text%3E%3C/svg%3E">
-<title>Datenschutzerklärung — Palm City RP</title>
+<meta name="robots" content="noindex, nofollow">
+<title>Datenschutzerklärung | Palm City RP</title>
 <style>
 :root{
   color-scheme:dark;
-  --color-bg:#050a14;--color-surface:#0b1424;--color-surface-2:#101b30;
-  --color-border:rgba(130,165,230,.14);--color-border-strong:rgba(130,165,230,.28);
-  --color-text:#eaf0fa;--color-text-soft:#b9c6dc;--color-muted:#8d9bb5;
-  --color-primary:#2563eb;--color-primary-hover:#3b78f5;--color-primary-soft:#8db4ff;
-  --s2:8px;--s3:12px;--s4:16px;--s5:20px;--s6:24px;--s8:32px;--s10:40px;--s12:48px;
-  --r-sm:10px;--r-md:12px;--font:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-  --wrap:760px;
+  --bg:#050a14;--surface:#0b1424;--surface2:#101b30;
+  --border:rgba(130,165,230,.16);--border-strong:rgba(130,165,230,.3);
+  --text:#eaf0fa;--soft:#b9c6dc;--muted:#8d9bb5;
+  --primary:#8db4ff;--warning:#f5b94a;--danger:#ff8b8b;
+  --space2:8px;--space3:12px;--space4:16px;--space5:20px;--space6:24px;--space8:32px;--space10:40px;--space12:48px;
+  --radius:12px;--font:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;--wrap:820px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:var(--font);font-size:1rem;line-height:1.65;color:var(--color-text);background:var(--color-bg);-webkit-font-smoothing:antialiased}
-a{color:var(--color-primary-soft)}
-a:hover{color:var(--color-primary-hover)}
-:focus-visible{outline:3px solid var(--color-primary-soft);outline-offset:2px;border-radius:var(--r-sm)}
-.wrap{width:min(var(--wrap),100% - var(--s8));margin-inline:auto}
-.nav{padding:var(--s5) 0;border-bottom:1px solid var(--color-border)}
-.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:var(--s4)}
-.brand{font-weight:800;text-decoration:none;letter-spacing:-.01em}
-.back{font-size:.9375rem;text-decoration:none}
-main{padding:var(--s12) 0 var(--s12)}
-h1{font-size:clamp(1.75rem,1.3rem + 2vw,2.5rem);line-height:1.1;font-weight:800;letter-spacing:-.01em;margin-bottom:var(--s3)}
-.updated{color:var(--color-muted);font-size:.9375rem;margin-bottom:var(--s10)}
-h2{font-size:1.25rem;font-weight:700;letter-spacing:-.01em;margin:var(--s10) 0 var(--s3)}
-h2:first-of-type{margin-top:0}
-h3{font-size:1.0625rem;font-weight:650;margin:var(--s6) 0 var(--s2)}
-p{margin-bottom:var(--s4);color:var(--color-text-soft)}
-ul{margin:0 0 var(--s4) var(--s5);color:var(--color-text-soft)}
-li{margin-bottom:var(--s2)}
-strong{color:var(--color-text);font-weight:650}
-.box{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--r-md);padding:var(--s5) var(--s6);margin-bottom:var(--s6)}
+body{font-family:var(--font);font-size:1rem;line-height:1.68;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
+a{color:var(--primary);overflow-wrap:anywhere}
+a:hover{color:#b7ceff}
+:focus-visible{outline:3px solid var(--primary);outline-offset:3px;border-radius:8px}
+.wrap{width:min(var(--wrap),calc(100% - 32px));margin-inline:auto}
+.nav{padding:18px 0;border-bottom:1px solid var(--border)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{font-weight:800;text-decoration:none;letter-spacing:-.02em;color:var(--text)}
+.back{font-size:.94rem;text-decoration:none}
+main{padding:48px 0}
+h1{font-size:clamp(1.8rem,1.3rem + 2vw,2.55rem);line-height:1.13;font-weight:800;letter-spacing:-.02em;margin-bottom:12px}
+.updated{color:var(--muted);font-size:.94rem;margin-bottom:30px}
+h2{font-size:1.25rem;font-weight:750;letter-spacing:-.01em;margin:38px 0 12px}
+h3{font-size:1.06rem;font-weight:700;margin:24px 0 8px}
+p{margin-bottom:15px;color:var(--soft)}
+ul{margin:0 0 16px 22px;color:var(--soft)}
+li{margin-bottom:8px}
+strong{color:var(--text);font-weight:700}
+code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.92em;color:#d8e5ff}
+.notice{background:rgba(245,185,74,.09);border:1px solid rgba(245,185,74,.55);border-radius:var(--radius);padding:18px 20px;margin:24px 0 30px}
+.notice strong{color:var(--warning)}
+.notice p:last-child{margin-bottom:0}
+.box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin:18px 0}
 .box p:last-child{margin-bottom:0}
-footer{padding:var(--s8) 0;border-top:1px solid var(--color-border);color:var(--color-muted);font-size:.875rem}
+footer{padding:30px 0;border-top:1px solid var(--border);color:var(--muted);font-size:.9rem}
+footer a{margin-right:12px}
+@media(max-width:560px){.nav .wrap{align-items:flex-start;flex-direction:column}.back{font-size:.9rem}main{padding:34px 0}}
 </style>
 </head>
 <body>
 <nav class="nav"><div class="wrap">
   <a class="brand" href="/">Palm City RP</a>
-  <a class="back" href="/">← Zurück zur Startseite</a>
+  <a class="back" href="/">Zurück zur Startseite</a>
 </div></nav>
 
 <main><div class="wrap">
   <h1>Datenschutzerklärung</h1>
-  <p class="updated">Stand: <span id="d"></span></p>
+  <p class="updated">Stand: 31. Oktober 2026</p>
 
-  <div class="box">
-    <p>Diese Erklärung beschreibt, welche personenbezogenen Daten auf <strong>palm-city-rp.vercel.app</strong> verarbeitet werden, wofür und auf welcher Rechtsgrundlage. Sie gilt für die Startseite, das Moderationsportal (<code>/einspruch</code>) und die zugehörigen Programmierschnittstellen.</p>
+  <div class="notice">
+    <p><strong>Wichtiger Prüfhinweis: Noch nicht zur Veröffentlichung freigegeben</strong></p>
+    <p>Die technische Verwendung von Analyse- und Trackingdiensten ist noch nicht geprüft. Außerdem müssen die tatsächlichen Speicher- und Löschfristen, die Supabase-Projektregion, die eingesetzten Unterauftragsverarbeiter und die ladungsfähige Anschrift des Verantwortlichen abschließend geklärt werden. Diese Punkte dürfen nicht durch Vermutungen ersetzt werden. Die Seite ist deshalb eine überarbeitete Arbeitsfassung und noch keine bestätigte rechtliche Freigabe.</p>
   </div>
 
-  <h2>1. Verantwortlicher</h2>
-  <p>Verantwortlich im Sinne der Datenschutz-Grundverordnung (DSGVO) ist die im <a href="/impressum">Impressum</a> genannte Person. Dort findest du auch die Kontaktmöglichkeit für Datenschutz-Anfragen.</p>
+  <div class="box">
+    <p>Diese Datenschutzerklärung informiert darüber, welche personenbezogenen Daten im Zusammenhang mit der Website <strong>palm-city-rp.vercel.app</strong>, den dazugehörigen Formularen, dem Moderations- und Einspruchsportal sowie den angebundenen Schnittstellen verarbeitet werden. Welche Daten konkret anfallen, hängt davon ab, welche Funktionen du nutzt.</p>
+  </div>
 
-  <h2>2. Allgemeines zur Datenverarbeitung</h2>
-  <p>Wir verarbeiten personenbezogene Daten unserer Nutzer grundsätzlich nur, soweit dies zur Bereitstellung einer funktionsfähigen Website sowie unserer Inhalte und Leistungen erforderlich ist. Die Verarbeitung erfolgt regelmäßig nur mit Einwilligung der Nutzer (Art. 6 Abs. 1 lit. a DSGVO) oder soweit sie zur Erfüllung eines mit dem Nutzer bestehenden vertragsähnlichen Nutzungsverhältnisses erforderlich ist (Art. 6 Abs. 1 lit. b DSGVO) bzw. aufgrund berechtigter Interessen (Art. 6 Abs. 1 lit. f DSGVO), etwa zur Abwehr von Missbrauch und zur Sicherstellung des Betriebs.</p>
+  <h2>1. Verantwortlicher und Kontakt</h2>
+  <p>Verantwortlicher im Sinne von Art. 4 Nr. 7 DSGVO ist nach den derzeit vorliegenden Projektangaben:</p>
+  <div class="box">
+    <p><strong>Leon Pajaziti</strong><br>
+    Palm City RP<br>
+    Römerstraße 1<br>
+    74722 Buchen<br>
+    E-Mail: <a href="mailto:support.palmcityrp@gmail.com">support.palmcityrp@gmail.com</a></p>
+  </div>
 
-  <h2>3. Hosting</h2>
-  <p>Diese Website wird bei <strong>Vercel Inc.</strong>, 440 N Barranca Ave #4133, Covina, CA 91723, USA gehostet. Vercel verarbeitet dabei technisch notwendig Server-Logdaten (u. a. IP-Adresse, Zeitpunkt des Zugriffs, aufgerufene Seite, User-Agent), um die Website auszuliefern und gegen Angriffe abzusichern. Rechtsgrundlage ist unser berechtigtes Interesse an einem stabilen und sicheren Betrieb (Art. 6 Abs. 1 lit. f DSGVO). Es kann dabei zu einer Datenübermittlung in die USA kommen; Vercel ist nach eigenen Angaben zertifiziert bzw. nutzt EU-Standardvertragsklauseln.</p>
+  <h2>2. Allgemeines zur Verarbeitung personenbezogener Daten</h2>
+  <p>Personenbezogene Daten werden verarbeitet, soweit dies für den Betrieb der Website, die Bereitstellung der von dir angeforderten Funktionen, die Bearbeitung von Anfragen und Anträgen oder die Sicherheit des Angebots erforderlich ist. Je nach konkretem Vorgang stützen wir die Verarbeitung auf Art. 6 Abs. 1 lit. b DSGVO, soweit sie zur Bereitstellung einer angeforderten Funktion erforderlich ist, oder auf Art. 6 Abs. 1 lit. f DSGVO. Berechtigte Interessen können insbesondere der sichere Betrieb, die Missbrauchsabwehr und die Bearbeitung von Nutzeranliegen sein.</p>
+  <p>Soweit eine Verarbeitung auf einer Einwilligung beruht, erfolgt sie auf Grundlage von Art. 6 Abs. 1 lit. a DSGVO. Eine erteilte Einwilligung kann jederzeit mit Wirkung für die Zukunft widerrufen werden.</p>
 
-  <h2>4. Datenbank (Supabase)</h2>
-  <p>Kontaktnachrichten, Bewertungen, Anträge und Roblox-Verknüpfungen werden in einer Datenbank bei <strong>Supabase Inc.</strong> gespeichert. Rechtsgrundlage ist je nach Inhalt die Erfüllung des Nutzungsverhältnisses (Art. 6 Abs. 1 lit. b DSGVO) bzw. unser berechtigtes Interesse an einer geordneten Bearbeitung von Anträgen und Rückmeldungen (Art. 6 Abs. 1 lit. f DSGVO).</p>
+  <h2>3. Hosting und technische Zugriffsdaten</h2>
+  <p>Die Website wird über <strong>Vercel</strong> bereitgestellt. Beim Aufruf der Website werden technisch erforderliche Verbindungs- und Protokolldaten verarbeitet. Dazu können insbesondere die IP-Adresse, Datum und Uhrzeit des Zugriffs, die aufgerufene Adresse, Informationen zum Browser und Betriebssystem, die Referrer-Adresse sowie technische Status- und Übertragungsdaten gehören.</p>
+  <p>Die Verarbeitung dient der Auslieferung der Website, der Fehleranalyse und dem Schutz vor Angriffen und Missbrauch. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Die konkrete Speicherdauer hängt von den für das Vercel-Projekt geltenden Protokoll- und Aufbewahrungseinstellungen ab und muss anhand der tatsächlichen Kontoeinstellungen geprüft werden.</p>
+  <p>Vercel kann Daten in Ländern außerhalb des Europäischen Wirtschaftsraums verarbeiten. Für solche Übermittlungen sind die jeweils tatsächlich anwendbaren datenschutzrechtlichen Transfermechanismen maßgeblich, insbesondere ein Angemessenheitsbeschluss oder geeignete Garantien wie EU-Standardvertragsklauseln. Maßgeblich sind die für das konkrete Vertragsverhältnis geltenden Bedingungen und Einstellungen.</p>
+
+  <h2>4. Datenbank und Speicherung bei Supabase</h2>
+  <p>Für die Speicherung von Website-Daten wird <strong>Supabase</strong> eingesetzt. Nach den vorliegenden Angaben betrifft dies insbesondere Kontaktnachrichten, Bewertungen, Anträge, Einsprüche und Daten zur Roblox-Konto-Verknüpfung. Je nach Funktion können dabei Discord-Kennungen, Benutzernamen, Anzeigenamen, Profilbilder, Inhalte von Nachrichten oder Anträgen, Bewertungen, Kommentare, Roblox-Benutzernamen sowie Zeitpunkte der Übermittlung gespeichert werden.</p>
+  <p>Die Verarbeitung erfolgt zur Bereitstellung der jeweiligen Funktion, zur Bearbeitung der eingereichten Inhalte und zur Verwaltung des Community-Angebots. Rechtsgrundlage ist je nach Vorgang Art. 6 Abs. 1 lit. b DSGVO oder Art. 6 Abs. 1 lit. f DSGVO.</p>
+  <p>Supabase Pte. Ltd. stellt eine Datenschutzvereinbarung für die Verarbeitung von Kundendaten bereit. Ob und in welcher Form diese Vereinbarung für das konkrete Projekt abgeschlossen bzw. einbezogen ist, muss im Supabase-Konto geprüft werden. Ebenso müssen die tatsächliche Datenbankregion, Backups, Unterauftragsverarbeiter und Löschfristen anhand der Projekteinstellungen verifiziert werden.</p>
 
   <h2>5. Anmeldung mit Discord</h2>
-  <p>Für das Moderationsportal kannst du dich mit deinem Discord-Konto anmelden (OAuth2, Berechtigung „identify“). Dabei erhalten wir von Discord deine Discord-ID, deinen Benutzernamen, deinen Anzeigenamen und deinen Avatar. Diese Daten werden in einem signierten, verschlüsselten Cookie in deinem Browser gespeichert (<code>pc_session</code>, 30 Tage gültig) und bei jeder Anfrage zur Authentifizierung verwendet. Rechtsgrundlage ist die Erfüllung des mit dir bestehenden Nutzungsverhältnisses für das Portal (Art. 6 Abs. 1 lit. b DSGVO). Zusätzlich werden zwei kurzlebige, rein technische Cookies gesetzt (<code>pc_state</code>, <code>pc_next</code>), die ausschließlich zur Absicherung des Anmeldevorgangs dienen und nach wenigen Minuten verfallen.</p>
-  <p>Anbieter der Anmeldung ist Discord Inc., 444 De Haro Street, Suite 200, San Francisco, CA 94107, USA. Es gilt zusätzlich die <a href="https://discord.com/privacy" target="_blank" rel="noopener noreferrer">Datenschutzerklärung von Discord</a>.</p>
+  <p>Für bestimmte Funktionen des Moderations- oder Einspruchsportals kann eine Anmeldung über Discord (OAuth2) angeboten werden. Nach den bisherigen Angaben wird dabei der Berechtigungsumfang <code>identify</code> verwendet. Hierdurch können insbesondere deine Discord-ID, dein Benutzername, dein Anzeigename und dein Avatar abgerufen werden.</p>
+  <p>Für die Anmeldung werden nach der bisherigen technischen Beschreibung Cookies verwendet: <code>pc_session</code> zur Verwaltung der Sitzung mit einer Laufzeit von bis zu 30 Tagen sowie die kurzlebigen Cookies <code>pc_state</code> und <code>pc_next</code> zur Absicherung bzw. Steuerung des Anmeldevorgangs. Die tatsächlichen Cookie-Einstellungen und Laufzeiten müssen mit der aktuellen Implementierung abgeglichen werden.</p>
+  <p>Anbieter des Discord-Dienstes ist Discord Inc. Weitere Informationen findest du in der <a href="https://discord.com/privacy" target="_blank" rel="noopener noreferrer">Datenschutzerklärung von Discord</a>. Discord kann Daten auch außerhalb des Europäischen Wirtschaftsraums verarbeiten. Die dafür verwendeten Transfermechanismen ergeben sich aus den jeweils geltenden Datenschutzbedingungen von Discord.</p>
 
-  <h2>6. Cookies</h2>
-  <p>Wir setzen ausschließlich technisch notwendige Cookies ein (siehe Punkt 5). Es werden keine Cookies zu Analyse-, Marketing- oder Trackingzwecken verwendet. Für technisch notwendige Cookies ist nach § 25 Abs. 2 TTDSG keine gesonderte Einwilligung erforderlich.</p>
+  <h2>6. Cookies und ähnliche Technologien</h2>
+  <p>Die bisherige technische Beschreibung nennt ausschließlich Cookies, die für die Anmeldung und die Bereitstellung angeforderter Funktionen erforderlich sein sollen. Für eine Speicherung oder einen Zugriff auf Informationen im Endgerät ist § 25 TDDDG zu beachten. Eine Einwilligung ist nach § 25 Abs. 2 Nr. 2 TDDDG nur dann nicht erforderlich, wenn die Speicherung oder der Zugriff unbedingt erforderlich ist, um einen vom Nutzer ausdrücklich gewünschten digitalen Dienst bereitzustellen.</p>
+  <p>Ob tatsächlich ausschließlich solche notwendigen Cookies oder weitere lokale Speichertechniken eingesetzt werden, ist noch nicht technisch geprüft. Insbesondere ist derzeit nicht bestätigt, ob Analyse-, Statistik-, Marketing- oder Trackingdienste eingebunden sind. Vor Veröffentlichung muss die Website einschließlich aller eingebundenen Skripte, Bibliotheken und Drittanbieter-Aufrufe geprüft werden. Nicht notwendige Technologien dürfen, soweit gesetzlich erforderlich, erst nach wirksamer Einwilligung aktiviert werden.</p>
 
   <h2>7. Kontaktformular</h2>
-  <p>Wenn du uns über das Kontaktformular schreibst, werden Name, E-Mail-Adresse, ausgewähltes Thema und deine Nachricht verarbeitet, um deine Anfrage zu beantworten. Diese Angaben werden in unserer Datenbank gespeichert und zusätzlich über unseren Discord-Bot an einen internen Team-Kanal weitergeleitet. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b bzw. lit. f DSGVO (Bearbeitung deiner Anfrage).</p>
+  <p>Wenn du das Kontaktformular nutzt, werden die von dir eingegebenen Angaben verarbeitet. Nach der bisherigen Funktionsbeschreibung betrifft dies Name, E-Mail-Adresse, ausgewähltes Thema und Nachricht. Die Angaben werden in der Datenbank gespeichert und über einen Discord-Bot an einen internen Team-Kanal weitergeleitet, damit die Anfrage bearbeitet werden kann.</p>
+  <p>Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO, soweit die Bearbeitung zur Erbringung der angefragten Leistung gehört, andernfalls Art. 6 Abs. 1 lit. f DSGVO aufgrund des berechtigten Interesses an der Bearbeitung von Anfragen und der Verwaltung des Community-Angebots.</p>
 
-  <h2>8. Bewertungen</h2>
-  <p>Angemeldete Nutzer können den Server mit 1–5 Sternen und einem Kommentar bewerten. Gespeichert werden dabei deine Discord-ID, dein Anzeigename, dein Avatar, die Bewertung, dein Kommentar sowie der Zeitpunkt. Bewertungen können öffentlich auf der Website angezeigt werden. Rechtsgrundlage ist deine aktive Teilnahme an dieser freiwilligen Funktion (Art. 6 Abs. 1 lit. b DSGVO).</p>
+  <h2>8. Bewertungen und weitere Nutzerdaten</h2>
+  <p>Über die Website können Nutzer nach der bisherigen Funktionsbeschreibung eine Bewertung mit 1 bis 5 Sternen und einem Kommentar abgeben. Dabei können insbesondere Discord-ID, Discord-Benutzername, Anzeigename, Avatar, Bewertung, Kommentar und Zeitpunkt verarbeitet werden. Bewertungen können auf der Website öffentlich angezeigt werden.</p>
+  <p>Zusätzlich zu Kontaktformularen und Anträgen werden Bewertungen und weitere Nutzerdaten über den Discord-Bot an dafür vorgesehene Discord-Kanäle oder Funktionen übermittelt. Welche weiteren Daten übertragen werden, richtet sich nach der jeweils genutzten Funktion und den tatsächlich vom Bot versendeten Inhalten. Der genaue Umfang und die Berechtigungen der betreffenden Discord-Kanäle müssen technisch geprüft werden.</p>
+  <p>Rechtsgrundlage ist je nach Funktion Art. 6 Abs. 1 lit. b DSGVO oder Art. 6 Abs. 1 lit. f DSGVO. Eine öffentliche Anzeige von Bewertungen muss außerdem auf eine tragfähige Rechtsgrundlage gestützt werden. Soweit hierfür eine Einwilligung verwendet wird, muss diese freiwillig, informiert und widerrufbar eingeholt werden.</p>
 
   <h2>9. Roblox-Konto-Verknüpfung</h2>
-  <p>Um Roblox-Moderationsfälle deinem Discord-Konto zuordnen zu können, kannst du deinen Roblox-Benutzernamen verknüpfen. Dabei fragen wir öffentlich zugängliche Profildaten (Benutzername, Anzeigename, Avatar, Profilbeschreibung) direkt bei Roblox Corporation ab, um die Verknüpfung zu bestätigen. Gespeichert wird bei uns dauerhaft nur dein Roblox-Benutzername zusammen mit deiner Discord-ID. Die Verifizierung erfolgt über einen Code, den du vorübergehend in deine öffentliche Roblox-Profilbeschreibung einträgst; dieser Text selbst wird nicht dauerhaft bei uns gespeichert. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.</p>
+  <p>Du kannst, sofern die Funktion angeboten wird, deinen Roblox-Benutzernamen verknüpfen, damit Moderationsfälle zugeordnet werden können. Nach der bisherigen Beschreibung werden dazu öffentlich verfügbare Profildaten wie Benutzername, Anzeigename, Avatar und Profilbeschreibung bei Roblox Corporation abgerufen. Gespeichert werden soll dauerhaft der Roblox-Benutzername zusammen mit deiner Discord-ID.</p>
+  <p>Zur Verifizierung kann ein Code vorübergehend in die öffentliche Roblox-Profilbeschreibung eingetragen werden. Nach der bisherigen Beschreibung wird dieser Text nicht dauerhaft gespeichert. Bitte beachte, dass die Datenverarbeitung durch Roblox zusätzlich den Datenschutzbedingungen von Roblox unterliegt.</p>
+  <p>Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO, soweit die Verknüpfung zur Bereitstellung der angeforderten Portal-Funktion erforderlich ist, andernfalls Art. 6 Abs. 1 lit. f DSGVO.</p>
 
-  <h2>10. Anträge / Einsprüche</h2>
-  <p>Stellst du über das Portal einen Antrag (z. B. Entbannungsantrag oder Widerspruch gegen eine Verwarnung), verarbeiten wir deine Discord-ID, deinen Discord-Benutzernamen, die Antragsart, den betroffenen Fall sowie deine Begründung. Der Antrag wird gespeichert und über unseren Discord-Bot an das Team-Mitglied im zuständigen Kanal übermittelt, damit dieser bearbeitet werden kann. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.</p>
+  <h2>10. Anträge, Einsprüche und Moderationsdaten</h2>
+  <p>Bei Anträgen oder Einsprüchen können insbesondere deine Discord-ID, dein Discord-Benutzername, die Antragsart, Angaben zum betroffenen Moderationsfall und deine Begründung verarbeitet werden. Die Angaben werden in der Datenbank gespeichert und über den Discord-Bot an die für die Bearbeitung vorgesehenen Team-Kanäle weitergeleitet.</p>
+  <p>Darüber hinaus können Moderationsdaten angezeigt werden, die im Rahmen der Serververwaltung durch den Discord-Bot entstehen, beispielsweise Verwarnungen oder Fallinformationen. Der Zugriff im Portal soll nach der bisherigen Funktionsbeschreibung auf Daten beschränkt sein, die dem angemeldeten Discord-Konto oder einem verknüpften Roblox-Konto zugeordnet sind. Die tatsächlichen Zugriffsregeln müssen regelmäßig technisch geprüft werden.</p>
+  <p>Rechtsgrundlage ist je nach Vorgang Art. 6 Abs. 1 lit. b DSGVO oder Art. 6 Abs. 1 lit. f DSGVO, insbesondere zur Bearbeitung von Einsprüchen, zur Durchsetzung der Serverregeln und zur Abwehr von Missbrauch.</p>
 
-  <h2>11. Server-übergreifende Moderationsdaten</h2>
-  <p>Zur Anzeige deiner Verwarnungen und Fälle greifen wir auf Moderationsdaten zu, die unser Discord-Bot im Rahmen der normalen Serververwaltung erstellt (z. B. bei einer Verwarnung durch das Team). Diese Daten sind dir im Portal nur einsehbar, wenn sie zu deiner Discord-ID bzw. deinem verknüpften Roblox-Konto gehören.</p>
+  <h2>11. Weitergabe an Discord durch den Bot</h2>
+  <p>Der Discord-Bot übermittelt Daten, die für die Bearbeitung von Kontaktanfragen, Bewertungen, Anträgen, Einsprüchen und weiteren Community-Funktionen erforderlich sind, an Discord und dort an die jeweils vorgesehenen Server- oder Team-Kanäle. Empfänger innerhalb des Discord-Servers können diejenigen Teammitglieder sein, die aufgrund ihrer Rollen- und Kanalberechtigungen Zugriff auf diese Inhalte haben.</p>
+  <p>Bitte sende über Formulare nur Angaben, die für dein Anliegen erforderlich sind. Besonders vertrauliche Daten oder Ausweisdokumente sollten nicht über allgemeine Community-Kanäle übermittelt werden.</p>
 
-  <h2>12. IP-Adressen beim Kontaktformular</h2>
-  <p>Um Spam und Missbrauch des Kontaktformulars zu verhindern, wird deine IP-Adresse kurzzeitig im Arbeitsspeicher unseres Servers zur Begrenzung der Anfragen pro Zeitraum (Rate-Limiting) genutzt. Diese Information wird nicht dauerhaft gespeichert und nicht in die Datenbank geschrieben. Rechtsgrundlage ist unser berechtigtes Interesse an einem missbrauchsfreien Betrieb (Art. 6 Abs. 1 lit. f DSGVO).</p>
+  <h2>12. IP-Adresse beim Kontaktformular und Missbrauchsschutz</h2>
+  <p>Nach der bisherigen technischen Beschreibung wird die IP-Adresse beim Kontaktformular kurzzeitig im Arbeitsspeicher verwendet, um die Anzahl von Anfragen zu begrenzen (Rate-Limiting). Sie soll dabei nicht dauerhaft in der Datenbank gespeichert werden. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO aufgrund des berechtigten Interesses an der Abwehr von Spam und Missbrauch. Die tatsächliche Umsetzung muss anhand des Server-Codes geprüft werden.</p>
 
-  <h2>13. Speicherdauer</h2>
-  <p>Wir speichern personenbezogene Daten nur so lange, wie es für die jeweils genannten Zwecke erforderlich ist, oder bis du die Löschung verlangst und keine gesetzliche Aufbewahrungspflicht entgegensteht. Das Session-Cookie verfällt automatisch nach 30 Tagen.</p>
+  <h2>13. Empfänger und Drittlandübermittlungen</h2>
+  <p>Je nach Funktion können personenbezogene Daten an folgende Anbieter bzw. Empfänger gelangen: Vercel für Hosting und Auslieferung der Website, Supabase für Datenbank- und Speicherdienste, Discord für Anmeldung und Bot-Übermittlungen sowie Roblox Corporation für die Abfrage öffentlich verfügbarer Profildaten im Rahmen der Roblox-Verknüpfung.</p>
+  <p>Bei Vercel, Supabase und Discord kann eine Verarbeitung außerhalb des Europäischen Wirtschaftsraums nicht ausgeschlossen werden. Für konkrete Übermittlungen sind die jeweils geltenden Angemessenheitsbeschlüsse oder geeigneten Garantien, insbesondere Standardvertragsklauseln, sowie die tatsächlichen Vertrags- und Kontoeinstellungen maßgeblich. Eine pauschale Aussage, dass sämtliche Daten ausschließlich in der EU gespeichert werden, wird nicht getroffen.</p>
 
-  <h2>14. Deine Rechte</h2>
-  <p>Du hast nach Maßgabe der gesetzlichen Bestimmungen jederzeit das Recht auf unentgeltliche Auskunft über deine gespeicherten personenbezogenen Daten, deren Herkunft, Empfänger und den Zweck der Datenverarbeitung sowie ein Recht auf Berichtigung, Sperrung oder Löschung dieser Daten. Außerdem hast du das Recht auf Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch gegen die Verarbeitung. Wende dich hierzu an die im <a href="/impressum">Impressum</a> genannte Kontaktadresse.</p>
+  <h2>14. Speicherdauer</h2>
+  <p>Personenbezogene Daten werden nur so lange gespeichert, wie es für den jeweiligen Zweck erforderlich ist. Nach Abschluss einer Anfrage oder eines Antrags werden die Daten gelöscht, sobald sie für die Bearbeitung, die Dokumentation eines Vorgangs oder die Abwehr bzw. Durchsetzung möglicher Rechtsansprüche nicht mehr benötigt werden und keine gesetzlichen Aufbewahrungspflichten entgegenstehen.</p>
+  <p>Öffentliche Bewertungen bleiben grundsätzlich sichtbar, solange die Bewertungsfunktion genutzt wird und keine Löschung erfolgt oder andere Gründe eine Entfernung erfordern. Sitzungs-Cookies werden nach der bisherigen Beschreibung spätestens nach 30 Tagen ungültig; die Cookies zur Absicherung des OAuth-Vorgangs sind kurzlebig. Die konkreten Löschfristen für Datenbankeinträge, Moderationsfälle, Protokolle und Backups sind noch anhand der tatsächlichen Konfiguration festzulegen und zu dokumentieren.</p>
 
-  <h2>15. Beschwerderecht bei der Aufsichtsbehörde</h2>
-  <p>Du hast das Recht, dich bei einer Datenschutz-Aufsichtsbehörde über die Verarbeitung deiner personenbezogenen Daten zu beschweren.</p>
+  <h2>15. Deine Rechte</h2>
+  <p>Nach Maßgabe der gesetzlichen Voraussetzungen hast du das Recht auf Auskunft über deine personenbezogenen Daten (Art. 15 DSGVO), Berichtigung (Art. 16 DSGVO), Löschung (Art. 17 DSGVO), Einschränkung der Verarbeitung (Art. 18 DSGVO) und Datenübertragbarkeit (Art. 20 DSGVO). Soweit eine Verarbeitung auf berechtigten Interessen beruht, kannst du aus Gründen, die sich aus deiner besonderen Situation ergeben, Widerspruch nach Art. 21 DSGVO einlegen.</p>
+  <p>Eine erteilte Einwilligung kannst du jederzeit mit Wirkung für die Zukunft widerrufen. Die Rechtmäßigkeit der bis zum Widerruf erfolgten Verarbeitung bleibt hiervon unberührt. Zur Ausübung deiner Rechte genügt eine Nachricht an <a href="mailto:support.palmcityrp@gmail.com">support.palmcityrp@gmail.com</a>. Bitte beschreibe möglichst genau, auf welche Funktion oder Daten sich deine Anfrage bezieht.</p>
+
+  <h2>16. Beschwerderecht</h2>
+  <p>Du hast das Recht, dich bei einer Datenschutzaufsichtsbehörde zu beschweren, insbesondere bei der Aufsichtsbehörde deines gewöhnlichen Aufenthaltsorts, deines Arbeitsplatzes oder des Orts des mutmaßlichen Datenschutzverstoßes (Art. 77 DSGVO).</p>
+
+  <h2>17. Automatisierte Entscheidungen</h2>
+  <p>Ob einzelne technische Funktionen automatisierte Prüfungen oder Einschränkungen auslösen, muss anhand der eingesetzten Website- und Bot-Funktionen geprüft werden. Eine abschließende Aussage zum Vorliegen automatisierter Entscheidungen im Sinne von Art. 22 DSGVO kann auf Grundlage der bisher vorliegenden Informationen nicht getroffen werden.</p>
+
+  <h2>18. Änderungen dieser Datenschutzerklärung</h2>
+  <p>Diese Datenschutzerklärung wird angepasst, wenn sich die Website, die eingesetzten Dienste oder die Datenverarbeitung ändern. Das oben angegebene Stand-Datum bezeichnet das Datum der letzten inhaltlichen Überarbeitung und wird nicht automatisch bei jedem Seitenaufruf aktualisiert.</p>
 </div></main>
 
-<footer><div class="wrap">Palm City RP · <a href="/impressum">Impressum</a> · <a href="/datenschutz">Datenschutz</a></div></footer>
-
-<script>
-document.getElementById('d').textContent = new Date().toLocaleDateString('de-DE', {year:'numeric', month:'long', day:'numeric'});
-</script>
+<footer><div class="wrap">Palm City RP · <a href="/impressum">Impressum</a><a href="/datenschutz">Datenschutz</a></div></footer>
 </body>
 </html>
