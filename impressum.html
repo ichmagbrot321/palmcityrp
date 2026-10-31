@@ -4,90 +4,75 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#050a14">
-<meta name="robots" content="noindex">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🌴%3C/text%3E%3C/svg%3E">
-<title>Impressum — Palm City RP</title>
+<meta name="robots" content="noindex, nofollow">
+<title>Impressum | Palm City RP</title>
 <style>
 :root{
   color-scheme:dark;
-  --color-bg:#050a14;--color-surface:#0b1424;--color-surface-2:#101b30;
-  --color-border:rgba(130,165,230,.14);--color-border-strong:rgba(130,165,230,.28);
-  --color-text:#eaf0fa;--color-text-soft:#b9c6dc;--color-muted:#8d9bb5;
-  --color-primary:#2563eb;--color-primary-hover:#3b78f5;--color-primary-soft:#8db4ff;
-  --color-warning:#f5b94a;
-  --s2:8px;--s3:12px;--s4:16px;--s5:20px;--s6:24px;--s8:32px;--s10:40px;--s12:48px;
-  --r-sm:10px;--r-md:12px;--font:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-  --wrap:760px;
+  --bg:#050a14;--surface:#0b1424;--border:rgba(130,165,230,.16);
+  --text:#eaf0fa;--soft:#b9c6dc;--muted:#8d9bb5;--primary:#8db4ff;
+  --warning:#f5b94a;--space4:16px;--space5:20px;--space6:24px;--space8:32px;--space12:48px;
+  --radius:12px;--font:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;--wrap:820px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:var(--font);font-size:1rem;line-height:1.65;color:var(--color-text);background:var(--color-bg);-webkit-font-smoothing:antialiased}
-a{color:var(--color-primary-soft)}
-a:hover{color:var(--color-primary-hover)}
-:focus-visible{outline:3px solid var(--color-primary-soft);outline-offset:2px;border-radius:var(--r-sm)}
-.wrap{width:min(var(--wrap),100% - var(--s8));margin-inline:auto}
-.nav{padding:var(--s5) 0;border-bottom:1px solid var(--color-border)}
-.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:var(--s4)}
-.brand{font-weight:800;text-decoration:none;letter-spacing:-.01em}
-.back{font-size:.9375rem;text-decoration:none}
-main{padding:var(--s12) 0 var(--s12)}
-h1{font-size:clamp(1.75rem,1.3rem + 2vw,2.5rem);line-height:1.1;font-weight:800;letter-spacing:-.01em;margin-bottom:var(--s3)}
-.updated{color:var(--color-muted);font-size:.9375rem;margin-bottom:var(--s10)}
-h2{font-size:1.25rem;font-weight:700;letter-spacing:-.01em;margin:var(--s10) 0 var(--s3)}
-h2:first-of-type{margin-top:0}
-p{margin-bottom:var(--s4);color:var(--color-text-soft)}
-strong{color:var(--color-text);font-weight:650}
-.box{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--r-md);padding:var(--s5) var(--s6);margin-bottom:var(--s6)}
+body{font-family:var(--font);font-size:1rem;line-height:1.68;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
+a{color:var(--primary);overflow-wrap:anywhere}
+a:hover{color:#b7ceff}
+:focus-visible{outline:3px solid var(--primary);outline-offset:3px;border-radius:8px}
+.wrap{width:min(var(--wrap),calc(100% - 32px));margin-inline:auto}
+.nav{padding:18px 0;border-bottom:1px solid var(--border)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{font-weight:800;text-decoration:none;letter-spacing:-.02em;color:var(--text)}
+.back{font-size:.94rem;text-decoration:none}
+main{padding:48px 0}
+h1{font-size:clamp(1.8rem,1.3rem + 2vw,2.55rem);line-height:1.13;font-weight:800;letter-spacing:-.02em;margin-bottom:20px}
+h2{font-size:1.25rem;font-weight:750;margin:34px 0 12px}
+p{margin-bottom:15px;color:var(--soft)}
+strong{color:var(--text);font-weight:700}
+.notice{background:rgba(245,185,74,.09);border:1px solid rgba(245,185,74,.55);border-radius:var(--radius);padding:18px 20px;margin:22px 0 30px}
+.notice strong{color:var(--warning)}
+.notice p:last-child{margin-bottom:0}
+.box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin:18px 0}
 .box p:last-child{margin-bottom:0}
-.todo{background:rgba(245,185,74,.1);border:1px dashed var(--color-warning);border-radius:var(--r-md);padding:var(--s5) var(--s6);margin-bottom:var(--s8)}
-.todo strong{color:var(--color-warning)}
-.todo p{color:var(--color-text-soft);margin-bottom:0}
-.fields{list-style:none;margin:var(--s3) 0 0;padding:0}
-.fields li{padding:var(--s2) 0;border-bottom:1px solid var(--color-border);display:flex;gap:var(--s3)}
-.fields li:last-child{border-bottom:none}
-.fields b{min-width:140px;color:var(--color-text)}
-.fields span{color:var(--color-muted)}
-footer{padding:var(--s8) 0;border-top:1px solid var(--color-border);color:var(--color-muted);font-size:.875rem}
+footer{padding:30px 0;border-top:1px solid var(--border);color:var(--muted);font-size:.9rem}
+footer a{margin-right:12px}
+@media(max-width:560px){.nav .wrap{align-items:flex-start;flex-direction:column}main{padding:34px 0}}
 </style>
 </head>
 <body>
 <nav class="nav"><div class="wrap">
   <a class="brand" href="/">Palm City RP</a>
-  <a class="back" href="/">← Zurück zur Startseite</a>
+  <a class="back" href="/">Zurück zur Startseite</a>
 </div></nav>
 
 <main><div class="wrap">
   <h1>Impressum</h1>
 
-  <div class="todo">
-    <p><strong>Noch nicht veröffentlichungsbereit:</strong> Diese Seite ist ein Gerüst. Sobald du mir Name, Anschrift und E-Mail-Adresse geschickt hast, trage ich sie unten ein und entferne diesen Hinweis sowie das <code>noindex</code> im Seitenkopf. Bis dahin bitte nicht live schalten, damit niemand ein unvollständiges Impressum sieht.</p>
+  <div class="notice">
+    <p><strong>Hinweis vor Veröffentlichung</strong></p>
+    <p>Bitte prüfe vor der Veröffentlichung gemeinsam mit einem Erziehungsberechtigten, ob die Anbieterangaben und die Nutzung dieser Anschrift für das Projekt rechtlich passend sind. Die Seite bleibt bis zu dieser Prüfung vorsorglich auf „noindex“ gesetzt.</p>
   </div>
 
-  <h2>Angaben gemäß § 5 TMG / § 5 DDG</h2>
-  <ul class="fields">
-    <li><b>Name</b><span>— Leon Pajaziti —</span></li>
-    <li><b>Anschrift</b><span>— Römerstraße 1,74722 Buchen —</span></li>
-  </ul>
+  <h2>Anbieter</h2>
+  <div class="box">
+    <p><strong>Palm City RP</strong><br>
+    Betreiber: Leon Pajaziti<br>
+    E-Mail: <a href="mailto:support.palmcityrp@gmail.com">support.palmcityrp@gmail.com</a></p>
+    <p><strong>Anschrift:</strong><br>Römerstraße 1<br>74722 Buchen</p>
+  </div>
+
+  <h2>Rechtliche Hinweise</h2>
+  <p>Die Anbieterkennzeichnung richtet sich insbesondere nach § 18 Abs. 1 Medienstaatsvertrag (MStV) und, soweit anwendbar, § 5 Digitale-Dienste-Gesetz (DDG). Die erforderlichen Angaben müssen leicht erkennbar, unmittelbar erreichbar und dauerhaft verfügbar sein.</p>
+  <p>Eine Postfachadresse oder eine bloße Weiterleitungsadresse ersetzt grundsätzlich keine ladungsfähige Anschrift. Bei besonderen Umständen, etwa der Minderjährigkeit des Betreibers, sollte vor Veröffentlichung rechtlich geprüft werden, ob eine geeignete Empfangsbevollmächtigung mit einem Rechtsanwalt oder einer hierfür geeigneten Stelle vereinbart werden kann.</p>
+
+  <h2>Verantwortlich für journalistisch-redaktionelle Inhalte</h2>
+  <p>Ob einzelne Inhalte des Angebots als journalistisch-redaktionell gestaltet im Sinne von § 18 Abs. 2 MStV einzuordnen sind, ist anhand der tatsächlich veröffentlichten Inhalte zu prüfen. Falls diese Vorschrift greift, müssen Name und Anschrift einer dafür rechtlich geeigneten verantwortlichen Person ergänzt werden.</p>
 
   <h2>Kontakt</h2>
-  <ul class="fields">
-    <li><b>E-Mail</b><span>— support.palmcityrp@gmail.com —</span></li>
-    <li><b>Telefon</b><span>— Das ist mir zu Privat —</span></li>
-  </ul>
-
-  <h2>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h2>
-  <p>— dieselbe Person wie oben —</p>
-
-  <h2>Streitschlichtung</h2>
-  <p>Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit: <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener noreferrer">ec.europa.eu/consumers/odr</a>. Wir sind nicht verpflichtet und nicht bereit, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
-
-  <h2>Haftung für Inhalte</h2>
-  <p>Als Diensteanbieter sind wir gemäß § 7 Abs. 1 DDG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 DDG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.</p>
-
-  <h2>Haftung für Links</h2>
-  <p>Unser Angebot enthält Links zu externen Websites Dritter (u. a. Discord-Server von Partnern), auf deren Inhalte wir keinen Einfluss haben. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter verantwortlich.</p>
+  <p>Für allgemeine Anfragen ist die oben angegebene E-Mail-Adresse erreichbar: <a href="mailto:support.palmcityrp@gmail.com">support.palmcityrp@gmail.com</a>.</p>
 </div></main>
 
-<footer><div class="wrap">Palm City RP · <a href="/impressum">Impressum</a> · <a href="/datenschutz">Datenschutz</a></div></footer>
+<footer><div class="wrap">Palm City RP · <a href="/impressum">Impressum</a><a href="/datenschutz">Datenschutz</a></div></footer>
 </body>
 </html>
