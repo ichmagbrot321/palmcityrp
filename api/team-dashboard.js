@@ -163,12 +163,12 @@ function getSession(req) {
 // Kritische Berechtigungsprüfung: Der Cookie allein reicht niemals aus.
 // Discord-Mitgliedschaft und zwingende Zugriffsrolle werden bei jeder Anfrage
 // live über die Bot-API geprüft. Bei API-Ausfall wird der Zugriff verweigert.
-const ACCESS_GUILD_ID = process.env.DISCORD_GUILD_ID || "1555883394301173822";
-const ACCESS_ROLE_ID = "1555884009496514570";
+const ACCESS_GUILD_ID = process.env.DISCORD_GUILD_ID || "1557432169931079720";
+const ACCESS_ROLE_ID = "1561028616068931624";
 const DEPARTMENT_LEADER_ROLE_IDS = new Set([
-  "1555883982095257670", // Adminleitung
-  "1555883988474667028", // Modleitung
-  "1555883995298799666", // Supportleitung
+  "1566489760380223708", // Adminleitung
+  "1566490000281833652", // Modleitung
+  "1566490064123330703", // Supportleitung
 ]);
 const ACCESS_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 // Kurzer Cache gegen doppelte Discord-Rollenabfragen beim initialen Laden.
