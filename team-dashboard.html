@@ -6254,6 +6254,35 @@ html[data-theme="light"] .side-brand strong { color: #0f1a33; }
 .proposal-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 @media (max-width: 720px) { .proposal-form-grid { grid-template-columns: minmax(0,1fr); } .proposal-ranks { grid-template-columns: minmax(0,1fr); } .proposal-arrow { display: none; } }
 </style>
+<style id="perf-fix">
+/* ===== Performance-Fix: viele Teammitglieder ===== */
+/* Dauer-Animationen im Hintergrund aus (liefen ununterbrochen) */
+body::before, body::after, .hero::before, .hero::after { animation: none !important; }
+.live i, .live-dot { animation: none !important; }
+#p-feedback .feedback-hero::before, #p-feedback .feedback-hero::after { animation: none !important; filter: none !important; }
+.skeleton { animation: none !important; }
+
+/* Spotlight-Ebene aus (hing an --mx/--my) */
+.content::before, .top::after { display: none !important; }
+
+/* Weichzeichner (backdrop-filter) ist die teuerste Eigenschaft: überall aus */
+*, *::before, *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+.backdrop, .lock { background: rgba(2, 4, 10, .92) !important; }
+.top { background: rgba(4, 8, 16, .96) !important; }
+
+/* Einblend-Animationen pro Listeneintrag/Karte aus (bei 50 Mitgliedern bei jedem Neuaufbau) */
+.list > .row, .list > .empty, .team-grid > *, #p-team .team-card,
+section:not([hidden]) > .list, section:not([hidden]) > .stats { animation: none !important; }
+
+/* Masken pro Karte erzwingen eine eigene Render-Ebene je Karte: aus */
+#p-team .team-card { -webkit-mask-image: none !important; mask-image: none !important; will-change: auto !important; }
+
+/* Nur sichtbare Karten rendern */
+#p-team .team-grid > .team-card, #p-team .team-grid > li {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 150px;
+}
+</style>
 </head>
 <body>
 
@@ -6465,7 +6494,7 @@ html[data-theme="light"] .side-brand strong { color: #0f1a33; }
 "use strict";
 
 const API = "/api/team-dashboard";
-const POLL_MS = 5000; // Schnelle Statusaktualisierung; schwere Bereiche werden nur bei Tab-Aufruf geladen.
+const POLL_MS = 15000; // Statusaktualisierung; schwere Bereiche werden nur bei Tab-Aufruf geladen.
 
 const $ = (selector, root = document) => root.querySelector(selector);
 
@@ -10395,7 +10424,30 @@ async function loadUsers() {
   }
 }
 
-async function refresh() {
+let refreshPromise = null;
+let refreshQueued = false;
+
+function refresh() {
+  // Nie zwei State-Abrufe gleichzeitig: Ein laufender Abruf wird abgewartet,
+  // danach genau einmal erneut geladen (z. B. nach einer Aktion).
+  if (refreshPromise) {
+    refreshQueued = true;
+    return refreshPromise;
+  }
+
+  refreshPromise = refreshNow().finally(() => {
+    refreshPromise = null;
+
+    if (refreshQueued) {
+      refreshQueued = false;
+      refresh();
+    }
+  });
+
+  return refreshPromise;
+}
+
+async function refreshNow() {
   try {
     const data = await api("state");
     S.data = data;
@@ -10425,6 +10477,10 @@ function loop() {
     loop();
   }, POLL_MS);
 }
+
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden && S.me) refresh();
+});
 
 // ============================================================
 // START
@@ -10565,6 +10621,7 @@ boot();
 // PREMIUM MOTION: desktop pointer spotlight
 // ============================================================
 (function setupMotionLayer() {
+  return; // Performance: Spotlight deaktiviert (Style-Neuberechnung bei jeder Mausbewegung)
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   if (window.matchMedia && window.matchMedia('(max-width: 820px)').matches) return;
 
