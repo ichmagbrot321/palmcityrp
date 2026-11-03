@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Nova RP | Moderationsportal</title>
+<title>Palm City RP | Moderationsportal</title>
 <meta name="theme-color" content="#06101d">
 <link rel="icon" href="/logo.png" type="image/png">
 <!-- Schriften werden bewusst NICHT von Google geladen (keine Drittanbieter-Verbindung ohne
@@ -306,8 +306,8 @@ footer{border-top:1px solid var(--color-border);padding:var(--space-6) 0 var(--s
 <header class="nav">
   <div class="shell nav-in">
     <a class="brand" href="/">
-      <img src="/logo.png" alt="Nova RP">
-      <span>Nova RP<small>Moderationsportal</small></span>
+      <img src="/logo.png" alt="Palm City RP">
+      <span>Palm City RP<small>Moderationsportal</small></span>
     </a>
     <div class="nav-actions" id="nav-actions"></div>
   </div>
@@ -326,7 +326,7 @@ footer{border-top:1px solid var(--color-border);padding:var(--space-6) 0 var(--s
     <div class="hero-grid">
       <div>
         <h1>Deine Moderationen auf einen Blick</h1>
-        <p>Sieh deine Discord- und Roblox-Fälle ein und stelle Anträge direkt an das Nova RP Team.</p>
+        <p>Sieh deine Discord- und Roblox-Fälle ein und stelle Anträge direkt an das Palm City RP Team.</p>
         <a class="btn btn-primary" href="/api/login">
           <svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.54 5.32A16.6 16.6 0 0 0 15.5 4l-.5 1.02a15.6 15.6 0 0 0-4 0L10.5 4a16.6 16.6 0 0 0-4.04 1.32C3.9 9.13 3.2 12.86 3.55 16.54a16.4 16.4 0 0 0 4.95 2.5l1.2-1.65c-.66-.25-1.28-.56-1.86-.92l.45-.34c3.59 1.68 7.48 1.68 11.02 0l.46.34c-.58.36-1.2.67-1.86.92l1.2 1.65a16.4 16.4 0 0 0 4.95-2.5c.4-4.26-.68-7.95-3.52-11.22ZM9.73 14.67c-1.08 0-1.97-.98-1.97-2.18s.87-2.18 1.97-2.18c1.11 0 1.99.98 1.98 2.18 0 1.2-.87 2.18-1.98 2.18Zm4.54 0c-1.09 0-1.98-.98-1.98-2.18s.87-2.18 1.98-2.18c1.1 0 1.98.98 1.98 2.18s-.87 2.18-1.98 2.18Z"/></svg>
           Mit Discord anmelden
@@ -338,7 +338,7 @@ footer{border-top:1px solid var(--color-border);padding:var(--space-6) 0 var(--s
           <li><b>3</b><span>Fälle ansehen und bei Bedarf Widerspruch einlegen</span></li>
         </ol>
       </div>
-      <div class="hero-art"><img src="/logo.png" alt="Nova RP Logo"></div>
+      <div class="hero-art"><img src="/logo.png" alt="Palm City RP Logo"></div>
     </div>
   </section>
 
@@ -430,7 +430,7 @@ footer{border-top:1px solid var(--color-border);padding:var(--space-6) 0 var(--s
 
 </div>
 
-<footer>Nova RP Moderationsportal · <a href="/impressum">Impressum</a> · <a href="/datenschutz">Datenschutz</a></footer>
+<footer>Palm City RP Moderationsportal · <a href="/impressum">Impressum</a> · <a href="/datenschutz">Datenschutz</a></footer>
 
 <!-- Modal -->
 <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="mtitle">
@@ -658,8 +658,8 @@ function renderCases(list, type, pendingCaseIds) {
   return list.map(x => {
     const info = actionInfo(x.action);
     const status = String(x.status || 'active').toLowerCase();
-    const statusText = {closed:'Erledigt', expired:'Abgelaufen', removed:'Entfernt'}[status] || 'Aktiv';
-    const inactive = ['closed','expired','removed'].includes(status);
+    const statusText = {closed:'Erledigt', expired:'Abgelaufen', removed:'Entfernt', revoked:'Aufgehoben', deleted:'Entfernt'}[status] || 'Aktiv';
+    const inactive = ['closed','expired','removed','revoked','deleted'].includes(status);
     const pending = pendingCaseIds.has(String(x.case_id));
 
     let actions = '';
@@ -730,7 +730,7 @@ function renderSummary(d, activeWarns, activeRoblox, openAppeals) {
     <div class="stat"><b>${openAppeals}</b><span>Offene Anträge</span></div>`;
 }
 
-const isActive = x => !['closed','expired','removed'].includes(String(x.status || 'active').toLowerCase());
+const isActive = x => !['closed','expired','removed','revoked','deleted'].includes(String(x.status || 'active').toLowerCase());
 
 /* ---------- Tabs ---------- */
 document.querySelectorAll('.tab').forEach(btn => {
