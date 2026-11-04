@@ -230,6 +230,7 @@ input:focus,textarea:focus{border-color:var(--color-primary);box-shadow:0 0 0 3p
 .tab[aria-selected="true"] i{background:rgba(45,140,255,.16);color:var(--color-primary-hover)}
 
 .list{display:grid;gap:var(--space-3)}
+.appeal-group{display:grid;gap:var(--space-3)}
 .list:not(.hidden){animation:enter var(--duration-base) var(--ease-out)}
 .case{position:relative;padding:var(--space-4) var(--space-5) var(--space-4) var(--space-6);border-radius:var(--radius-lg);border:1px solid var(--color-border);background:var(--color-surface);overflow:hidden;box-shadow:var(--shadow-subtle);transition:border-color var(--duration-fast),background-color var(--duration-fast)}
 .case:hover{border-color:var(--color-border-strong);background:var(--color-surface-raised)}
@@ -686,31 +687,55 @@ function renderCases(list, type, pendingCaseIds) {
   }).join('');
 }
 
+function renderAppealCard(x) {
+  const s = String(x.status || 'open').toLowerCase();
+  const accepted = ['accepted','approved'].includes(s);
+  const rejected = ['rejected','denied'].includes(s);
+  const withdrawn = ['deleted','withdrawn'].includes(s);
+  const completed = withdrawn || rejected || (accepted && Boolean(x.bot_handled));
+  const cls = accepted ? 'accepted' : rejected ? 'rejected' : withdrawn ? 'kick' : 'open';
+  const text = accepted
+    ? (x.bot_error ? 'Angenommen · Fehler' : x.bot_handled ? 'Angenommen · erledigt' : 'Angenommen · Verarbeitung')
+    : rejected ? 'Abgelehnt' : withdrawn ? 'Zurückgezogen' : s === 'pending' ? 'In Prüfung' : 'Offen';
+  const tagCls = accepted && !x.bot_error ? 'good' : rejected || x.bot_error ? 'bad' : 'warn';
+  return `
+    <article class="case ${cls}">
+      <div class="case-top">
+        <div>
+          <div class="case-title">${esc(APPEAL_TYPES[x.type] || x.type)}${x.case_id ? ', Fall #' + esc(x.case_id) : ''}</div>
+          <div class="case-date">Antrag #${esc(x.id ?? x.appeal_id)} vom ${esc(fmtDate(x.created_at))}</div>
+        </div>
+        <span class="tag ${tagCls}">${text}</span>
+      </div>
+      <p class="case-reason">${esc(x.reason)}</p>
+      ${x.staff_reason ? `<div class="case-actions"><strong>${rejected ? '❌ Ablehnungsgrund des Teams' : '📝 Rückmeldung des Teams'}</strong><p class="case-reason">${esc(x.staff_reason)}</p></div>` : ''}
+      ${x.staff_id ? `<div class="case-date">Bearbeitet von Discord-ID ${esc(x.staff_id)}${x.decided_at ? ' · ' + esc(fmtDate(x.decided_at)) : ''}</div>` : ''}
+      ${x.bot_error ? `<div class="identity-problem">Die Moderationsaktion konnte noch nicht vollständig verarbeitet werden: ${esc(x.bot_error)}</div>` : ''}
+      ${x.bot_handled ? `<div class="case-date">✓ Zugehörige Moderationsakte erfolgreich verarbeitet</div>` : ''}
+      ${completed ? '<div class="case-date">Dieser Antrag befindet sich im abgeschlossenen Verlauf.</div>' : ''}
+    </article>`;
+}
+
 function renderAppeals(appeals) {
   if (!appeals.length) {
     return `<div class="empty">${iconSvg('send')}<b>Noch keine Anträge</b>Anträge, die du stellst, erscheinen hier.</div>`;
   }
-  return appeals.map(x => {
+  const isCompleted = x => {
     const s = String(x.status || 'open').toLowerCase();
-    const cls = ['accepted','approved'].includes(s) ? 'accepted' : ['rejected','denied'].includes(s) ? 'rejected' : ['deleted','withdrawn'].includes(s) ? 'kick' : 'open';
-    const text = cls === 'accepted' ? (x.bot_handled ? 'Angenommen · erledigt' : 'Angenommen · Verarbeitung') : cls === 'rejected' ? 'Abgelehnt' : cls === 'kick' ? 'Zurückgezogen' : s === 'pending' ? 'In Prüfung' : 'Offen';
-    const tagCls = cls === 'accepted' ? 'good' : cls === 'rejected' ? 'bad' : 'warn';
-    return `
-      <article class="case ${cls}">
-        <div class="case-top">
-          <div>
-            <div class="case-title">${esc(APPEAL_TYPES[x.type] || x.type)}${x.case_id ? ', Fall #' + esc(x.case_id) : ''}</div>
-            <div class="case-date">Antrag #${esc(x.id ?? x.appeal_id)} vom ${esc(fmtDate(x.created_at))}</div>
-          </div>
-          <span class="tag ${tagCls}">${text}</span>
-        </div>
-        <p class="case-reason">${esc(x.reason)}</p>
-        ${x.staff_reason ? `<div class="case-actions"><strong>${cls === 'rejected' ? '❌ Ablehnungsgrund des Teams' : '📝 Rückmeldung des Teams'}</strong><p class="case-reason">${esc(x.staff_reason)}</p></div>` : ''}
-        ${x.staff_id ? `<div class="case-date">Bearbeitet von Discord-ID ${esc(x.staff_id)}${x.decided_at ? ' · ' + esc(fmtDate(x.decided_at)) : ''}</div>` : ''}
-        ${x.bot_error ? `<div class="identity-problem">Die angenommene Aktion konnte noch nicht vollständig verarbeitet werden: ${esc(x.bot_error)}</div>` : ''}
-        ${x.bot_handled ? `<div class="case-date">✓ Zugehörige Moderationsaktion erfolgreich verarbeitet</div>` : ''}
-      </article>`;
-  }).join('');
+    return ['rejected','denied','deleted','withdrawn'].includes(s)
+      || (['approved','accepted'].includes(s) && Boolean(x.bot_handled));
+  };
+  const active = appeals.filter(x => !isCompleted(x));
+  const history = appeals.filter(isCompleted);
+  return `
+    <section class="appeal-group">
+      <div class="case-top"><div class="case-title">Aktive Anträge</div><span class="tag warn">${active.length}</span></div>
+      ${active.length ? active.map(renderAppealCard).join('') : '<div class="empty"><b>Keine offenen Anträge</b>Alle Anträge wurden entschieden oder verarbeitet.</div>'}
+    </section>
+    <section class="appeal-group" style="margin-top:18px">
+      <div class="case-top"><div class="case-title">Entschiedene Anträge · Verlauf</div><span class="tag">${history.length}</span></div>
+      ${history.length ? history.slice().reverse().map(renderAppealCard).join('') : '<div class="help">Entschiedene Anträge erscheinen hier als Verlauf und werden nicht aus der Aktenhistorie gelöscht.</div>'}
+    </section>`;
 }
 
 function renderRoblox(d) {
@@ -760,7 +785,7 @@ async function load(options = {}) {
   const refreshButton = $('refreshPortal');
   if (refreshButton && options.manual) { refreshButton.disabled = true; refreshButton.textContent = '↻ Aktualisiere ...'; }
   try {
-    const d = await api('/api/me');
+    const d = await api('/api/me?refresh=' + Date.now());
     currentData = d;
 
     $('nav-actions').innerHTML = `
@@ -787,7 +812,7 @@ async function load(options = {}) {
     $('banAppeal').onclick = () => openModal('discord_ban', null);
 
     const appeals = d.appeals || [];
-    const open = appeals.filter(a => ['open','pending'].includes(String(a.status || 'open').toLowerCase()));
+    const open = appeals.filter(a => { const status = String(a.status || 'open').toLowerCase(); return ['open','pending'].includes(status) || (['approved','accepted'].includes(status) && !a.bot_handled); });
     const pendingCaseIds = new Set(open.filter(a => a.case_id).map(a => String(a.case_id)));
     const banAppealOpen = open.some(a => a.type === 'discord_ban');
     $('banAppeal').disabled = banAppealOpen;
