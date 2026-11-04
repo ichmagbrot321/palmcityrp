@@ -687,55 +687,34 @@ function renderCases(list, type, pendingCaseIds) {
   }).join('');
 }
 
-function renderAppealCard(x) {
-  const s = String(x.status || 'open').toLowerCase();
-  const accepted = ['accepted','approved'].includes(s);
-  const rejected = ['rejected','denied'].includes(s);
-  const withdrawn = ['deleted','withdrawn'].includes(s);
-  const completed = withdrawn || rejected || (accepted && Boolean(x.bot_handled));
-  const cls = accepted ? 'accepted' : rejected ? 'rejected' : withdrawn ? 'kick' : 'open';
-  const text = accepted
-    ? (x.bot_error ? 'Angenommen · Fehler' : x.bot_handled ? 'Angenommen · erledigt' : 'Angenommen · Verarbeitung')
-    : rejected ? 'Abgelehnt' : withdrawn ? 'Zurückgezogen' : s === 'pending' ? 'In Prüfung' : 'Offen';
-  const tagCls = accepted && !x.bot_error ? 'good' : rejected || x.bot_error ? 'bad' : 'warn';
-  return `
-    <article class="case ${cls}">
-      <div class="case-top">
-        <div>
-          <div class="case-title">${esc(APPEAL_TYPES[x.type] || x.type)}${x.case_id ? ', Fall #' + esc(x.case_id) : ''}</div>
-          <div class="case-date">Antrag #${esc(x.id ?? x.appeal_id)} vom ${esc(fmtDate(x.created_at))}</div>
-        </div>
-        <span class="tag ${tagCls}">${text}</span>
-      </div>
-      <p class="case-reason">${esc(x.reason)}</p>
-      ${x.staff_reason ? `<div class="case-actions"><strong>${rejected ? '❌ Ablehnungsgrund des Teams' : '📝 Rückmeldung des Teams'}</strong><p class="case-reason">${esc(x.staff_reason)}</p></div>` : ''}
-      ${x.staff_id ? `<div class="case-date">Bearbeitet von Discord-ID ${esc(x.staff_id)}${x.decided_at ? ' · ' + esc(fmtDate(x.decided_at)) : ''}</div>` : ''}
-      ${x.bot_error ? `<div class="identity-problem">Die Moderationsaktion konnte noch nicht vollständig verarbeitet werden: ${esc(x.bot_error)}</div>` : ''}
-      ${x.bot_handled ? `<div class="case-date">✓ Zugehörige Moderationsakte erfolgreich verarbeitet</div>` : ''}
-      ${completed ? '<div class="case-date">Dieser Antrag befindet sich im abgeschlossenen Verlauf.</div>' : ''}
-    </article>`;
-}
+function renderAppeals(openAppeals) {
+  // In "Meine Anträge" werden ausschließlich noch offene Anträge angezeigt.
+  // Angenommene, abgelehnte und zurückgezogene Anträge verschwinden sofort
+  // aus dieser Ansicht und werden nicht als Verlauf eingeblendet.
+  const visible = (openAppeals || []).filter(x => {
+    const status = String(x.status || 'open').trim().toLowerCase();
+    return status === 'open' || status === 'pending';
+  });
 
-function renderAppeals(appeals) {
-  if (!appeals.length) {
-    return `<div class="empty">${iconSvg('send')}<b>Noch keine Anträge</b>Anträge, die du stellst, erscheinen hier.</div>`;
+  if (!visible.length) {
+    return `<div class="empty">${iconSvg('send')}<b>Keine offenen Anträge</b>Angenommene oder abgelehnte Anträge werden hier nicht mehr angezeigt.</div>`;
   }
-  const isCompleted = x => {
-    const s = String(x.status || 'open').toLowerCase();
-    return ['rejected','denied','deleted','withdrawn'].includes(s)
-      || (['approved','accepted'].includes(s) && Boolean(x.bot_handled));
-  };
-  const active = appeals.filter(x => !isCompleted(x));
-  const history = appeals.filter(isCompleted);
-  return `
-    <section class="appeal-group">
-      <div class="case-top"><div class="case-title">Aktive Anträge</div><span class="tag warn">${active.length}</span></div>
-      ${active.length ? active.map(renderAppealCard).join('') : '<div class="empty"><b>Keine offenen Anträge</b>Alle Anträge wurden entschieden oder verarbeitet.</div>'}
-    </section>
-    <section class="appeal-group" style="margin-top:18px">
-      <div class="case-top"><div class="case-title">Entschiedene Anträge · Verlauf</div><span class="tag">${history.length}</span></div>
-      ${history.length ? history.slice().reverse().map(renderAppealCard).join('') : '<div class="help">Entschiedene Anträge erscheinen hier als Verlauf und werden nicht aus der Aktenhistorie gelöscht.</div>'}
-    </section>`;
+
+  return visible.map(x => {
+    const status = String(x.status || 'open').trim().toLowerCase();
+    const statusText = status === 'pending' ? 'In Prüfung' : 'Offen';
+    return `
+      <article class="case open">
+        <div class="case-top">
+          <div>
+            <div class="case-title">${esc(APPEAL_TYPES[x.type] || x.type)}${x.case_id ? ', Fall #' + esc(x.case_id) : ''}</div>
+            <div class="case-date">Antrag #${esc(x.id ?? x.appeal_id)} vom ${esc(fmtDate(x.created_at))}</div>
+          </div>
+          <span class="tag warn">${statusText}</span>
+        </div>
+        <p class="case-reason">${esc(x.reason || '')}</p>
+      </article>`;
+  }).join('');
 }
 
 function renderRoblox(d) {
@@ -811,8 +790,14 @@ async function load(options = {}) {
     $('banReason').textContent = d.ban?.reason || 'Kein Grund angegeben';
     $('banAppeal').onclick = () => openModal('discord_ban', null);
 
-    const appeals = d.appeals || [];
-    const open = appeals.filter(a => { const status = String(a.status || 'open').toLowerCase(); return ['open','pending'].includes(status) || (['approved','accepted'].includes(status) && !a.bot_handled); });
+    const appeals = Array.isArray(d.appeals) ? d.appeals : [];
+    // Nur tatsächlich offene Anträge gelten als offen. Sobald ein Antrag
+    // angenommen oder abgelehnt wurde, wird er aus dem Portal entfernt –
+    // unabhängig davon, ob die nachgelagerte Bot-Aktion bereits fertig ist.
+    const open = appeals.filter(a => {
+      const status = String(a.status || 'open').trim().toLowerCase();
+      return status === 'open' || status === 'pending';
+    });
     const pendingCaseIds = new Set(open.filter(a => a.case_id).map(a => String(a.case_id)));
     const banAppealOpen = open.some(a => a.type === 'discord_ban');
     $('banAppeal').disabled = banAppealOpen;
@@ -825,14 +810,14 @@ async function load(options = {}) {
 
     $('warns').innerHTML = renderCases(warns, 'discord_warn', pendingCaseIds);
     $('robloxCases').innerHTML = renderCases(rcases, 'roblox', pendingCaseIds);
-    $('appeals').innerHTML = renderAppeals(appeals);
+    $('appeals').innerHTML = renderAppeals(open);
 
     // Die aktive Registerkarte bleibt auch nach automatischen Aktualisierungen erhalten.
     ['warns','robloxCases','appeals'].forEach(id => $(id).classList.toggle('hidden', id !== activeTab));
     document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === activeTab)));
     $('c-warns').textContent = warns.length;
     $('c-robloxCases').textContent = rcases.length;
-    $('c-appeals').textContent = appeals.length;
+    $('c-appeals').textContent = open.length;
     lastSuccessfulLoad = Date.now();
     const stamp = new Date(lastSuccessfulLoad).toLocaleTimeString('de-DE', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
     if ($('lastUpdated')) $('lastUpdated').textContent = 'Zuletzt aktualisiert: ' + stamp + ' · automatische Aktualisierung aktiv';
