@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Palm City RP | Moderationsportal</title>
+<title>Nova RP | Moderationsportal</title>
 <meta name="theme-color" content="#06101d">
 <link rel="icon" href="/logo.png" type="image/png">
 <!-- Schriften werden bewusst NICHT von Google geladen (keine Drittanbieter-Verbindung ohne
@@ -306,8 +306,8 @@ footer{border-top:1px solid var(--color-border);padding:var(--space-6) 0 var(--s
 <header class="nav">
   <div class="shell nav-in">
     <a class="brand" href="/">
-      <img src="/logo.png" alt="Palm City RP">
-      <span>Palm City RP<small>Moderationsportal</small></span>
+      <img src="/logo.png" alt="Nova RP">
+      <span>Nova RP<small>Moderationsportal</small></span>
     </a>
     <div class="nav-actions" id="nav-actions"></div>
   </div>
@@ -326,7 +326,7 @@ footer{border-top:1px solid var(--color-border);padding:var(--space-6) 0 var(--s
     <div class="hero-grid">
       <div>
         <h1>Deine Moderationen auf einen Blick</h1>
-        <p>Sieh deine Discord- und Roblox-Fälle ein und stelle Anträge direkt an das Palm City RP Team.</p>
+        <p>Sieh deine Discord- und Roblox-Fälle ein und stelle Anträge direkt an das Nova RP Team.</p>
         <a class="btn btn-primary" href="/api/login">
           <svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.54 5.32A16.6 16.6 0 0 0 15.5 4l-.5 1.02a15.6 15.6 0 0 0-4 0L10.5 4a16.6 16.6 0 0 0-4.04 1.32C3.9 9.13 3.2 12.86 3.55 16.54a16.4 16.4 0 0 0 4.95 2.5l1.2-1.65c-.66-.25-1.28-.56-1.86-.92l.45-.34c3.59 1.68 7.48 1.68 11.02 0l.46.34c-.58.36-1.2.67-1.86.92l1.2 1.65a16.4 16.4 0 0 0 4.95-2.5c.4-4.26-.68-7.95-3.52-11.22ZM9.73 14.67c-1.08 0-1.97-.98-1.97-2.18s.87-2.18 1.97-2.18c1.11 0 1.99.98 1.98 2.18 0 1.2-.87 2.18-1.98 2.18Zm4.54 0c-1.09 0-1.98-.98-1.98-2.18s.87-2.18 1.98-2.18c1.1 0 1.98.98 1.98 2.18s-.87 2.18-1.98 2.18Z"/></svg>
           Mit Discord anmelden
@@ -338,7 +338,7 @@ footer{border-top:1px solid var(--color-border);padding:var(--space-6) 0 var(--s
           <li><b>3</b><span>Fälle ansehen und bei Bedarf Widerspruch einlegen</span></li>
         </ol>
       </div>
-      <div class="hero-art"><img src="/logo.png" alt="Palm City RP Logo"></div>
+      <div class="hero-art"><img src="/logo.png" alt="Nova RP Logo"></div>
     </div>
   </section>
 
@@ -393,6 +393,10 @@ footer{border-top:1px solid var(--color-border);padding:var(--space-6) 0 var(--s
     <div class="portal-head">
       <h1>Deine Moderationen</h1>
       <p>Aktuelle Fälle und eingereichte Anträge.</p>
+      <div class="portal-tools" style="display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap">
+        <button id="refreshPortal" class="btn btn-ghost btn-sm" type="button" onclick="load({manual:true})">↻ Jetzt aktualisieren</button>
+        <span id="lastUpdated" class="help" aria-live="polite">Noch nicht aktualisiert</span>
+      </div>
     </div>
 
     <div class="identities">
@@ -430,7 +434,7 @@ footer{border-top:1px solid var(--color-border);padding:var(--space-6) 0 var(--s
 
 </div>
 
-<footer>Palm City RP Moderationsportal · <a href="/impressum">Impressum</a> · <a href="/datenschutz">Datenschutz</a></footer>
+<footer>Nova RP Moderationsportal · <a href="/impressum">Impressum</a> · <a href="/datenschutz">Datenschutz</a></footer>
 
 <!-- Modal -->
 <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="mtitle">
@@ -457,6 +461,7 @@ let lookedUp = null;
 /* ---------- Helfer ---------- */
 async function api(url, options = {}) {
   const res = await fetch(url, {
+    cache: 'no-store',
     ...options,
     headers: {
       ...(options.body ? {'Content-Type':'application/json'} : {}),
@@ -687,8 +692,8 @@ function renderAppeals(appeals) {
   }
   return appeals.map(x => {
     const s = String(x.status || 'open').toLowerCase();
-    const cls = ['accepted','approved'].includes(s) ? 'accepted' : s === 'rejected' ? 'rejected' : 'open';
-    const text = cls === 'accepted' ? 'Angenommen' : cls === 'rejected' ? 'Abgelehnt' : s === 'pending' ? 'In Prüfung' : 'Offen';
+    const cls = ['accepted','approved'].includes(s) ? 'accepted' : ['rejected','denied'].includes(s) ? 'rejected' : ['deleted','withdrawn'].includes(s) ? 'kick' : 'open';
+    const text = cls === 'accepted' ? (x.bot_handled ? 'Angenommen · erledigt' : 'Angenommen · Verarbeitung') : cls === 'rejected' ? 'Abgelehnt' : cls === 'kick' ? 'Zurückgezogen' : s === 'pending' ? 'In Prüfung' : 'Offen';
     const tagCls = cls === 'accepted' ? 'good' : cls === 'rejected' ? 'bad' : 'warn';
     return `
       <article class="case ${cls}">
@@ -700,6 +705,10 @@ function renderAppeals(appeals) {
           <span class="tag ${tagCls}">${text}</span>
         </div>
         <p class="case-reason">${esc(x.reason)}</p>
+        ${x.staff_reason ? `<div class="case-actions"><strong>${cls === 'rejected' ? '❌ Ablehnungsgrund des Teams' : '📝 Rückmeldung des Teams'}</strong><p class="case-reason">${esc(x.staff_reason)}</p></div>` : ''}
+        ${x.staff_id ? `<div class="case-date">Bearbeitet von Discord-ID ${esc(x.staff_id)}${x.decided_at ? ' · ' + esc(fmtDate(x.decided_at)) : ''}</div>` : ''}
+        ${x.bot_error ? `<div class="identity-problem">Die angenommene Aktion konnte noch nicht vollständig verarbeitet werden: ${esc(x.bot_error)}</div>` : ''}
+        ${x.bot_handled ? `<div class="case-date">✓ Zugehörige Moderationsaktion erfolgreich verarbeitet</div>` : ''}
       </article>`;
   }).join('');
 }
@@ -735,13 +744,21 @@ const isActive = x => !['closed','expired','removed','revoked','deleted'].includ
 /* ---------- Tabs ---------- */
 document.querySelectorAll('.tab').forEach(btn => {
   btn.addEventListener('click', () => {
+    activeTab = btn.dataset.tab;
     document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t === btn)));
     ['warns','robloxCases','appeals'].forEach(id => $(id).classList.toggle('hidden', id !== btn.dataset.tab));
   });
 });
 
 /* ---------- Daten laden ---------- */
-async function load() {
+let loadInProgress = false;
+let lastSuccessfulLoad = 0;
+let activeTab = 'warns';
+async function load(options = {}) {
+  if (loadInProgress) return;
+  loadInProgress = true;
+  const refreshButton = $('refreshPortal');
+  if (refreshButton && options.manual) { refreshButton.disabled = true; refreshButton.textContent = '↻ Aktualisiere ...'; }
   try {
     const d = await api('/api/me');
     currentData = d;
@@ -785,9 +802,15 @@ async function load() {
     $('robloxCases').innerHTML = renderCases(rcases, 'roblox', pendingCaseIds);
     $('appeals').innerHTML = renderAppeals(appeals);
 
+    // Die aktive Registerkarte bleibt auch nach automatischen Aktualisierungen erhalten.
+    ['warns','robloxCases','appeals'].forEach(id => $(id).classList.toggle('hidden', id !== activeTab));
+    document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === activeTab)));
     $('c-warns').textContent = warns.length;
     $('c-robloxCases').textContent = rcases.length;
     $('c-appeals').textContent = appeals.length;
+    lastSuccessfulLoad = Date.now();
+    const stamp = new Date(lastSuccessfulLoad).toLocaleTimeString('de-DE', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    if ($('lastUpdated')) $('lastUpdated').textContent = 'Zuletzt aktualisiert: ' + stamp + ' · automatische Aktualisierung aktiv';
 
   } catch (e) {
     if (e.status === 401) {
@@ -797,6 +820,9 @@ async function load() {
       show('home');
       toast(e.message);
     }
+  } finally {
+    loadInProgress = false;
+    if (refreshButton && options.manual) { refreshButton.disabled = false; refreshButton.textContent = '↻ Jetzt aktualisieren'; }
   }
 }
 
@@ -932,6 +958,17 @@ $('verifyCheck').onclick = async () => {
 };
 
 load();
+// Automatische Aktualisierung: Entscheidungen, Ablehnungsgründe und Aktenänderungen
+// erscheinen ohne Neuanmeldung. Im Hintergrund wird die Abfrage pausiert.
+setInterval(() => {
+  if (document.visibilityState === 'visible' && currentData?.user) load();
+}, 8000);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && currentData?.user) load();
+});
+window.addEventListener('focus', () => {
+  if (currentData?.user && Date.now() - lastSuccessfulLoad > 5000) load();
+});
 </script>
 </body>
 </html>
