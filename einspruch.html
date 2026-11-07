@@ -300,6 +300,7 @@ footer{border-top:1px solid var(--color-border);padding:var(--space-6) 0 var(--s
   .stat{padding:var(--space-4)}
 }
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+.done-cases{margin-top:16px}.done-cases>summary{cursor:pointer;color:var(--muted,#8b93a7);font-weight:600;padding:8px 0}
 </style>
 </head>
 <body>
@@ -657,34 +658,75 @@ function actionInfo(action) {
   return {cls:'', text: action || 'Moderation'};
 }
 
-function renderCases(list, type, pendingCaseIds) {
+const INACTIVE_STATUS = ['closed','expired','removed','revoked','deleted'];
+const APPROVED_STATUS = ['approved','accepted','angenommen','granted','done','completed'];
+const REJECTED_STATUS = ['rejected','denied','declined','abgelehnt'];
+const appealStatus = a => String(a?.status || 'open').trim().toLowerCase();
+
+/* Ermittelt je Fall den Endstand der Widersprüche (neuester Antrag gewinnt). */
+function buildCaseResolutions(appeals) {
+  const map = new Map();
+  const sorted = [...appeals].filter(a => a.case_id).sort((x, y) =>
+    new Date(x.decided_at || x.updated_at || x.created_at || 0) - new Date(y.decided_at || y.updated_at || y.created_at || 0));
+  for (const a of sorted) {
+    const st = appealStatus(a);
+    if (APPROVED_STATUS.includes(st)) map.set(String(a.case_id), {kind:'approved', appeal:a});
+    else if (REJECTED_STATUS.includes(st) && map.get(String(a.case_id))?.kind !== 'approved') map.set(String(a.case_id), {kind:'rejected', appeal:a});
+  }
+  return map;
+}
+
+/* Wirksamer Status eines Falls: ein angenommener Widerspruch hebt den Fall auf. */
+const isCaseActive = (x, resolutions) =>
+  !INACTIVE_STATUS.includes(String(x.status || 'active').toLowerCase()) &&
+  resolutions.get(String(x.case_id))?.kind !== 'approved';
+
+function renderCaseCard(x, type, pendingCaseIds, resolutions) {
+  const info = actionInfo(x.action);
+  const status = String(x.status || 'active').toLowerCase();
+  const res = resolutions.get(String(x.case_id));
+  const approved = res?.kind === 'approved';
+  const rejected = res?.kind === 'rejected';
+  const inactive = INACTIVE_STATUS.includes(status) || approved;
+  const statusText = approved ? 'Erledigt – Widerspruch angenommen'
+    : ({closed:'Erledigt', expired:'Abgelaufen', removed:'Entfernt', revoked:'Aufgehoben', deleted:'Entfernt'}[status] || 'Aktiv');
+  const pending = pendingCaseIds.has(String(x.case_id));
+
+  let actions = '';
+  if (pending) actions = '<span class="tag warn">Antrag in Prüfung</span>';
+  else if (rejected && !inactive) actions = '<span class="tag">Widerspruch abgelehnt</span>';
+  else if (!inactive) actions = `<button class="btn btn-ghost btn-sm" onclick="openModal('${type}', ${Number(x.case_id)})">Widerspruch einlegen</button>`;
+
+  const staffNote = rejected && res.appeal.staff_reason
+    ? `<p class="case-reason"><b>Begründung des Teams:</b> ${esc(res.appeal.staff_reason)}</p>` : '';
+
+  return `
+    <article class="case ${info.cls}" ${inactive ? 'style="opacity:.7"' : ''}>
+      <div class="case-top">
+        <div>
+          <div class="case-title">Fall #${esc(x.case_id)}: ${esc(info.text)}</div>
+          <div class="case-date">${esc(fmtDate(x.created_at))}</div>
+        </div>
+        <span class="tag ${inactive ? '' : 'warn'}">${esc(statusText)}</span>
+      </div>
+      <p class="case-reason">${esc(x.reason || 'Kein Grund angegeben')}</p>
+      ${staffNote}
+      ${actions ? `<div class="case-actions">${actions}</div>` : ''}
+    </article>`;
+}
+
+function renderCases(list, type, pendingCaseIds, resolutions) {
+  const active = list.filter(x => isCaseActive(x, resolutions));
+  const done = list.filter(x => !isCaseActive(x, resolutions));
   if (!list.length) {
     return `<div class="empty">${iconSvg('inbox')}<b>Keine Fälle</b>Hier gibt es nichts zu sehen.</div>`;
   }
-  return list.map(x => {
-    const info = actionInfo(x.action);
-    const status = String(x.status || 'active').toLowerCase();
-    const statusText = {closed:'Erledigt', expired:'Abgelaufen', removed:'Entfernt', revoked:'Aufgehoben', deleted:'Entfernt'}[status] || 'Aktiv';
-    const inactive = ['closed','expired','removed','revoked','deleted'].includes(status);
-    const pending = pendingCaseIds.has(String(x.case_id));
-
-    let actions = '';
-    if (pending) actions = '<span class="tag warn">Antrag in Prüfung</span>';
-    else if (!inactive) actions = `<button class="btn btn-ghost btn-sm" onclick="openModal('${type}', ${Number(x.case_id)})">Widerspruch einlegen</button>`;
-
-    return `
-      <article class="case ${info.cls}">
-        <div class="case-top">
-          <div>
-            <div class="case-title">Fall #${esc(x.case_id)}: ${esc(info.text)}</div>
-            <div class="case-date">${esc(fmtDate(x.created_at))}</div>
-          </div>
-          <span class="tag ${inactive ? '' : 'warn'}">${esc(statusText)}</span>
-        </div>
-        <p class="case-reason">${esc(x.reason || 'Kein Grund angegeben')}</p>
-        ${actions ? `<div class="case-actions">${actions}</div>` : ''}
-      </article>`;
-  }).join('');
+  const activeHtml = active.length
+    ? active.map(x => renderCaseCard(x, type, pendingCaseIds, resolutions)).join('')
+    : `<div class="empty">${iconSvg('inbox')}<b>Keine aktuellen Fälle</b>Hier ist alles erledigt.</div>`;
+  const doneHtml = done.length
+    ? `<details class="done-cases"><summary>Erledigte Fälle (${done.length})</summary>${done.map(x => renderCaseCard(x, type, pendingCaseIds, resolutions)).join('')}</details>` : '';
+  return activeHtml + doneHtml;
 }
 
 function renderAppeals(openAppeals) {
@@ -743,7 +785,6 @@ function renderSummary(d, activeWarns, activeRoblox, openAppeals) {
     <div class="stat"><b>${openAppeals}</b><span>Offene Anträge</span></div>`;
 }
 
-const isActive = x => !['closed','expired','removed','revoked','deleted'].includes(String(x.status || 'active').toLowerCase());
 
 /* ---------- Tabs ---------- */
 document.querySelectorAll('.tab').forEach(btn => {
@@ -806,17 +847,18 @@ async function load(options = {}) {
     const warns = d.warns || [];
     const rcases = d.roblox?.cases || [];
 
-    renderSummary(d, warns.filter(isActive).length, rcases.filter(isActive).length, open.length);
+    const resolutions = buildCaseResolutions(appeals);
+    renderSummary(d, warns.filter(x => isCaseActive(x, resolutions)).length, rcases.filter(x => isCaseActive(x, resolutions)).length, open.length);
 
-    $('warns').innerHTML = renderCases(warns, 'discord_warn', pendingCaseIds);
-    $('robloxCases').innerHTML = renderCases(rcases, 'roblox', pendingCaseIds);
+    $('warns').innerHTML = renderCases(warns, 'discord_warn', pendingCaseIds, resolutions);
+    $('robloxCases').innerHTML = renderCases(rcases, 'roblox', pendingCaseIds, resolutions);
     $('appeals').innerHTML = renderAppeals(open);
 
     // Die aktive Registerkarte bleibt auch nach automatischen Aktualisierungen erhalten.
     ['warns','robloxCases','appeals'].forEach(id => $(id).classList.toggle('hidden', id !== activeTab));
     document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === activeTab)));
-    $('c-warns').textContent = warns.length;
-    $('c-robloxCases').textContent = rcases.length;
+    $('c-warns').textContent = warns.filter(x => isCaseActive(x, resolutions)).length;
+    $('c-robloxCases').textContent = rcases.filter(x => isCaseActive(x, resolutions)).length;
     $('c-appeals').textContent = open.length;
     lastSuccessfulLoad = Date.now();
     const stamp = new Date(lastSuccessfulLoad).toLocaleTimeString('de-DE', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
