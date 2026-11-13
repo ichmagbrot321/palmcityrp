@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#050a14">
 <meta name="robots" content="noindex, nofollow">
-<title>Impressum | Palm City RP</title>
+<title>Impressum | Nova City RP</title>
 <style>
 :root{
   color-scheme:dark;
@@ -42,21 +42,16 @@ footer a{margin-right:12px}
 </head>
 <body>
 <nav class="nav"><div class="wrap">
-  <a class="brand" href="/">Palm City RP</a>
+  <a class="brand" href="/">Nova City RP</a>
   <a class="back" href="/">Zurück zur Startseite</a>
 </div></nav>
 
 <main><div class="wrap">
   <h1>Impressum</h1>
 
-  <div class="notice">
-    <p><strong>Hinweis vor Veröffentlichung</strong></p>
-    <p>Bitte prüfe vor der Veröffentlichung gemeinsam mit einem Erziehungsberechtigten, ob die Anbieterangaben und die Nutzung dieser Anschrift für das Projekt rechtlich passend sind. Die Seite bleibt bis zu dieser Prüfung vorsorglich auf „noindex“ gesetzt.</p>
-  </div>
-
   <h2>Anbieter</h2>
   <div class="box">
-    <p><strong>Palm City RP</strong><br>
+    <p><strong>Nova City RP</strong><br>
     Betreiber: Leon Pajaziti<br>
     E-Mail: <a href="mailto:support.palmcityrp@gmail.com">support.palmcityrp@gmail.com</a></p>
     <p><strong>Anschrift:</strong><br>Römerstraße 1<br>74722 Buchen</p>
@@ -73,6 +68,141 @@ footer a{margin-right:12px}
   <p>Für allgemeine Anfragen ist die oben angegebene E-Mail-Adresse erreichbar: <a href="mailto:support.palmcityrp@gmail.com">support.palmcityrp@gmail.com</a>.</p>
 </div></main>
 
-<footer><div class="wrap">Palm City RP · <a href="/impressum">Impressum</a><a href="/datenschutz">Datenschutz</a></div></footer>
+<footer><div class="wrap">Nova City RP · <a href="/impressum">Impressum</a><a href="/datenschutz">Datenschutz</a></div></footer>
+<style id="dash-nav-css">
+/* ===== Dashboard-Navigation ===== */
+#sidenav,#bnav,#moreSheet{display:none}
+.nv-ico{display:grid;place-items:center;flex:none;position:relative}
+.nv-ico svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nv-sheet{position:fixed;inset:0;z-index:9000;background:rgba(3,7,15,.7);display:flex;align-items:flex-end;justify-content:center}
+.nv-panel{width:min(640px,100%);max-height:92dvh;overflow:auto;background:var(--surface);border:1px solid rgba(130,165,230,.3);border-radius:20px 20px 0 0;padding:18px 16px calc(22px + env(safe-area-inset-bottom));box-shadow:0 32px 80px rgba(0,0,0,.65)}
+.nv-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}
+.nv-head h2{font-size:1.25rem;line-height:1.2;margin:0}
+.nv-head p{color:var(--muted);font-size:.875rem;margin:2px 0 0}
+.nv-x{min-height:44px;padding:0 14px;border:1px solid rgba(130,165,230,.3);border-radius:10px;background:transparent;color:var(--text);font:inherit;cursor:pointer}
+.nv-search{width:100%;min-height:46px;padding:0 14px;border:1px solid rgba(130,165,230,.3);border-radius:12px;background:var(--bg);color:var(--text);font:inherit}
+.nv-group h3{margin:18px 0 8px;font-size:.75rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.nv-list{display:grid;gap:8px}
+.nv-row{display:flex;align-items:center;gap:12px;min-height:60px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;color:var(--text);text-decoration:none}
+.nv-row:hover{border-color:var(--primary);background:var(--surface2,#101b30)}
+.nv-row[aria-current=true]{border-color:#2563eb;background:rgba(37,99,235,.16)}
+.nv-row .nv-ico{width:38px;height:38px;border-radius:10px;background:#101b30;color:var(--primary)}
+.nv-row b{display:block;font-size:1rem}
+.nv-row small{display:block;color:var(--muted);font-size:.8125rem;line-height:1.35}
+.nv-empty{color:var(--muted);padding:14px 2px}
+body.nv-lock{overflow:hidden}
+@media (max-width:1023px){
+  body{padding-bottom:calc(82px + env(safe-area-inset-bottom))}
+  #bnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:8000;gap:4px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));background:rgba(11,20,36,.97);border-top:1px solid rgba(130,165,230,.3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+  #bnav a,#bnav button{flex:1 1 0;min-width:0;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;border-radius:12px;background:transparent;color:var(--muted);font:inherit;font-size:.72rem;font-weight:650;cursor:pointer;padding:4px 2px;text-decoration:none}
+  #bnav svg{width:24px;height:24px}
+  #bnav .t{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #bnav [aria-current=true]{color:var(--primary);background:rgba(37,99,235,.18)}
+}
+@media (min-width:1024px){
+  body{padding-left:248px}
+  .nav{display:none}
+  #sidenav{display:flex;flex-direction:column;position:fixed;z-index:8000;left:0;top:0;bottom:0;width:248px;padding:18px 12px 14px;background:linear-gradient(180deg,rgba(255,255,255,.02),transparent),var(--surface);border-right:1px solid var(--border)}
+  #sidenav .sb-brand{display:block;padding:4px 8px 14px;text-decoration:none;color:var(--text)}
+  #sidenav .sb-brand b{display:block;font-size:1.0625rem;line-height:1.2}
+  #sidenav .sb-brand small{color:var(--muted);font-size:.8125rem}
+  #sidenav nav{flex:1;overflow:auto}
+  #sidenav h3{margin:16px 10px 6px;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  #sidenav .sb-item{display:flex;align-items:center;gap:12px;min-height:40px;padding:8px 10px;border-radius:10px;color:var(--soft);text-decoration:none;font-size:.9375rem;font-weight:550}
+  #sidenav .sb-item.sub{min-height:34px;font-size:.84rem;padding:6px 10px 6px 14px;font-weight:500}
+  #sidenav .sb-item:hover{background:#101b30;color:var(--text)}
+  #sidenav .sb-item[aria-current=true]{background:rgba(37,99,235,.18);color:#fff;box-shadow:inset 3px 0 0 #2563eb}
+  #sidenav .sb-item[aria-current=true] .nv-ico{color:var(--primary)}
+  .nv-sheet{align-items:center}.nv-panel{border-radius:20px}
+}
+</style>
+<script id="dash-nav-script">
+(function(){
+"use strict";
+const ICON={
+ home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
+ gavel:'<path d="M12 3v18"/><path d="M5 21h14"/><path d="M4 8l8-3 8 3"/><path d="M4 8l-2 6a3 3 0 004 0zM20 8l-2 6a3 3 0 004 0z"/>',
+ doc:'<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/>',
+ shield:'<path d="M12 3l8 3v6c0 5-3.500 8-8 9-4.500-1-8-4-8-9V6z"/>',
+ list:'<line x1="8" y1="7" x2="20" y2="7"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="8" y1="17" x2="20" y2="17"/><circle cx="4" cy="7" r=".8"/><circle cx="4" cy="12" r=".8"/><circle cx="4" cy="17" r=".8"/>',
+ more:'<line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/>'
+};
+const ico=k=>'<span class="nv-ico"><svg viewBox="0 0 24 24" aria-hidden="true">'+ICON[k]+'</svg></span>';
+const el=(t,a,h)=>{const e=document.createElement(t);for(const k in a||{})e.setAttribute(k,a[k]);if(h!=null)e.innerHTML=h;return e;};
+const path=location.pathname.replace(/\.html$/,"").replace(/\/$/,"");
+const onImp=/impressum/.test(path)||document.title.startsWith("Impressum");
+const onDs=/datenschutz/.test(path)||document.title.startsWith("Datenschutz");
+const brand=(document.querySelector(".brand")||{}).textContent||"Startseite";
+const PAGES=[
+ {id:"home",t:"Startseite",d:"Zurück zur Hauptseite",i:"home",href:"/",group:brand},
+ {id:"einspruch",t:"Moderationsportal",d:"Fälle ansehen und Widerspruch einlegen",i:"gavel",href:"/einspruch",group:brand},
+ {id:"imp",t:"Impressum",d:"Anbieterangaben und Kontakt",i:"doc",href:"/impressum",group:"Rechtliches",cur:onImp},
+ {id:"ds",t:"Datenschutz",d:"Wie wir mit deinen Daten umgehen",i:"shield",href:"/datenschutz",group:"Rechtliches",cur:onDs}
+];
+/* Abschnitte der Seite (h2) als Inhaltsverzeichnis */
+const heads=[...document.querySelectorAll("main h2")].map((h,n)=>{if(!h.id)h.id="abschnitt-"+(n+1);return h;});
+const SECTIONS=heads.map(h=>({id:h.id,t:h.textContent.trim()}));
+let curSec="";
+
+const side=el("aside",{id:"sidenav","aria-label":"Seitenleiste"});
+side.append(el("a",{class:"sb-brand",href:"/"},"<b>"+brand+"</b><small>Rechtliches</small>"));
+const sn=el("nav",{"aria-label":"Bereiche"});side.append(sn);
+document.body.prepend(side);
+const bnav=el("nav",{id:"bnav","aria-label":"Hauptnavigation"});document.body.append(bnav);
+
+function paint(){
+  sn.replaceChildren();
+  const groups={};PAGES.forEach(p=>(groups[p.group]=groups[p.group]||[]).push(p));
+  Object.entries(groups).forEach(([g,list])=>{
+    sn.append(el("h3",{},g));
+    list.forEach(p=>{
+      sn.append(el("a",{class:"sb-item",href:p.href,title:p.d,"aria-current":p.cur?"page":"false"},ico(p.i)+"<span>"+p.t+"</span>"));
+      if(p.cur&&SECTIONS.length>2)SECTIONS.forEach(s=>sn.append(el("a",{class:"sb-item sub",href:"#"+s.id,"aria-current":String(curSec===s.id)},"<span>"+s.t.replace(/^\d+\.\s*/,"")+"</span>")));
+    });
+  });
+}
+function bar(){
+  bnav.replaceChildren();
+  [["home","Start","home"],["imp","Impressum","doc"],["ds","Datenschutz","shield"]].forEach(([id,label,icon])=>{
+    const p=PAGES.find(x=>x.id===id);
+    bnav.append(el("a",{href:p.href,"aria-current":p.cur?"page":"false"},ico(icon)+'<span class="t">'+label+"</span>"));
+  });
+  if(SECTIONS.length>2){const b=el("button",{type:"button"},ico("list")+'<span class="t">Inhalt</span>');b.addEventListener("click",()=>openSheet("sections"));bnav.append(b);}
+  const m=el("button",{type:"button","aria-haspopup":"dialog"},ico("more")+'<span class="t">Mehr</span>');m.addEventListener("click",()=>openSheet("all"));bnav.append(m);
+}
+let sheet=null;
+function closeSheet(){if(!sheet)return;document.removeEventListener("keydown",onKey);sheet.remove();sheet=null;document.body.classList.remove("nv-lock");}
+function onKey(e){if(e.key==="Escape")closeSheet();}
+function openSheet(mode){
+  if(sheet)return;
+  const search=el("input",{type:"search",class:"nv-search",placeholder:mode==="sections"?"Abschnitt suchen, z. B. Cookies":"Bereich suchen","aria-label":"Suchen",autocomplete:"off"});
+  const list=el("div");
+  const draw=()=>{
+    const q=search.value.trim().toLowerCase();list.replaceChildren();let n=0;
+    const rows=(title,items)=>{items=items.filter(i=>!q||i.t.toLowerCase().includes(q)||(i.d||"").toLowerCase().includes(q));if(!items.length)return;n+=items.length;
+      const box=el("section",{class:"nv-group"},"<h3>"+title+"</h3>"),r=el("div",{class:"nv-list"});
+      items.forEach(i=>{const a=el("a",{class:"nv-row",href:i.href,"aria-current":String(!!i.cur)},ico(i.i)+"<span><b>"+i.t+"</b>"+(i.d?"<small>"+i.d+"</small>":"")+"</span>");a.addEventListener("click",closeSheet);r.append(a);});
+      box.append(r);list.append(box);};
+    if(mode==="sections")rows("Auf dieser Seite",SECTIONS.map(s=>({t:s.t,href:"#"+s.id,i:"list",cur:s.id===curSec})));
+    else{const groups={};PAGES.forEach(p=>(groups[p.group]=groups[p.group]||[]).push(p));Object.entries(groups).forEach(([g,l])=>rows(g,l));
+      if(SECTIONS.length>2)rows("Auf dieser Seite",SECTIONS.map(s=>({t:s.t,href:"#"+s.id,i:"list",cur:s.id===curSec})));}
+    if(!n)list.append(el("p",{class:"nv-empty"},"Nichts gefunden. Versuche ein anderes Wort."));
+  };
+  search.addEventListener("input",draw);draw();
+  const close=el("button",{type:"button",class:"nv-x"},"Schließen");close.addEventListener("click",closeSheet);
+  const head=el("div",{class:"nv-head"},"<div><h2>"+(mode==="sections"?"Inhalt dieser Seite":"Alle Bereiche")+"</h2><p>Tippe auf einen Eintrag, um dorthin zu springen.</p></div>");head.append(close);
+  const panel=el("div",{class:"nv-panel",role:"dialog","aria-modal":"true"});panel.append(head,search,list);
+  sheet=el("div",{class:"nv-sheet"});sheet.append(panel);
+  sheet.addEventListener("click",e=>{if(e.target===sheet)closeSheet();});
+  document.addEventListener("keydown",onKey);document.body.classList.add("nv-lock");document.body.append(sheet);
+}
+function spy(){
+  let best="";for(const h of heads){if(h.getBoundingClientRect().top<=innerHeight*0.3)best=h.id;}
+  if(best!==curSec){curSec=best;paint();}
+}
+addEventListener("scroll",()=>requestAnimationFrame(spy),{passive:true});
+paint();bar();spy();
+})();
+</script>
 </body>
 </html>
