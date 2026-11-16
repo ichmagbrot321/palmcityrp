@@ -90,6 +90,18 @@ const ROUTES = {
   quiz_submit: ["POST", "/team/quiz/submit"],
   quiz_templates: ["GET", "/team/quiz/templates"],
   quiz_import: ["POST", "/team/quiz/import"],
+  mod_cases: ["GET", "/team/mod/cases"],
+  mod_case: ["GET", "/team/mod/case"],
+  mod_case_note: ["POST", "/team/mod/case/note"],
+  mod_case_reason: ["POST", "/team/mod/case/reason"],
+  mod_case_revoke: ["POST", "/team/mod/case/revoke"],
+  mod_case_close: ["POST", "/team/mod/case/close"],
+  mod_case_delete: ["POST", "/team/mod/case/delete"],
+  mod_case_restore: ["POST", "/team/mod/case/restore"],
+  archive_users: ["GET", "/team/archive/users"],
+  archive_messages: ["GET", "/team/archive/messages"],
+  archive_file: ["GET", "/team/archive/file"],
+  archive_delete: ["POST", "/team/archive/delete"],
   praise: ["POST", "/team/praise"],
   praise_get: ["GET", "/team/praise"],
   mine: ["GET", "/team/mine"],
@@ -480,6 +492,21 @@ async function proxy(req, res, url, action, session) {
     });
 
     const contentType = upstream.headers.get("content-type") || "";
+
+    // Archiv-Dateien (Bilder, Sprachnachrichten …) werden unverändert durchgereicht.
+    if (action === "archive_file" && upstream.ok && !contentType.includes("application/json")) {
+      const file = Buffer.from(await upstream.arrayBuffer());
+      res.statusCode = 200;
+      res.setHeader("Content-Type", contentType);
+      res.setHeader("Content-Length", String(file.length));
+      res.setHeader("Cache-Control", "private, max-age=3600");
+      res.setHeader("X-Content-Type-Options", "nosniff");
+      res.setHeader("Content-Security-Policy", "default-src 'none'; sandbox");
+      const disposition = upstream.headers.get("content-disposition");
+      if (disposition) res.setHeader("Content-Disposition", disposition);
+      return res.end(file);
+    }
+
     const text = await upstream.text();
 
     let data = null;
@@ -659,6 +686,21 @@ async function checkBotHealth(session) {
     });
 
     const contentType = upstream.headers.get("content-type") || "";
+
+    // Archiv-Dateien (Bilder, Sprachnachrichten …) werden unverändert durchgereicht.
+    if (action === "archive_file" && upstream.ok && !contentType.includes("application/json")) {
+      const file = Buffer.from(await upstream.arrayBuffer());
+      res.statusCode = 200;
+      res.setHeader("Content-Type", contentType);
+      res.setHeader("Content-Length", String(file.length));
+      res.setHeader("Cache-Control", "private, max-age=3600");
+      res.setHeader("X-Content-Type-Options", "nosniff");
+      res.setHeader("Content-Security-Policy", "default-src 'none'; sandbox");
+      const disposition = upstream.headers.get("content-disposition");
+      if (disposition) res.setHeader("Content-Disposition", disposition);
+      return res.end(file);
+    }
+
     const text = await upstream.text();
 
     let data = null;
